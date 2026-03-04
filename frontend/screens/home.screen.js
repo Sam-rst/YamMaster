@@ -1,28 +1,20 @@
-import { useEffect, useState } from "react";
-import { Platform, StyleSheet, Text, View } from "react-native";
-import io from "socket.io-client";
-
-console.log('Emulation OS Platform: ', Platform.OS);
-// Also usable : "<http://10.0.2.2:3000>"
-export const socketEndpoint = Platform.OS === 'web' ? "http://localhost:3000" : "http://172.20.10.2:3000";
+import { useEffect, useState, useContext } from "react";
+import { StyleSheet, Text, View } from "react-native";
+import { SocketContext } from '../contexts/socket.context';
 
 export default function HomeScreen() {
-  const [hasConnection, setConnection] = useState(false);
+
+  const socket = useContext(SocketContext);
+
   const [time, setTime] = useState(null);
 
-  useEffect(function didMount() {
-    const socket = io(socketEndpoint, {
-      transports: ["websocket"],
-    });
-
-    socket.io.on("open", () => setConnection(true));
-    socket.io.on("close", () => setConnection(false));
+  useEffect(() => {
 
     socket.on("time-msg", (data) => {
       setTime(new Date(data.time).toString());
     });
 
-    return function didUnmount() {
+    return () => {
       socket.disconnect();
       socket.removeAllListeners();
     };
@@ -30,10 +22,10 @@ export default function HomeScreen() {
 
   return (
     <View style={styles.container}>
-      {!hasConnection && (
+      {!socket && (
         <>
           <Text style={styles.paragraph}>
-            Connecting to {socketEndpoint}...
+            Connecting to websocket server...
           </Text>
           <Text style={styles.footnote}>
             Make sure the backend is started and reachable
@@ -41,7 +33,7 @@ export default function HomeScreen() {
         </>
       )}
 
-      {hasConnection && (
+      {socket && (
         <>
           <Text style={[styles.paragraph, { fontWeight: "bold" }]}>
             Server time
