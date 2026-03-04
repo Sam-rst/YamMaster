@@ -1,9 +1,10 @@
 import { useEffect, useState } from "react";
-import { StyleSheet, Text, View } from "react-native";
+import { Platform, StyleSheet, Text, View } from "react-native";
 import io from "socket.io-client";
 
-// Replace this URL with your own socket-io host, or start the backend locally
-const socketEndpoint = "http://localhost:3000";
+console.log('Emulation OS Platform: ', Platform.OS);
+// Also usable : "<http://10.0.2.2:3000>"
+export const socketEndpoint = Platform.OS === 'web' ? "http://localhost:3000" : "http://172.20.10.2:3000";
 
 export default function App() {
   const [hasConnection, setConnection] = useState(false);
