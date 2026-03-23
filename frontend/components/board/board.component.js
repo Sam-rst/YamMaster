@@ -2,19 +2,13 @@
 
 import React from "react";
 import { View, Text, StyleSheet } from 'react-native';
+import PlayerTimer from "./timers/player-timer.component";
+import OpponentTimer from "./timers/oppenent-timer.component";
 
 const OpponentInfos = () => {
   return (
     <View style={styles.opponentInfosContainer}>
       <Text>Opponent infos</Text>
-    </View>
-  );
-};
-
-const OpponentTimer = () => {
-  return (
-    <View style={styles.opponentTimerContainer}>
-      <Text>Timer: </Text>
     </View>
   );
 };
@@ -66,15 +60,6 @@ const PlayerInfos = () => {
   return (
     <View style={styles.playerInfosContainer}>
       <Text>Player Infos</Text>
-    </View>
-  );
-};
-
-const PlayerTimer = () => {
-
-  return (
-    <View style={styles.playerTimerContainer}>
-      <Text>Timer: </Text>
     </View>
   );
 };
@@ -151,11 +136,6 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     backgroundColor: "lightgrey"
   },
-  opponentTimerContainer: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
   opponentScoreContainer: {
     flex: 1,
     justifyContent: 'center',
@@ -198,12 +178,6 @@ const styles = StyleSheet.create({
   playerTimerScoreContainer: {
     flex: 3,
     flexDirection: 'column',
-    justifyContent: 'center',
-    alignItems: 'center',
-    backgroundColor: "lightgrey"
-  },
-  playerTimerContainer: {
-    flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
     backgroundColor: "lightgrey"
