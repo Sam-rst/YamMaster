@@ -43,7 +43,7 @@ cd backend && npm run typecheck     # Type check sans émission
 cd frontend && npm run build        # Export web Expo
 ```
 
-CI/CD via GitHub Actions (`.github/workflows/ci.yml`).
+CI/CD via GitHub Actions — workflows séparés par environnement dans `.github/workflows/`.
 
 ## Gitflow
 

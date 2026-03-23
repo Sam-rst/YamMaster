@@ -1,0 +1,13 @@
+name: CI Feature / Bugfix / Hotfix
+
+on:
+  push:
+    branches:
+      - 'feature/**'
+      - 'bugfix/**'
+      - 'hotfix/**'
+
+jobs:
+  ci:
+    name: Lint → Tests → Build
+    uses: ./.github/workflows/_ci-shared.yml

@@ -1,0 +1,29 @@
+name: Branch Gate
+
+on:
+  push:
+    branches-ignore: [main, develop, recette]
+  pull_request:
+    branches: [main, develop, recette]
+
+jobs:
+  check-naming:
+    name: Vérification nommage branche
+    runs-on: ubuntu-latest
+    steps:
+      - name: Vérifier la convention de nommage
+        run: |
+          BRANCH="${GITHUB_HEAD_REF:-${GITHUB_REF_NAME}}"
+          echo "Branche: $BRANCH"
+          if [[ "$BRANCH" =~ ^(main|develop|recette|feature/.*|bugfix/.*|hotfix/.*)$ ]]; then
+            echo "✅ Convention respectée: $BRANCH"
+          else
+            echo "❌ Branche mal nommée: $BRANCH"
+            echo ""
+            echo "Conventions acceptées:"
+            echo "  - main, develop, recette"
+            echo "  - feature/<nom>"
+            echo "  - bugfix/<nom>"
+            echo "  - hotfix/<nom>"
+            exit 1
+          fi
