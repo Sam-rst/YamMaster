@@ -318,6 +318,92 @@ const GameService = {
     },
     grid: {
 
+        calculateScores: (grid) => {
+            const scores = { player1Score: 0, player2Score: 0 };
+            const size = grid.length; // 5
+
+            // Collecte tous les alignements (longueur max) pour chaque joueur
+            const checkLine = (cells) => {
+                // cells = tableau d'owners (null, 'player:1', 'player:2')
+                let current = null;
+                let count = 0;
+                const segments = [];
+
+                for (let i = 0; i < cells.length; i++) {
+                    if (cells[i] !== null && cells[i] === current) {
+                        count++;
+                    } else {
+                        if (current !== null && count >= 3) {
+                            segments.push({ owner: current, length: count });
+                        }
+                        current = cells[i];
+                        count = 1;
+                    }
+                }
+                if (current !== null && count >= 3) {
+                    segments.push({ owner: current, length: count });
+                }
+                return segments;
+            };
+
+            const allSegments = [];
+
+            // Lignes horizontales
+            for (let r = 0; r < size; r++) {
+                const owners = grid[r].map(cell => cell.owner);
+                allSegments.push(...checkLine(owners));
+            }
+
+            // Colonnes verticales
+            for (let c = 0; c < size; c++) {
+                const owners = [];
+                for (let r = 0; r < size; r++) {
+                    owners.push(grid[r][c].owner);
+                }
+                allSegments.push(...checkLine(owners));
+            }
+
+            // Diagonales (\) — toutes les diagonales de longueur >= 3
+            for (let start = -(size - 3); start <= size - 3; start++) {
+                const owners = [];
+                for (let i = 0; i < size; i++) {
+                    const r = i;
+                    const c = i + start;
+                    if (c >= 0 && c < size) {
+                        owners.push(grid[r][c].owner);
+                    }
+                }
+                allSegments.push(...checkLine(owners));
+            }
+
+            // Diagonales (/) — toutes les anti-diagonales de longueur >= 3
+            for (let start = 2; start <= 2 * (size - 1) - 2; start++) {
+                const owners = [];
+                for (let i = 0; i < size; i++) {
+                    const r = i;
+                    const c = start - i;
+                    if (c >= 0 && c < size) {
+                        owners.push(grid[r][c].owner);
+                    }
+                }
+                allSegments.push(...checkLine(owners));
+            }
+
+            // Calculer les points
+            for (const seg of allSegments) {
+                const key = seg.owner === 'player:1' ? 'player1Score' : 'player2Score';
+                if (seg.length >= 5) {
+                    scores[key] = Infinity;
+                } else if (seg.length === 4) {
+                    scores[key] += 2;
+                } else if (seg.length === 3) {
+                    scores[key] += 1;
+                }
+            }
+
+            return scores;
+        },
+
         resetcanBeCheckedCells: (grid) => {
             const updatedGrid = grid.map(row => row.map(cell => {
                 return { ...cell, canBeChecked: false };

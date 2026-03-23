@@ -223,8 +223,10 @@ io.on('connection', socket => {
     games[gameIndex].gameState.grid = GameService.grid.resetcanBeCheckedCells(games[gameIndex].gameState.grid);
     games[gameIndex].gameState.grid = GameService.grid.selectCell(data.cellId, data.rowIndex, data.cellIndex, games[gameIndex].gameState.currentTurn, games[gameIndex].gameState.grid);
 
-    // TODO: Here calcul score
-    // TODO: Then check if a player win
+    // Calcul des scores après pose de pion
+    const scores = GameService.grid.calculateScores(games[gameIndex].gameState.grid);
+    games[gameIndex].gameState.player1Score = scores.player1Score;
+    games[gameIndex].gameState.player2Score = scores.player2Score;
 
     // end turn
     games[gameIndex].gameState.currentTurn = games[gameIndex].gameState.currentTurn === 'player:1' ? 'player:2' : 'player:1';

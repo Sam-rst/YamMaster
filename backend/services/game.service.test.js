@@ -612,3 +612,131 @@ describe('GameService.send', () => {
         });
     });
 });
+
+// =============================================================
+// SCORES (calculateScores)
+// =============================================================
+describe('GameService.grid.calculateScores', () => {
+
+    // Helper pour créer une grille avec des owners spécifiques
+    const makeGrid = (ownerMap) => {
+        const grid = GameService.init.grid();
+        for (const [row, col, owner] of ownerMap) {
+            grid[row][col].owner = owner;
+        }
+        return grid;
+    };
+
+    it('retourne 0/0 sur une grille vide', () => {
+        const grid = GameService.init.grid();
+        const scores = GameService.grid.calculateScores(grid);
+        expect(scores).toEqual({ player1Score: 0, player2Score: 0 });
+    });
+
+    // --- Alignements horizontaux ---
+    it('détecte un alignement horizontal de 3 pions (1 point)', () => {
+        const grid = makeGrid([
+            [0, 0, 'player:1'], [0, 1, 'player:1'], [0, 2, 'player:1'],
+        ]);
+        const scores = GameService.grid.calculateScores(grid);
+        expect(scores.player1Score).toBe(1);
+    });
+
+    it('détecte un alignement horizontal de 4 pions (2 points)', () => {
+        const grid = makeGrid([
+            [0, 0, 'player:1'], [0, 1, 'player:1'], [0, 2, 'player:1'], [0, 3, 'player:1'],
+        ]);
+        const scores = GameService.grid.calculateScores(grid);
+        expect(scores.player1Score).toBe(2);
+    });
+
+    // --- Alignements verticaux ---
+    it('détecte un alignement vertical de 3 pions (1 point)', () => {
+        const grid = makeGrid([
+            [0, 0, 'player:2'], [1, 0, 'player:2'], [2, 0, 'player:2'],
+        ]);
+        const scores = GameService.grid.calculateScores(grid);
+        expect(scores.player2Score).toBe(1);
+    });
+
+    it('détecte un alignement vertical de 4 pions (2 points)', () => {
+        const grid = makeGrid([
+            [0, 0, 'player:1'], [1, 0, 'player:1'], [2, 0, 'player:1'], [3, 0, 'player:1'],
+        ]);
+        const scores = GameService.grid.calculateScores(grid);
+        expect(scores.player1Score).toBe(2);
+    });
+
+    // --- Alignements diagonaux ---
+    it('détecte un alignement diagonal (\\) de 3 pions (1 point)', () => {
+        const grid = makeGrid([
+            [0, 0, 'player:1'], [1, 1, 'player:1'], [2, 2, 'player:1'],
+        ]);
+        const scores = GameService.grid.calculateScores(grid);
+        expect(scores.player1Score).toBe(1);
+    });
+
+    it('détecte un alignement diagonal (/) de 3 pions (1 point)', () => {
+        const grid = makeGrid([
+            [0, 2, 'player:2'], [1, 1, 'player:2'], [2, 0, 'player:2'],
+        ]);
+        const scores = GameService.grid.calculateScores(grid);
+        expect(scores.player2Score).toBe(1);
+    });
+
+    it('détecte un alignement diagonal de 4 pions (2 points)', () => {
+        const grid = makeGrid([
+            [0, 0, 'player:1'], [1, 1, 'player:1'], [2, 2, 'player:1'], [3, 3, 'player:1'],
+        ]);
+        const scores = GameService.grid.calculateScores(grid);
+        expect(scores.player1Score).toBe(2);
+    });
+
+    // --- Cas multiples ---
+    it('additionne les points de plusieurs alignements pour un même joueur', () => {
+        // Deux alignements de 3 horizontaux sur deux lignes différentes
+        const grid = makeGrid([
+            [0, 0, 'player:1'], [0, 1, 'player:1'], [0, 2, 'player:1'],
+            [2, 0, 'player:1'], [2, 1, 'player:1'], [2, 2, 'player:1'],
+        ]);
+        const scores = GameService.grid.calculateScores(grid);
+        expect(scores.player1Score).toBe(2);
+    });
+
+    it('calcule les scores des deux joueurs indépendamment', () => {
+        const grid = makeGrid([
+            [0, 0, 'player:1'], [0, 1, 'player:1'], [0, 2, 'player:1'],
+            [4, 0, 'player:2'], [4, 1, 'player:2'], [4, 2, 'player:2'],
+        ]);
+        const scores = GameService.grid.calculateScores(grid);
+        expect(scores.player1Score).toBe(1);
+        expect(scores.player2Score).toBe(1);
+    });
+
+    // --- Pas de double comptage ---
+    it('ne compte pas un alignement de 3 inclus dans un alignement de 4', () => {
+        // Un alignement de 4 devrait donner 2pts, pas 2+1=3
+        const grid = makeGrid([
+            [0, 0, 'player:1'], [0, 1, 'player:1'], [0, 2, 'player:1'], [0, 3, 'player:1'],
+        ]);
+        const scores = GameService.grid.calculateScores(grid);
+        expect(scores.player1Score).toBe(2);
+    });
+
+    // --- 5 alignés ---
+    it('détecte un alignement de 5 pions horizontaux', () => {
+        const grid = makeGrid([
+            [0, 0, 'player:1'], [0, 1, 'player:1'], [0, 2, 'player:1'], [0, 3, 'player:1'], [0, 4, 'player:1'],
+        ]);
+        const scores = GameService.grid.calculateScores(grid);
+        expect(scores.player1Score).toBe(Infinity);
+    });
+
+    it('détecte un alignement de 5 pions en diagonale', () => {
+        const grid = makeGrid([
+            [0, 0, 'player:2'], [1, 1, 'player:2'], [2, 2, 'player:2'], [3, 3, 'player:2'], [4, 4, 'player:2'],
+        ]);
+        const scores = GameService.grid.calculateScores(grid);
+        expect(scores.player2Score).toBe(Infinity);
+    });
+});
