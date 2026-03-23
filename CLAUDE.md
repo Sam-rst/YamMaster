@@ -20,7 +20,15 @@ cd frontend && npm install   # Install dependencies
 cd frontend && npm run start # Start Expo dev server
 ```
 
-No test framework is configured. No build step for the backend (runs directly with Node).
+### Tests
+```bash
+cd backend && npm test              # Tests backend (Jest)
+cd backend && npm run test:coverage # Tests backend + couverture
+cd frontend && npm test             # Tests frontend (Jest + jsdom)
+cd frontend && npm run test:coverage # Tests frontend + couverture
+```
+
+No build step for the backend (runs directly with Node).
 
 ## Architecture
 
