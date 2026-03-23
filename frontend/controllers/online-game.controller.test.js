@@ -70,7 +70,7 @@ describe('OnlineGameController', () => {
         expect(getByText('MockBoard')).toBeTruthy();
     });
 
-    it('écoute les événements queue.added et game.start', () => {
+    it('écoute les événements queue.added, game.start et game.end', () => {
         render(
             <SocketContext.Provider value={mockSocket}>
                 <OnlineGameController />
@@ -79,5 +79,62 @@ describe('OnlineGameController', () => {
         const events = mockSocket.on.mock.calls.map(call => call[0]);
         expect(events).toContain('queue.added');
         expect(events).toContain('game.start');
+        expect(events).toContain('game.end');
+    });
+
+    it('affiche l\'écran de fin de partie après game.end avec un vainqueur', () => {
+        const { getByText, queryByText } = render(
+            <SocketContext.Provider value={mockSocket}>
+                <OnlineGameController />
+            </SocketContext.Provider>
+        );
+
+        // Démarrer la partie
+        act(() => {
+            mockSocket.__simulateEvent('game.start', {
+                inQueue: false,
+                inGame: true,
+                idOpponent: 'opponent-id',
+            });
+        });
+
+        // Fin de partie
+        act(() => {
+            mockSocket.__simulateEvent('game.end', {
+                winner: 'player:1',
+                reason: 'alignment5',
+                player1Score: Infinity,
+                player2Score: 3,
+            });
+        });
+
+        expect(queryByText('MockBoard')).toBeNull();
+        expect(getByText(/Fin de la partie/)).toBeTruthy();
+        expect(getByText(/player:1/)).toBeTruthy();
+    });
+
+    it('affiche un bouton retour au menu après game.end', () => {
+        const { getByText } = render(
+            <SocketContext.Provider value={mockSocket}>
+                <OnlineGameController />
+            </SocketContext.Provider>
+        );
+
+        act(() => {
+            mockSocket.__simulateEvent('game.start', {
+                inQueue: false, inGame: true, idOpponent: 'opp',
+            });
+        });
+
+        act(() => {
+            mockSocket.__simulateEvent('game.end', {
+                winner: 'player:2',
+                reason: 'noTokens',
+                player1Score: 2,
+                player2Score: 5,
+            });
+        });
+
+        expect(getByText('Retour au menu')).toBeTruthy();
     });
 });
