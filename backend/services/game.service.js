@@ -457,7 +457,6 @@ const GameService = {
         },
 
         isAnyCombinationAvailableOnGridForPlayer: (gameState) => {
-            const currentTurn = gameState.currentTurn;
             const grid = gameState.grid;
             const availableChoices = gameState.choices.availableChoices;
 

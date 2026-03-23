@@ -28,7 +28,18 @@ cd frontend && npm test             # Tests frontend (Jest + jsdom)
 cd frontend && npm run test:coverage # Tests frontend + couverture
 ```
 
-No build step for the backend (runs directly with Node).
+### Lint
+```bash
+cd backend && npm run lint          # ESLint backend
+cd frontend && npm run lint         # ESLint frontend
+```
+
+### Build
+```bash
+cd frontend && npm run build        # Export web Expo
+```
+
+No build step for the backend (runs directly with Node). CI/CD via GitHub Actions (`.github/workflows/ci.yml`).
 
 ## Architecture
 
