@@ -108,7 +108,7 @@ const GameService = {
         },
 
         grid: () => {
-            return { ...GRID_INIT };
+            return GRID_INIT.map(row => row.map(cell => ({ ...cell })));
         }
     },
 
