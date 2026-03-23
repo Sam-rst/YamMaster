@@ -14,7 +14,12 @@ jobs:
     runs-on: ubuntu-latest
     needs: ci
     steps:
-      - uses: actions/checkout@v4
-      - name: Déploiement environnement PRODUCTION
-        run: echo "🏁 Déploiement en PRODUCTION"
-        # TODO: Ajouter les commandes de déploiement production
+      - name: Trigger Render Deploy
+        run: |
+          echo "🏁 Déploiement en PRODUCTION"
+          if [ -n "${{ secrets.RENDER_DEPLOY_HOOK_PROD }}" ]; then
+            curl -s "${{ secrets.RENDER_DEPLOY_HOOK_PROD }}"
+            echo "Deploy hook triggered"
+          else
+            echo "⚠️ RENDER_DEPLOY_HOOK_PROD non configuré — Render auto-deploy actif"
+          fi
