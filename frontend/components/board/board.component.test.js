@@ -44,6 +44,14 @@ jest.mock('./infos/opponent-infos.component', () => {
     const React = require('react');
     return () => React.createElement('Text', {}, 'OpponentInfos');
 });
+jest.mock('./tokens/player-tokens.component', () => {
+    const React = require('react');
+    return () => React.createElement('Text', {}, 'PlayerTokens');
+});
+jest.mock('./tokens/opponent-tokens.component', () => {
+    const React = require('react');
+    return () => React.createElement('Text', {}, 'OpponentTokens');
+});
 
 describe('Board', () => {
 
@@ -65,5 +73,7 @@ describe('Board', () => {
         expect(getByText('PlayerScore')).toBeTruthy();
         expect(getByText('PlayerInfos')).toBeTruthy();
         expect(getByText('OpponentInfos')).toBeTruthy();
+        expect(getByText('PlayerTokens')).toBeTruthy();
+        expect(getByText('OpponentTokens')).toBeTruthy();
     });
 });

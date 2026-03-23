@@ -1,10 +1,10 @@
 import React from 'react';
 import { render, act } from '@testing-library/react';
-import PlayerScore from './player-score.component';
+import OpponentTokens from './opponent-tokens.component';
 import { SocketContext } from '../../../contexts/socket.context';
 import { createMockSocket } from '../../../__mocks__/socket.mock';
 
-describe('PlayerScore', () => {
+describe('OpponentTokens', () => {
 
     let mockSocket;
 
@@ -13,31 +13,31 @@ describe('PlayerScore', () => {
         mockSocket = createMockSocket();
     });
 
-    it('affiche score 0 par défaut', () => {
+    it('affiche 12 jetons par défaut', () => {
         const { getByText } = render(
             <SocketContext.Provider value={mockSocket}>
-                <PlayerScore />
+                <OpponentTokens />
             </SocketContext.Provider>
         );
-        expect(getByText('Score: 0')).toBeTruthy();
+        expect(getByText(/12/)).toBeTruthy();
     });
 
-    it('met à jour le score après game.score', () => {
+    it('met à jour les jetons après game.score', () => {
         const { getByText } = render(
             <SocketContext.Provider value={mockSocket}>
-                <PlayerScore />
+                <OpponentTokens />
             </SocketContext.Provider>
         );
 
         act(() => {
             mockSocket.__simulateEvent('game.score', {
-                playerScore: 3,
-                opponentScore: 1,
-                playerTokens: 8,
-                opponentTokens: 10,
+                playerScore: 0,
+                opponentScore: 2,
+                playerTokens: 10,
+                opponentTokens: 7,
             });
         });
 
-        expect(getByText('Score: 3')).toBeTruthy();
+        expect(getByText(/7/)).toBeTruthy();
     });
 });

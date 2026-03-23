@@ -13,16 +13,16 @@ describe('OpponentScore', () => {
         mockSocket = createMockSocket();
     });
 
-    it('affiche un score par défaut', () => {
+    it('affiche score 0 par défaut', () => {
         const { getByText } = render(
             <SocketContext.Provider value={mockSocket}>
                 <OpponentScore />
             </SocketContext.Provider>
         );
-        expect(getByText(/Score/)).toBeTruthy();
+        expect(getByText('Score: 0')).toBeTruthy();
     });
 
-    it('met à jour le score et les jetons après game.score', () => {
+    it('met à jour le score après game.score', () => {
         const { getByText } = render(
             <SocketContext.Provider value={mockSocket}>
                 <OpponentScore />
@@ -38,7 +38,6 @@ describe('OpponentScore', () => {
             });
         });
 
-        expect(getByText(/4/)).toBeTruthy();
-        expect(getByText(/7/)).toBeTruthy();
+        expect(getByText('Score: 4')).toBeTruthy();
     });
 });

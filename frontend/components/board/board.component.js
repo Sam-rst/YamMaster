@@ -12,33 +12,37 @@ import OpponentScore from "./scores/opponent-score.component";
 import PlayerScore from "./scores/player-score.component";
 import PlayerInfos from "./infos/player-infos.component";
 import OpponentInfos from "./infos/opponent-infos.component";
+import PlayerTokens from "./tokens/player-tokens.component";
+import OpponentTokens from "./tokens/opponent-tokens.component";
 
 
 const Board = ({ gameViewState}) => {
   return (
     <View style={styles.container}>
-      <View style={[styles.row, { height: '5%' }]}>
+      <View style={[styles.row, { height: '8%' }]}>
         <OpponentInfos />
-        <View style={styles.opponentTimerScoreContainer}>
+        <View style={styles.opponentStatsContainer}>
           <OpponentTimer />
           <OpponentScore />
+          <OpponentTokens />
         </View>
       </View>
-      <View style={[styles.row, { height: '25%' }]}>
+      <View style={[styles.row, { height: '22%' }]}>
         <OpponentDeck />
       </View>
       <View style={[styles.row, { height: '40%' }]}>
         <Grid />
         <Choices />
       </View>
-      <View style={[styles.row, { height: '25%' }]}>
+      <View style={[styles.row, { height: '22%' }]}>
         <PlayerDeck />
       </View>
-      <View style={[styles.row, { height: '5%' }]}>
+      <View style={[styles.row, { height: '8%' }]}>
         <PlayerInfos />
-        <View style={styles.playerTimerScoreContainer}>
+        <View style={styles.playerStatsContainer}>
           <PlayerTimer />
           <PlayerScore />
+          <PlayerTokens />
         </View>
       </View>
     </View>
@@ -60,17 +64,17 @@ const styles = StyleSheet.create({
     borderBottomWidth: 1,
     borderColor: 'black',
   },
-  opponentTimerScoreContainer: {
+  opponentStatsContainer: {
     flex: 3,
-    flexDirection: 'column',
-    justifyContent: 'center',
+    flexDirection: 'row',
+    justifyContent: 'space-around',
     alignItems: 'center',
     backgroundColor: "lightgrey"
   },
-  playerTimerScoreContainer: {
+  playerStatsContainer: {
     flex: 3,
-    flexDirection: 'column',
-    justifyContent: 'center',
+    flexDirection: 'row',
+    justifyContent: 'space-around',
     alignItems: 'center',
     backgroundColor: "lightgrey"
   },
