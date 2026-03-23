@@ -9,9 +9,11 @@ const PlayerTimer = () => {
   const [playerTimer, setPlayerTimer] = useState(0);
 
   useEffect(() => {
-    socket.on("game.timer", (data) => {
-      setPlayerTimer(data['playerTimer'])
-    });
+    const onTimer = (data) => {
+      setPlayerTimer(data['playerTimer']);
+    };
+    socket.on("game.timer", onTimer);
+    return () => socket.off("game.timer", onTimer);
   }, []);
 
   return (

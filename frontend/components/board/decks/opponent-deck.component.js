@@ -11,12 +11,14 @@ const OpponentDeck = () => {
   const [opponentDices, setOpponentDices] = useState(Array(5).fill({ value: "", locked: false }));
 
   useEffect(() => {
-    socket.on("game.deck.view-state", (data) => {
+    const onDeckViewState = (data) => {
       setDisplayOpponentDeck(data['displayOpponentDeck']);
       if (data['displayOpponentDeck']) {
         setOpponentDices(data['dices']);
       }
-    });
+    };
+    socket.on("game.deck.view-state", onDeckViewState);
+    return () => socket.off("game.deck.view-state", onDeckViewState);
   }, []);
 
   return (

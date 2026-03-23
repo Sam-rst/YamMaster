@@ -7,9 +7,11 @@ const OpponentScore = () => {
   const [score, setScore] = useState(0);
 
   useEffect(() => {
-    socket.on("game.score", (data) => {
+    const onScore = (data) => {
       setScore(data.opponentScore);
-    });
+    };
+    socket.on("game.score", onScore);
+    return () => socket.off("game.score", onScore);
   }, []);
 
   return (

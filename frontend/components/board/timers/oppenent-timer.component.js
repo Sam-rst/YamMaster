@@ -9,11 +9,11 @@ const OpponentTimer = () => {
   const [opponentTimer, setOpponentTimer] = useState(0);
 
   useEffect(() => {
-
-    socket.on("game.timer", (data) => {
-      setOpponentTimer(data['opponentTimer'])
-    });
-
+    const onTimer = (data) => {
+      setOpponentTimer(data['opponentTimer']);
+    };
+    socket.on("game.timer", onTimer);
+    return () => socket.off("game.timer", onTimer);
   }, []);
   return (
     <View style={styles.opponentTimerContainer}>

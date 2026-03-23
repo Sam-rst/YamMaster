@@ -19,11 +19,13 @@ const Grid = () => {
     };
 
     useEffect(() => {
-        socket.on("game.grid.view-state", (data) => {
+        const onGridViewState = (data) => {
             setDisplayGrid(data['displayGrid']);
-            setCanSelectCells(data['canSelectCells'])
+            setCanSelectCells(data['canSelectCells']);
             setGrid(data['grid']);
-        });
+        };
+        socket.on("game.grid.view-state", onGridViewState);
+        return () => socket.off("game.grid.view-state", onGridViewState);
     }, []);
 
     return (

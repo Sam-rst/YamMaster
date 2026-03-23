@@ -16,18 +16,22 @@ export default function VsBotGameController({ navigation }) {
         console.log('[emit][game.vsbot]:', socket.id);
         socket.emit("game.vsbot");
 
-        socket.on('game.start', (data) => {
-            console.log('[listen][game.start]:', data);
+        const onGameStart = (data) => {
             setInGame(data['inGame']);
             setGameResult(null);
-        });
-
-        socket.on('game.end', (data) => {
-            console.log('[listen][game.end]:', data);
+        };
+        const onGameEnd = (data) => {
             setInGame(false);
             setGameResult(data);
-        });
+        };
 
+        socket.on('game.start', onGameStart);
+        socket.on('game.end', onGameEnd);
+
+        return () => {
+            socket.off('game.start', onGameStart);
+            socket.off('game.end', onGameEnd);
+        };
     }, []);
 
     return (

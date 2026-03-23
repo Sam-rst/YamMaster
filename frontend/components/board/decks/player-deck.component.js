@@ -15,8 +15,7 @@ const PlayerDeck = () => {
   const [rollsMaximum, setRollsMaximum] = useState(3);
 
   useEffect(() => {
-
-    socket.on("game.deck.view-state", (data) => {
+    const onDeckViewState = (data) => {
       setDisplayPlayerDeck(data['displayPlayerDeck']);
       if (data['displayPlayerDeck']) {
         setDisplayRollButton(data['displayRollButton']);
@@ -24,7 +23,9 @@ const PlayerDeck = () => {
         setRollsMaximum(data['rollsMaximum']);
         setDices(data['dices']);
       }
-    });
+    };
+    socket.on("game.deck.view-state", onDeckViewState);
+    return () => socket.off("game.deck.view-state", onDeckViewState);
   }, []);
 
   const toggleDiceLock = (index) => {

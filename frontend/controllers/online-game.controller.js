@@ -21,26 +21,30 @@ export default function OnlineGameController({ navigation }) {
         setInQueue(false);
         setInGame(false);
 
-        socket.on('queue.added', (data) => {
-            console.log('[listen][queue.added]:', data);
+        const onQueueAdded = (data) => {
             setInQueue(data['inQueue']);
             setInGame(data['inGame']);
-        });
-
-        socket.on('game.start', (data) => {
-            console.log('[listen][game.start]:', data);
+        };
+        const onGameStart = (data) => {
             setInQueue(data['inQueue']);
             setInGame(data['inGame']);
             setIdOpponent(data['idOpponent']);
             setGameResult(null);
-        });
-
-        socket.on('game.end', (data) => {
-            console.log('[listen][game.end]:', data);
+        };
+        const onGameEnd = (data) => {
             setInGame(false);
             setGameResult(data);
-        });
+        };
 
+        socket.on('queue.added', onQueueAdded);
+        socket.on('game.start', onGameStart);
+        socket.on('game.end', onGameEnd);
+
+        return () => {
+            socket.off('queue.added', onQueueAdded);
+            socket.off('game.start', onGameStart);
+            socket.off('game.end', onGameEnd);
+        };
     }, []);
 
     return (
