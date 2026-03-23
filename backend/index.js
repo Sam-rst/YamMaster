@@ -1,5 +1,6 @@
 // backend/index.js
 
+require('dotenv').config();
 const app = require('express')();
 const http = require('http').Server(app);
 const io = require('socket.io')(http);
@@ -11,7 +12,8 @@ const BotService = require('./services/bot.service');
 // ---------------------------------------------------
 // -------- CONSTANTS AND GLOBAL VARIABLES -----------
 // ---------------------------------------------------
-const DEV_MODE = process.env.DEV_MODE === 'true' || true; // Mettre à false en production
+const DEV_MODE = process.env.DEV_MODE === 'true';
+const PORT = process.env.PORT || 3000;
 let games = [];
 let queue = [];
 
@@ -575,6 +577,6 @@ io.on('connection', socket => {
 
 app.get('/', (req, res) => res.sendFile('index.html'));
 
-http.listen(3000, function () {
-  console.log('listening on *:3000');
+http.listen(PORT, function () {
+  console.log(`listening on *:${PORT}` + (DEV_MODE ? ' [DEV MODE]' : ''));
 });
