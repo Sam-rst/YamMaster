@@ -1,7 +1,7 @@
 // app/components/board/board.component.js
 
 import React from "react";
-import { View, Text, StyleSheet } from 'react-native';
+import { View, StyleSheet } from 'react-native';
 import PlayerTimer from "./timers/player-timer.component";
 import OpponentTimer from "./timers/oppenent-timer.component";
 import OpponentDeck from "./decks/opponent-deck.component";
@@ -18,7 +18,7 @@ import DevPanel from "./dev/dev-panel.component";
 import { DEV_MODE } from "../../config";
 
 
-const Board = ({ gameViewState}) => {
+const Board = ({ _gameViewState}) => {
   return (
     <View style={styles.container}>
       {DEV_MODE && <DevPanel />}

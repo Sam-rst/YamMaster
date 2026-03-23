@@ -12,7 +12,6 @@ export default function OnlineGameController({ navigation }) {
 
     const [inQueue, setInQueue] = useState(false);
     const [inGame, setInGame] = useState(false);
-    const [idOpponent, setIdOpponent] = useState(null);
     const [gameResult, setGameResult] = useState(null);
 
     useEffect(() => {
@@ -28,7 +27,6 @@ export default function OnlineGameController({ navigation }) {
         const onGameStart = (data) => {
             setInQueue(data['inQueue']);
             setInGame(data['inGame']);
-            setIdOpponent(data['idOpponent']);
             setGameResult(null);
         };
         const onGameEnd = (data) => {

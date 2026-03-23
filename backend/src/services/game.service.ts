@@ -1,8 +1,8 @@
 // backend/src/services/game.service.ts
 
 import {
-    Dice, Combination, GridCell, Grid, Choices, Deck,
-    GameState, Game, PlayerKey, VictoryResult, Scores, SocketLike
+    Dice, Combination, Grid, Choices, Deck,
+    GameState, Game, PlayerKey, VictoryResult, Scores
 } from '../types';
 
 const TURN_DURATION = 30;

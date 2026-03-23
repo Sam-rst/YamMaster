@@ -6,7 +6,7 @@ import { createMockSocket } from '../../../__mocks__/socket.mock';
 
 jest.mock('./dice.component', () => {
     const React = require('react');
-    return function MockDice({ value, locked, opponent }) {
+    return function MockDice({ value, _locked, _opponent }) {
         return React.createElement('Text', {}, `Dice:${value || '-'}`);
     };
 });

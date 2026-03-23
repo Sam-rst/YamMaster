@@ -6,7 +6,7 @@ import { createMockSocket } from '../../../__mocks__/socket.mock';
 
 jest.mock('./dice.component', () => {
     const React = require('react');
-    return function MockDice({ index, value, locked, onPress }) {
+    return function MockDice({ index, value, _locked, onPress }) {
         return React.createElement(
             'TouchableOpacity',
             { 'data-testid': `dice-${index}`, onClick: () => onPress(index) },
