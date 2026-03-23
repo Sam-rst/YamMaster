@@ -8,40 +8,10 @@ import OpponentDeck from "./decks/opponent-deck.component";
 import PlayerDeck from "./decks/player-deck.component";
 import Choices from "./choices/choices.component";
 import Grid from "./grid/grid.component";
-
-const OpponentInfos = () => {
-  return (
-    <View style={styles.opponentInfosContainer}>
-      <Text>Opponent infos</Text>
-    </View>
-  );
-};
-
-const OpponentScore = () => {
-  return (
-    <View style={styles.opponentScoreContainer}>
-      <Text>Score: </Text>
-    </View>
-  );
-};
-
-const PlayerInfos = () => {
-  return (
-    <View style={styles.playerInfosContainer}>
-      <Text>Player Infos</Text>
-    </View>
-  );
-};
-
-const PlayerScore = () => {
-
-  return (
-    <View style={styles.playerScoreContainer}>
-      <Text>PlayerScore</Text>
-    </View>
-  );
-};
-
+import OpponentScore from "./scores/opponent-score.component";
+import PlayerScore from "./scores/player-score.component";
+import PlayerInfos from "./infos/player-infos.component";
+import OpponentInfos from "./infos/opponent-infos.component";
 
 
 const Board = ({ gameViewState}) => {
@@ -90,14 +60,6 @@ const styles = StyleSheet.create({
     borderBottomWidth: 1,
     borderColor: 'black',
   },
-  opponentInfosContainer: {
-    flex: 7,
-    justifyContent: 'center',
-    alignItems: 'center',
-    borderRightWidth: 1,
-    borderColor: 'black',
-    backgroundColor: "lightgrey"
-  },
   opponentTimerScoreContainer: {
     flex: 3,
     flexDirection: 'column',
@@ -105,28 +67,9 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     backgroundColor: "lightgrey"
   },
-  opponentScoreContainer: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  playerInfosContainer: {
-    flex: 7,
-    justifyContent: 'center',
-    alignItems: 'center',
-    borderRightWidth: 1,
-    borderColor: 'black',
-    backgroundColor: "lightgrey"
-  },
   playerTimerScoreContainer: {
     flex: 3,
     flexDirection: 'column',
-    justifyContent: 'center',
-    alignItems: 'center',
-    backgroundColor: "lightgrey"
-  },
-  playerScoreContainer: {
-    flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
     backgroundColor: "lightgrey"
