@@ -10,11 +10,11 @@ Référence : TP Evaluation Finale du module Architecture Applicative (EPSI M1).
 
 | Critère | Points | Phase roadmap | Statut |
 |---------|--------|---------------|--------|
-| Gestion des scores (alignements 3 = 1pt, 4 = 2pts, 5 = victoire) | ~1.5 | Phase 1.2 | A FAIRE |
-| Gestion des 12 pions par joueur (décrément à chaque pose) | ~1 | Phase 1.3 | A FAIRE |
-| Vérification des conditions de victoire après chaque pose (lignes H/V/D, plus de pions) | ~1.5 | Phase 1.4 | A FAIRE |
-| Écran "Résumé de la partie" (vainqueur, perdant, scores) | ~1 | Phase 1.5 | A FAIRE |
-| Workflow fin de partie (retour menu, relancer, etc.) | ~0.5 | Phase 1.5 | A FAIRE |
+| Gestion des scores (alignements 3 = 1pt, 4 = 2pts, 5 = victoire) | ~1.5 | Phase 1.2 | FAIT |
+| Gestion des 12 pions par joueur (décrément à chaque pose) | ~1 | Phase 1.3 | FAIT |
+| Vérification des conditions de victoire après chaque pose (lignes H/V/D, plus de pions) | ~1.5 | Phase 1.4 | FAIT |
+| Écran "Résumé de la partie" (vainqueur, perdant, scores) | ~1 | Phase 1.5 | FAIT |
+| Workflow fin de partie (retour menu, relancer, etc.) | ~0.5 | Phase 1.5 | FAIT |
 | (Optionnel) Défi + Yam Predator | ~0.5 | Phase 1.6 | A FAIRE |
 
 ### Mode VS Bot — 8 pts
@@ -41,13 +41,13 @@ Référence : TP Evaluation Finale du module Architecture Applicative (EPSI M1).
 
 Le cahier des charges mentionne explicitement : *"vous serez jugés sur la pertinence des améliorations en terme de qualité"*.
 
-| Critère | Comment y répondre |
-|---------|--------------------|
-| Qualité du code | Factorisation, nommage, séparation des responsabilités |
-| Architecture fichiers | Arborescence claire, services externalisés |
-| README professionnel | Stack technique, comment lancer, architecture globale |
-| Exécution locale | Tout doit tourner en local (pas de dépendance cloud obligatoire) |
-| Projet GitHub public | Historique de commits propre, messages clairs |
+| Critère | Comment y répondre | Statut |
+|---------|--------------------|--------|
+| Qualité du code | Factorisation, nommage, séparation des responsabilités | EN COURS — TDD, 135 tests, >90% couverture |
+| Architecture fichiers | Arborescence claire, services externalisés | EN COURS — composants séparés (tokens, scores, timers, etc.) |
+| README professionnel | Stack technique, comment lancer, architecture globale | A FAIRE |
+| Exécution locale | Tout doit tourner en local (pas de dépendance cloud obligatoire) | FAIT |
+| Projet GitHub public | Historique de commits propre, messages clairs | EN COURS |
 
 ---
 

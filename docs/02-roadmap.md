@@ -4,34 +4,33 @@ Priorisation basée sur la grille d'évaluation (14pts obligatoires + 6pts au ch
 
 ---
 
-## Phase 1 — Finition du moteur de jeu (6 pts) `PRIORITÉ CRITIQUE`
+## Phase 1 — Finition du moteur de jeu (6 pts) `TERMINÉE`
 
-> Pré-requis pour tout le reste. Sans moteur complet, aucune autre feature n'a de sens.
-
-### 1.1 Correction des bugs existants
-- [ ] Fix shallow copy dans `GameService.init.gameState()` (objets partagés entre parties)
-- [ ] Fix réinitialisation de la grille au timeout (les pions posés disparaissent)
-- [ ] Remplacer timer hardcodé `5` par `END_TURN_DURATION`
+### 1.1 Correction des bugs existants `FAIT`
+- [x] Fix shallow copy dans `GameService.init.gameState()` (objets partagés entre parties)
+- [x] Fix réinitialisation de la grille au timeout (les pions posés disparaissent)
+- [x] Remplacer timer hardcodé `5` par `END_TURN_DURATION`
+- [x] Fix crash serveur en fin de partie (interval non nettoyé après splice)
 - [ ] Ajouter validation côté serveur (vérifier que c'est le tour du joueur qui émet)
 
-### 1.2 Calcul des scores
-- [ ] Implémenter `GameService.grid.calculateScores(grid)` — détection des alignements 3, 4 et 5 pions (horizontal, vertical, diagonal)
-- [ ] Mettre à jour `player1Score` / `player2Score` dans le gameState après chaque pose
-- [ ] Émettre les scores aux clients via les composants `<PlayerScore>` / `<OpponentScore>`
+### 1.2 Calcul des scores `FAIT`
+- [x] Implémenter `GameService.grid.calculateScores(grid)` — détection des alignements 3, 4 et 5 pions (horizontal, vertical, diagonal)
+- [x] Mettre à jour `player1Score` / `player2Score` dans le gameState après chaque pose
+- [x] Émettre les scores aux clients via `game.score` + composants `<PlayerScore>` / `<OpponentScore>`
 
-### 1.3 Gestion des 12 pions
-- [ ] Ajouter `player1Tokens: 12` et `player2Tokens: 12` dans `GAME_INIT`
-- [ ] Décrémenter le compteur à chaque pose de pion
-- [ ] Afficher le nombre de pions restants côté client
+### 1.3 Gestion des 12 pions `FAIT`
+- [x] Ajouter `player1Tokens: 12` et `player2Tokens: 12` dans gameState
+- [x] Décrémenter le compteur à chaque pose de pion
+- [x] Afficher le nombre de pions restants côté client via `<PlayerTokens>` / `<OpponentTokens>`
 
-### 1.4 Détection de victoire
-- [ ] Vérifier après chaque pose : alignement de 5 → victoire instantanée
-- [ ] Vérifier après chaque pose : un joueur à 0 pions → fin de partie, comparaison des scores
-- [ ] Émettre `game.end` avec les données de résultat (vainqueur, scores, raison)
+### 1.4 Détection de victoire `FAIT`
+- [x] Vérifier après chaque pose : alignement de 5 → victoire instantanée
+- [x] Vérifier après chaque pose : un joueur à 0 pions → fin de partie, comparaison des scores
+- [x] Émettre `game.end` avec les données de résultat (vainqueur, scores, raison)
 
-### 1.5 Écran de fin de partie
-- [ ] Créer un écran/modal "Résumé de la partie" (vainqueur, perdant, scores)
-- [ ] Workflow post-partie : bouton "Retour au menu" + bouton "Relancer"
+### 1.5 Écran de fin de partie `FAIT`
+- [x] Écran "Résumé de la partie" dans `OnlineGameController` (vainqueur, perdant, scores, raison)
+- [x] Workflow post-partie : bouton "Retour au menu" + bouton "Rejouer"
 
 ### 1.6 (Optionnel) Défi et Yam Predator
 - [ ] Implémenter le bouton "Défi" au 2e lancer (côté client + serveur)
@@ -104,19 +103,19 @@ Priorisation basée sur la grille d'évaluation (14pts obligatoires + 6pts au ch
 
 ---
 
-## Ordre d'implémentation recommandé
+## Progression
 
 ```
-Phase 1.1  Corrections bugs       ██░░░░░░░░  (fondation)
-Phase 1.2  Scores                 ████░░░░░░
-Phase 1.3  12 pions               █████░░░░░
-Phase 1.4  Victoire               ██████░░░░
-Phase 1.5  Écran fin              ███████░░░
-Phase 2.1  Factorisation moteur   ████████░░
-Phase 2.2  Bot basique            █████████░
-Phase 2.3  Frontend VsBot         ██████████
-Phase 3    Feature au choix       ██████████  (en parallèle si possible)
-Phase 4    Bonus                  ██████████  (si le temps le permet)
+Phase 1.1  Corrections bugs       ██████████  FAIT
+Phase 1.2  Scores                 ██████████  FAIT
+Phase 1.3  12 pions               ██████████  FAIT
+Phase 1.4  Victoire               ██████████  FAIT
+Phase 1.5  Écran fin              ██████████  FAIT
+Phase 2.1  Factorisation moteur   ░░░░░░░░░░  À FAIRE
+Phase 2.2  Bot basique            ░░░░░░░░░░  À FAIRE
+Phase 2.3  Frontend VsBot         ░░░░░░░░░░  À FAIRE
+Phase 3    Feature au choix       ░░░░░░░░░░  À FAIRE
+Phase 4    Bonus                  ░░░░░░░░░░  À FAIRE
 ```
 
 Approche **TDD** : chaque tâche commence par l'écriture de tests avant l'implémentation.

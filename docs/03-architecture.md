@@ -111,11 +111,13 @@ Game {
   │   │   │       │   ├── <OpponentInfos>
   │   │   │       │   ├── <OpponentTimer>
   │   │   │       │   ├── <OpponentScore>
+  │   │   │       │   ├── <OpponentTokens>
   │   │   │       │   ├── <OpponentDeck>
   │   │   │       │   ├── <Grid>
   │   │   │       │   ├── <Choices>
   │   │   │       │   ├── <PlayerDeck>
   │   │   │       │   ├── <PlayerScore>
+  │   │   │       │   ├── <PlayerTokens>
   │   │   │       │   ├── <PlayerTimer>
   │   │   │       │   └── <PlayerInfos>
   │   │   │       └── (écran résumé fin de partie)
@@ -151,6 +153,6 @@ Game {
 | `game.deck.view-state` | `{ dices, rollsCounter, ... }` | État des dés |
 | `game.choices.view-state` | `{ availableChoices, ... }` | Combinaisons disponibles |
 | `game.grid.view-state` | `{ grid, canSelectCells }` | État de la grille |
-| `game.scores` | `{ playerScore, opponentScore, playerTokens, opponentTokens }` | Scores et pions |
-| `game.end` | `{ winner, scores, reason }` | Fin de partie |
+| `game.score` | `{ playerScore, opponentScore, playerTokens, opponentTokens }` | Scores et pions (émis au start + après chaque pose) |
+| `game.end` | `{ winner, reason, player1Score, player2Score }` | Fin de partie |
 | `game.opponent.leave` | — | Adversaire déconnecté |

@@ -62,3 +62,4 @@ Backend listens on `localhost:3000`. Frontend connects via hardcoded IP for nati
 - **TDD**: Toujours écrire les tests en premier (Red → Green → Refactor). Pour chaque nouvelle fonctionnalité ou correction de bug : 1) écrire un test qui échoue, 2) implémenter le minimum pour le faire passer, 3) refactoriser.
 - **Commit avant changement**: Avant de commencer tout nouveau changement, s'assurer que le working tree est propre (commit ou stash). Ne jamais empiler des changements non commités.
 - **Couverture de tests**: Viser **90%** de couverture minimum. Tous les tests doivent passer au vert avant de considérer un changement comme terminé.
+- **Documentation**: Mettre à jour ou créer la documentation **après** que les tests passent au vert et **juste avant** le commit. Ordre : code → tests verts → docs → commit.

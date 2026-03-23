@@ -1,10 +1,10 @@
 # Audit de l'existant
 
-État des lieux du code au commit `6e37c00` (branche `main`).
+État des lieux initial au commit `6e37c00`, mis à jour au commit `7437217`.
 
 ## Résumé
 
-Le socle fournit un mode en ligne fonctionnel mais **incomplet** : les dés, le verrouillage, la détection de combinaisons et la pose de pions sur la grille marchent. En revanche, aucune logique de score, de victoire, de persistance ou d'authentification n'existe.
+Le moteur de jeu est désormais **fonctionnel** : combinaisons, scores par alignements, gestion des 12 pions, détection de victoire et écran de fin de partie sont implémentés. Le mode en ligne fonctionne de bout en bout. Les bugs critiques du socle initial ont été corrigés. Il reste le mode VS Bot, l'authentification, la persistance et les features au choix.
 
 ---
 
@@ -14,49 +14,48 @@ Le socle fournit un mode en ligne fonctionnel mais **incomplet** : les dés, le 
 |---------|--------|--------------------|---------|
 | Lancer de dés (jusqu'à 3 lancers) | FAIT | `game.service.js` (dices.roll) | Fonctionne correctement |
 | Verrouillage/déverrouillage des dés | FAIT | `game.service.js` (dices.lock) | OK |
-| Détection des combinaisons | FAIT | `game.service.js:253-323` | Brelan, Full, Carré, Yam, Suite, ≤8, Sec détectés |
-| Combinaison "Défi" | PARTIEL | `game.service.js:309` | Le flag `isDefi` existe mais n'est jamais activé côté serveur/client |
-| Combinaison "Sec" | FAIT | `game.service.js:316-319` | Détecté au 1er lancer uniquement |
+| Détection des combinaisons | FAIT | `game.service.js` (choices.findCombinations) | Brelan, Full, Carré, Yam, Suite, ≤8, Sec détectés |
+| Combinaison "Défi" | PARTIEL | `game.service.js` | Le flag `isDefi` existe mais n'est jamais activé côté client |
+| Combinaison "Sec" | FAIT | `game.service.js` | Détecté au 1er lancer uniquement |
 | Pose de pions sur la grille | FAIT | `game.service.js` (grid.selectCell) | Case marquée avec `owner` |
-| **Calcul des scores** (alignements) | **NON** | `index.js:226` | `// TODO: Here calcul score` |
-| **Gestion des 12 pions** | **NON** | — | Aucun compteur de pions |
-| **Détection de victoire** | **NON** | `index.js:227` | `// TODO: Then check if a player win` |
-| **Yam Predator** | **NON** | — | Aucune logique pour retirer un pion adverse |
-| **Écran résumé fin de partie** | **NON** | — | Pas d'événement `game.end` émis |
-| **Mode VS Bot** | **NON** | `vs-bot-game.screen.js` | Écran stub (texte "VsBot Game Interface" uniquement) |
+| Calcul des scores (alignements) | FAIT | `game.service.js` (grid.calculateScores) | Alignements H/V/D : 3→1pt, 4→2pts, 5→Infinity |
+| Gestion des 12 pions | FAIT | `game.service.js` + `index.js` | Décrément à chaque pose, affiché côté client |
+| Détection de victoire | FAIT | `game.service.js` (game.checkVictory) | 5 alignés ou 0 pions |
+| Émission `game.end` | FAIT | `index.js` | Émet aux deux joueurs + cleanup interval + splice |
+| Écran résumé fin de partie | FAIT | `online-game.controller.js` | Vainqueur, scores, raison, boutons Retour/Rejouer |
+| Affichage scores et jetons | FAIT | `player-score`, `opponent-score`, `player-tokens`, `opponent-tokens` | Via événement `game.score` |
+| Yam Predator | NON | — | Aucune logique pour retirer un pion adverse |
+| **Mode VS Bot** | **NON** | `vs-bot-game.screen.js` | Écran stub uniquement |
 | **Authentification** | **NON** | — | Pas de `<AuthScreen>`, pas de contexte utilisateur |
-| **Base de données** | **NON** | — | Tout en mémoire (arrays globaux `games[]`, `queue[]`) |
+| **Base de données** | **NON** | — | Tout en mémoire |
 | **Sauvegarde de parties** | **NON** | — | Aucune persistance |
-| **Reprise de partie** | **NON** | — | Pas de reconnexion, pas de restauration d'état |
+| **Reprise de partie** | **NON** | — | Pas de reconnexion |
 | **Replay de parties** | **NON** | — | |
-| **UI avancée** | **NON** | `player-score.component.js` | Composants score/infos en placeholder (texte brut) |
+| **UI avancée** | **NON** | — | Styles basiques |
 
 ---
 
-## Points de dette technique identifiés
+## Bugs corrigés depuis le socle initial
 
-### Backend
+| Bug | Commit | Détails |
+|-----|--------|---------|
+| Shallow copy `gameState` | `1c449dd` | `GAME_INIT` remplacé par deep copy dans `init.gameState()` |
+| Grille réinitialisée au timeout | `1c449dd` | `init.grid()` remplacé par `resetcanBeCheckedCells()` |
+| Timer hardcodé à 5 | `1c449dd` | Remplacé par `END_TURN_DURATION` |
+| Crash serveur en fin de partie | `7437217` | `setInterval` stocké dans `game.gameInterval`, nettoyé avant `splice` |
 
-1. **`game.service.js:94-98`** — `GameService.init.gameState()` utilise le spread `{ ...GAME_INIT }` mais c'est un **shallow copy** : `gameState`, `deck`, `choices` sont partagés entre les parties. La grille est corrigée avec `map` mais les autres objets ne le sont pas.
+## Dette technique restante
 
-2. **`index.js:98`** — Au changement de tour sur timeout, la grille est **réinitialisée** (`GameService.init.grid()`) au lieu de conserver les pions déjà posés. Bug critique : les pions posés disparaissent à chaque fin de tour par timeout.
-
-3. **`index.js:186`** — Au dernier lancer, le timer est hardcodé à 5 secondes (`games[gameIndex].gameState.timer = 5`) au lieu d'utiliser `END_TURN_DURATION`.
-
-4. **`index.js:109-116`** — La déconnexion d'un joueur clear l'interval mais ne notifie pas l'autre joueur (`game.opponent.leave` n'est pas émis) et ne nettoie pas l'entrée dans `games[]`.
-
-5. **Pas de validation côté serveur** — Le serveur ne vérifie pas que c'est bien le tour du joueur qui émet un événement (un joueur pourrait tricher).
-
-### Frontend
-
-6. **`online-game.controller.js:20`** — `setInQueue(false)` est appelé immédiatement après `socket.emit("queue.join")`, ce qui devrait être `true` en attendant la réponse.
-
-7. **Composants score** (`player-score.component.js`, `opponent-score.component.js`) — Sont des placeholders, n'affichent aucune donnée réelle.
-
-8. **Pas de cleanup des listeners Socket.IO** — Les `useEffect` n'ont pas de fonction de nettoyage, ce qui peut causer des fuites mémoire et des listeners dupliqués.
+1. **Pas de validation côté serveur** — Le serveur ne vérifie pas que c'est bien le tour du joueur qui émet.
+2. **Pas de cleanup des listeners Socket.IO** — Les `useEffect` frontend n'ont pas de fonction de nettoyage.
+3. **Déconnexion adverse** — `game.opponent.leave` n'est pas émis, la partie reste en mémoire.
 
 ---
 
-## Conclusion
+## Couverture de tests
 
-Le socle couvre environ **30%** des fonctionnalités demandées. Le moteur de jeu (combinaisons, dés, grille) est fonctionnel mais la boucle de jeu est incomplète (pas de score, pas de fin de partie). Tout le reste (auth, BDD, bot, sauvegarde) est à construire from scratch.
+| Cible | Tests | Couverture Stmts |
+|-------|-------|-----------------|
+| Backend (`game.service.js`) | 89 | 100% |
+| Frontend (composants + screens + controllers) | 46 | 96.15% |
+| **Total** | **135** | **> 90%** |
