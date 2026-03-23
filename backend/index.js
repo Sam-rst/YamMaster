@@ -443,8 +443,11 @@ io.on('connection', socket => {
       const combinations = GameService.choices.findCombinations(dices, isDefi, isSec);
       games[gameIndex].gameState.choices.availableChoices = combinations;
 
-      // reduce timer for end of turn after last roll
-      games[gameIndex].gameState.timer = GameService.timer.getEndTurnDuration();
+      // Réduire le timer seulement si aucune combinaison jouable sur la grille
+      const hasPlayableChoice = GameService.grid.isAnyCombinationAvailableOnGridForPlayer(games[gameIndex].gameState);
+      if (!hasPlayableChoice) {
+        games[gameIndex].gameState.timer = GameService.timer.getEndTurnDuration();
+      }
 
       // emit to views new state
       updateClientsViewDecks(games[gameIndex]);
