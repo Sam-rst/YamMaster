@@ -170,6 +170,16 @@ const GameService = {
                     grid: gameState.grid
                 };
 
+            },
+
+            scoreViewState: (playerKey, gameState) => {
+                const isPlayer1 = playerKey === 'player:1';
+                return {
+                    playerScore: isPlayer1 ? gameState.player1Score : gameState.player2Score,
+                    opponentScore: isPlayer1 ? gameState.player2Score : gameState.player1Score,
+                    playerTokens: isPlayer1 ? gameState.player1Tokens : gameState.player2Tokens,
+                    opponentTokens: isPlayer1 ? gameState.player2Tokens : gameState.player1Tokens,
+                };
             }
         }
     },

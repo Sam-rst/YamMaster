@@ -613,6 +613,26 @@ describe('GameService.send', () => {
             expect(grid.canSelectCells).toBe(false);
         });
     });
+
+    describe('scoreViewState', () => {
+        it('retourne score et tokens pour player:1', () => {
+            const state = { ...mockGame.gameState, player1Score: 3, player2Score: 1, player1Tokens: 9, player2Tokens: 11 };
+            const view = GameService.send.forPlayer.scoreViewState('player:1', state);
+            expect(view.playerScore).toBe(3);
+            expect(view.opponentScore).toBe(1);
+            expect(view.playerTokens).toBe(9);
+            expect(view.opponentTokens).toBe(11);
+        });
+
+        it('retourne score et tokens inversés pour player:2', () => {
+            const state = { ...mockGame.gameState, player1Score: 3, player2Score: 1, player1Tokens: 9, player2Tokens: 11 };
+            const view = GameService.send.forPlayer.scoreViewState('player:2', state);
+            expect(view.playerScore).toBe(1);
+            expect(view.opponentScore).toBe(3);
+            expect(view.playerTokens).toBe(11);
+            expect(view.opponentTokens).toBe(9);
+        });
+    });
 });
 
 // =============================================================

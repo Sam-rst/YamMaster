@@ -42,6 +42,11 @@ const updateClientsViewGrid = (game) => {
   }, 200)
 }
 
+const updateClientsViewScores = (game) => {
+  game.player1Socket.emit('game.score', GameService.send.forPlayer.scoreViewState('player:1', game.gameState));
+  game.player2Socket.emit('game.score', GameService.send.forPlayer.scoreViewState('player:2', game.gameState));
+};
+
 // ---------------------------------
 // -------- GAME METHODS -----------
 // ---------------------------------
@@ -70,6 +75,7 @@ const createGame = (player1Socket, player2Socket) => {
   updateClientsViewTimers(games[gameIndex]);
   updateClientsViewDecks(games[gameIndex]);
   updateClientsViewGrid(games[gameIndex]);
+  updateClientsViewScores(games[gameIndex]);
 
   // timer every second
   const gameInterval = setInterval(() => {
@@ -235,6 +241,9 @@ io.on('connection', socket => {
     const scores = GameService.grid.calculateScores(games[gameIndex].gameState.grid);
     games[gameIndex].gameState.player1Score = scores.player1Score;
     games[gameIndex].gameState.player2Score = scores.player2Score;
+
+    // Émettre les scores mis à jour
+    updateClientsViewScores(games[gameIndex]);
 
     // Vérification de victoire
     const victory = GameService.game.checkVictory(games[gameIndex].gameState);
