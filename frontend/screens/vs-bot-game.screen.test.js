@@ -1,8 +1,15 @@
 import React from 'react';
-import { render, fireEvent } from '@testing-library/react';
+import { render } from '@testing-library/react';
 import VsBotGameScreen from './vs-bot-game.screen';
 import { SocketContext } from '../contexts/socket.context';
 import { createMockSocket } from '../__mocks__/socket.mock';
+
+jest.mock('../controllers/vs-bot-game.controller', () => {
+    const React = require('react');
+    return function MockVsBotGameController() {
+        return React.createElement('Text', {}, 'MockVsBotController');
+    };
+});
 
 describe('VsBotGameScreen', () => {
 
@@ -21,24 +28,13 @@ describe('VsBotGameScreen', () => {
         expect(getByText('No connection with server...')).toBeTruthy();
     });
 
-    it('affiche l\'interface VsBot quand le socket est connecté', () => {
+    it('affiche le controller quand le socket est connecté', () => {
         const mockSocket = createMockSocket();
         const { getByText } = render(
             <SocketContext.Provider value={mockSocket}>
                 <VsBotGameScreen navigation={mockNavigation} />
             </SocketContext.Provider>
         );
-        expect(getByText('VsBot Game Interface')).toBeTruthy();
-    });
-
-    it('navigue vers HomeScreen au clic sur "Revenir au menu"', () => {
-        const mockSocket = createMockSocket();
-        const { getByText } = render(
-            <SocketContext.Provider value={mockSocket}>
-                <VsBotGameScreen navigation={mockNavigation} />
-            </SocketContext.Provider>
-        );
-        fireEvent.click(getByText('Revenir au menu'));
-        expect(mockNavigation.navigate).toHaveBeenCalledWith('HomeScreen');
+        expect(getByText('MockVsBotController')).toBeTruthy();
     });
 });

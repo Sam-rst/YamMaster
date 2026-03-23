@@ -25,7 +25,7 @@ Le moteur de jeu est désormais **fonctionnel** : combinaisons, scores par align
 | Écran résumé fin de partie | FAIT | `online-game.controller.js` | Vainqueur, scores, raison, boutons Retour/Rejouer |
 | Affichage scores et jetons | FAIT | `player-score`, `opponent-score`, `player-tokens`, `opponent-tokens` | Via événement `game.score` |
 | Yam Predator | NON | — | Aucune logique pour retirer un pion adverse |
-| **Mode VS Bot** | **NON** | `vs-bot-game.screen.js` | Écran stub uniquement |
+| Mode VS Bot | FAIT | `bot.service.js`, `index.js`, `vs-bot-game.controller.js` | Bot EventEmitter, même API WS, stratégie basique |
 | **Authentification** | **NON** | — | Pas de `<AuthScreen>`, pas de contexte utilisateur |
 | **Base de données** | **NON** | — | Tout en mémoire |
 | **Sauvegarde de parties** | **NON** | — | Aucune persistance |
@@ -56,6 +56,6 @@ Le moteur de jeu est désormais **fonctionnel** : combinaisons, scores par align
 
 | Cible | Tests | Couverture Stmts |
 |-------|-------|-----------------|
-| Backend (`game.service.js`) | 89 | 100% |
-| Frontend (composants + screens + controllers) | 46 | 96.15% |
-| **Total** | **135** | **> 90%** |
+| Backend (`game.service.js` + `bot.service.js`) | 96 | 99.18% |
+| Frontend (composants + screens + controllers) | 50 | 94.52% |
+| **Total** | **146** | **> 94%** |

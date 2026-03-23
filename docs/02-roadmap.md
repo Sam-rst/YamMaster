@@ -38,23 +38,22 @@ Priorisation basée sur la grille d'évaluation (14pts obligatoires + 6pts au ch
 
 ---
 
-## Phase 2 — Mode VS Bot (8 pts) `PRIORITÉ CRITIQUE`
+## Phase 2 — Mode VS Bot (8 pts) `TERMINÉE`
 
-> Poids le plus lourd de l'évaluation. Factoriser au maximum avec le mode en ligne.
+### 2.1 Factorisation du moteur `FAIT`
+- [x] `createGameVsBot(playerSocket)` réutilise le même moteur que `createGame`
+- [x] Bot implémenté comme un `EventEmitter` (faux socket) avec la même API WebSocket
 
-### 2.1 Factorisation du moteur
-- [ ] Extraire la logique de `createGame` en méthodes réutilisables
-- [ ] Créer `createGameVsBot(playerSocket)` qui réutilise le même moteur
+### 2.2 Bot basique `FAIT`
+- [x] `backend/services/bot.service.js` — logique externalisée (chooseBestCombination, chooseBestCell, chooseDicesToLock)
+- [x] Le bot joue automatiquement à son tour via les mêmes événements que le client
+- [x] Stratégie : priorise yam > carré > full > suite, verrouille les paires+
 
-### 2.2 Bot basique
-- [ ] Créer `backend/services/bot.service.js` — logique du bot externalisée
-- [ ] Le bot se connecte via la même API WebSocket que le client
-- [ ] Stratégie de base : lance les dés, choisit la meilleure combinaison disponible, pose sur la grille
-
-### 2.3 Frontend VsBot
-- [ ] Créer `VsBotGameController` (similaire à `OnlineGameController`)
-- [ ] Réutiliser le composant `<Board>` existant
-- [ ] Adapter l'écran `VsBotGameScreen` pour lancer une partie contre le bot
+### 2.3 Frontend VsBot `FAIT`
+- [x] `VsBotGameController` avec gestion game.start / game.end
+- [x] Réutilise le composant `<Board>` existant
+- [x] `VsBotGameScreen` branché sur le controller (plus de stub)
+- [x] Écran de fin : "Vous" / "Bot", boutons Retour/Rejouer
 
 ### 2.4 (Optionnel) Niveaux de difficulté
 - [ ] Facile : choix aléatoire
@@ -111,9 +110,9 @@ Phase 1.2  Scores                 ██████████  FAIT
 Phase 1.3  12 pions               ██████████  FAIT
 Phase 1.4  Victoire               ██████████  FAIT
 Phase 1.5  Écran fin              ██████████  FAIT
-Phase 2.1  Factorisation moteur   ░░░░░░░░░░  À FAIRE
-Phase 2.2  Bot basique            ░░░░░░░░░░  À FAIRE
-Phase 2.3  Frontend VsBot         ░░░░░░░░░░  À FAIRE
+Phase 2.1  Factorisation moteur   ██████████  FAIT
+Phase 2.2  Bot basique            ██████████  FAIT
+Phase 2.3  Frontend VsBot         ██████████  FAIT
 Phase 3    Feature au choix       ░░░░░░░░░░  À FAIRE
 Phase 4    Bonus                  ░░░░░░░░░░  À FAIRE
 ```

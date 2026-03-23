@@ -21,10 +21,10 @@ Référence : TP Evaluation Finale du module Architecture Applicative (EPSI M1).
 
 | Critère | Points | Phase roadmap | Statut |
 |---------|--------|---------------|--------|
-| Utilisation du socle existant (factorisation avec le mode en ligne) | ~2 | Phase 2.1 | A FAIRE |
-| Bot fonctionnel qui joue via la même API WebSocket | ~3 | Phase 2.2 | A FAIRE |
-| Frontend VsBot intégré (lancement, board, fin de partie) | ~2 | Phase 2.3 | A FAIRE |
-| Qualité de la stratégie du bot | ~1 | Phase 2.2-2.4 | A FAIRE |
+| Utilisation du socle existant (factorisation avec le mode en ligne) | ~2 | Phase 2.1 | FAIT |
+| Bot fonctionnel qui joue via la même API WebSocket | ~3 | Phase 2.2 | FAIT |
+| Frontend VsBot intégré (lancement, board, fin de partie) | ~2 | Phase 2.3 | FAIT |
+| Qualité de la stratégie du bot | ~1 | Phase 2.2-2.4 | FAIT (basique, améliorable) |
 
 ---
 
