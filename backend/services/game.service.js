@@ -157,7 +157,10 @@ const GameService = {
                     displayChoices: true,
                     canMakeChoice: playerKey === gameState.currentTurn,
                     idSelectedChoice: gameState.choices.idSelectedChoice,
-                    availableChoices: gameState.choices.availableChoices
+                    availableChoices: gameState.choices.availableChoices,
+                    isDefi: gameState.choices.isDefi,
+                    rollsCounter: gameState.deck.rollsCounter,
+                    hasYam: gameState.choices.availableChoices.some(c => c.id === 'yam'),
                 }
                 return choicesViewState;
             },
@@ -468,7 +471,16 @@ const GameService = {
             }
 
             return false; // aucune combinaison disponible pour le joueur actuel
-        }
+        },
+
+        yamPredator: (rowIndex, cellIndex, grid) => {
+            return grid.map((row, rIdx) => row.map((cell, cIdx) => {
+                if (rIdx === rowIndex && cIdx === cellIndex) {
+                    return { ...cell, owner: null };
+                }
+                return { ...cell };
+            }));
+        },
     },
     game: {
         checkVictory: (gameState) => {

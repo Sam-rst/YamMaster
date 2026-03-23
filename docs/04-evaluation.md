@@ -15,7 +15,7 @@ Référence : TP Evaluation Finale du module Architecture Applicative (EPSI M1).
 | Vérification des conditions de victoire après chaque pose (lignes H/V/D, plus de pions) | ~1.5 | Phase 1.4 | FAIT |
 | Écran "Résumé de la partie" (vainqueur, perdant, scores) | ~1 | Phase 1.5 | FAIT |
 | Workflow fin de partie (retour menu, relancer, etc.) | ~0.5 | Phase 1.5 | FAIT |
-| (Optionnel) Défi + Yam Predator | ~0.5 | Phase 1.6 | A FAIRE |
+| (Optionnel) Défi + Yam Predator | ~0.5 | Phase 1.6 | FAIT |
 
 ### Mode VS Bot — 8 pts
 

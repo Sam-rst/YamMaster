@@ -11,9 +11,14 @@ const Grid = () => {
     const [displayGrid, setDisplayGrid] = useState(true);
     const [canSelectCells, setCanSelectCells] = useState([]);
     const [grid, setGrid] = useState([]);
+    const [yamPredatorMode, setYamPredatorMode] = useState(false);
 
-    const handleSelectCell = (cellId, rowIndex, cellIndex) => {
-        if (canSelectCells) {
+    const handleSelectCell = (cellId, rowIndex, cellIndex, cell) => {
+        if (yamPredatorMode && cell.owner && cell.owner !== null) {
+            // En mode Yam Predator, cliquer sur un pion adverse pour le retirer
+            socket.emit("game.grid.yamPredator", { rowIndex, cellIndex });
+            setYamPredatorMode(false);
+        } else if (canSelectCells && cell.canBeChecked) {
             socket.emit("game.grid.selected", { cellId, rowIndex, cellIndex });
         }
     };
@@ -25,27 +30,42 @@ const Grid = () => {
             setGrid(data['grid']);
         };
         socket.on("game.grid.view-state", onGridViewState);
-        return () => socket.off("game.grid.view-state", onGridViewState);
+
+        const onYamPredatorActivate = () => {
+            setYamPredatorMode(true);
+        };
+        socket.on("game.yamPredator.activate", onYamPredatorActivate);
+
+        return () => {
+            socket.off("game.grid.view-state", onGridViewState);
+            socket.off("game.yamPredator.activate", onYamPredatorActivate);
+        };
     }, []);
 
     return (
         <View style={styles.gridContainer}>
+            {yamPredatorMode && (
+                <View style={styles.predatorBanner}>
+                    <Text style={styles.predatorBannerText}>Yam Predator : cliquez sur un pion adverse</Text>
+                </View>
+            )}
             {displayGrid &&
                 grid.map((row, rowIndex) => (
                     <View key={rowIndex} style={styles.row}>
                         {row.map((cell, cellIndex) => (
                             <TouchableOpacity
-                                key={cell.id}
+                                key={`${rowIndex}-${cellIndex}`}
                                 style={[
                                     styles.cell,
                                     cell.owner === "player:1" && styles.playerOwnedCell,
                                     cell.owner === "player:2" && styles.opponentOwnedCell,
-                                    (cell.canBeChecked && !(cell.owner === "player:1") && !(cell.owner === "player:2")) && styles.canBeCheckedCell,
+                                    (cell.canBeChecked && !cell.owner) && styles.canBeCheckedCell,
+                                    yamPredatorMode && cell.owner && styles.predatorTargetCell,
                                     rowIndex !== 0 && styles.topBorder,
                                     cellIndex !== 0 && styles.leftBorder,
                                 ]}
-                                onPress={() => handleSelectCell(cell.id, rowIndex, cellIndex)}
-                                disabled={!cell.canBeChecked}
+                                onPress={() => handleSelectCell(cell.id, rowIndex, cellIndex, cell)}
+                                disabled={!yamPredatorMode && !cell.canBeChecked}
                             >
                                 <Text style={styles.cellText}>{cell.viewContent}</Text>
                             </TouchableOpacity>
@@ -94,6 +114,21 @@ const styles = StyleSheet.create({
     canBeCheckedCell: {
         backgroundColor: "lightyellow",
     },
+    predatorTargetCell: {
+        borderColor: "red",
+        borderWidth: 2,
+    },
+    predatorBanner: {
+        backgroundColor: "#8b0000",
+        width: "100%",
+        paddingVertical: 4,
+        alignItems: "center",
+    },
+    predatorBannerText: {
+        color: "white",
+        fontSize: 11,
+        fontWeight: "bold",
+    },
     topBorder: {
         borderTopWidth: 1,
     },
@@ -103,4 +138,3 @@ const styles = StyleSheet.create({
 });
 
 export default Grid;
-

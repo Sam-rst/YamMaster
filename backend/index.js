@@ -417,7 +417,7 @@ io.on('connection', socket => {
 
       // combinations management
       const dices = games[gameIndex].gameState.deck.dices;
-      const isDefi = false;
+      const isDefi = games[gameIndex].gameState.choices.isDefi;
       const isSec = games[gameIndex].gameState.deck.rollsCounter === 2;
 
       const combinations = GameService.choices.findCombinations(dices, isDefi, isSec);
@@ -437,7 +437,7 @@ io.on('connection', socket => {
 
       // combinations management
       const dices = games[gameIndex].gameState.deck.dices;
-      const isDefi = false;
+      const isDefi = games[gameIndex].gameState.choices.isDefi;
       const isSec = games[gameIndex].gameState.deck.rollsCounter === 2;
 
       const combinations = GameService.choices.findCombinations(dices, isDefi, isSec);
@@ -461,6 +461,66 @@ io.on('connection', socket => {
     games[gameIndex].gameState.deck.dices[indexDice].locked = !games[gameIndex].gameState.deck.dices[indexDice].locked;
 
     updateClientsViewDecks(games[gameIndex]);
+  });
+
+  socket.on('game.defi', () => {
+    const gameIndex = GameService.utils.findGameIndexBySocketId(games, socket.id);
+    if (gameIndex === -1) return;
+
+    // Le défi ne peut être activé qu'après le 1er lancer (rollsCounter === 2 = on vient de faire le 1er roll)
+    if (games[gameIndex].gameState.deck.rollsCounter >= 2 && !games[gameIndex].gameState.choices.isDefi) {
+      games[gameIndex].gameState.choices.isDefi = true;
+
+      // Recalculer les combinaisons avec le flag défi activé
+      const dices = games[gameIndex].gameState.deck.dices;
+      const isSec = games[gameIndex].gameState.deck.rollsCounter === 2;
+      games[gameIndex].gameState.choices.availableChoices = GameService.choices.findCombinations(dices, true, isSec);
+
+      updateClientsViewChoices(games[gameIndex]);
+    }
+  });
+
+  socket.on('game.grid.yamPredator', (data) => {
+    const gameIndex = GameService.utils.findGameIndexBySocketId(games, socket.id);
+    if (gameIndex === -1) return;
+
+    const { rowIndex, cellIndex } = data;
+    const cell = games[gameIndex].gameState.grid[rowIndex][cellIndex];
+
+    // Vérifier que la cellule appartient à l'adversaire
+    const currentTurn = games[gameIndex].gameState.currentTurn;
+    const opponentKey = currentTurn === 'player:1' ? 'player:2' : 'player:1';
+    if (cell.owner !== opponentKey) return;
+
+    // Retirer le pion adverse
+    games[gameIndex].gameState.grid = GameService.grid.yamPredator(rowIndex, cellIndex, games[gameIndex].gameState.grid);
+
+    // Recréditer un pion à l'adversaire
+    if (opponentKey === 'player:1') {
+      games[gameIndex].gameState.player1Tokens++;
+    } else {
+      games[gameIndex].gameState.player2Tokens++;
+    }
+
+    // Recalculer scores
+    const scores = GameService.grid.calculateScores(games[gameIndex].gameState.grid);
+    games[gameIndex].gameState.player1Score = scores.player1Score;
+    games[gameIndex].gameState.player2Score = scores.player2Score;
+
+    updateClientsViewGrid(games[gameIndex]);
+    updateClientsViewScores(games[gameIndex]);
+
+    // Fin du tour
+    games[gameIndex].gameState.currentTurn = currentTurn === 'player:1' ? 'player:2' : 'player:1';
+    games[gameIndex].gameState.timer = GameService.timer.getTurnDuration();
+    games[gameIndex].gameState.deck = GameService.init.deck();
+    games[gameIndex].gameState.choices = GameService.init.choices();
+
+    games[gameIndex].player1Socket.emit('game.timer', GameService.send.forPlayer.gameTimer('player:1', games[gameIndex].gameState));
+    games[gameIndex].player2Socket.emit('game.timer', GameService.send.forPlayer.gameTimer('player:2', games[gameIndex].gameState));
+    updateClientsViewDecks(games[gameIndex]);
+    updateClientsViewChoices(games[gameIndex]);
+    updateClientsViewGrid(games[gameIndex]);
   });
 
   socket.on('game.choices.selected', (data) => {

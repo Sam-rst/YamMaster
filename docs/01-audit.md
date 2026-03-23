@@ -15,7 +15,7 @@ Le moteur de jeu est désormais **fonctionnel** : combinaisons, scores par align
 | Lancer de dés (jusqu'à 3 lancers) | FAIT | `game.service.js` (dices.roll) | Fonctionne correctement |
 | Verrouillage/déverrouillage des dés | FAIT | `game.service.js` (dices.lock) | OK |
 | Détection des combinaisons | FAIT | `game.service.js` (choices.findCombinations) | Brelan, Full, Carré, Yam, Suite, ≤8, Sec détectés |
-| Combinaison "Défi" | PARTIEL | `game.service.js` | Le flag `isDefi` existe mais n'est jamais activé côté client |
+| Combinaison "Défi" | FAIT | `game.service.js`, `index.js`, `choices.component.js` | Bouton Défi après 1er lancer, flag activé, combinaisons recalculées |
 | Combinaison "Sec" | FAIT | `game.service.js` | Détecté au 1er lancer uniquement |
 | Pose de pions sur la grille | FAIT | `game.service.js` (grid.selectCell) | Case marquée avec `owner` |
 | Calcul des scores (alignements) | FAIT | `game.service.js` (grid.calculateScores) | Alignements H/V/D : 3→1pt, 4→2pts, 5→Infinity |
@@ -24,7 +24,7 @@ Le moteur de jeu est désormais **fonctionnel** : combinaisons, scores par align
 | Émission `game.end` | FAIT | `index.js` | Émet aux deux joueurs + cleanup interval + splice |
 | Écran résumé fin de partie | FAIT | `online-game.controller.js` | Vainqueur, scores, raison, boutons Retour/Rejouer |
 | Affichage scores et jetons | FAIT | `player-score`, `opponent-score`, `player-tokens`, `opponent-tokens` | Via événement `game.score` |
-| Yam Predator | NON | — | Aucune logique pour retirer un pion adverse |
+| Yam Predator | FAIT | `game.service.js` (grid.yamPredator), `index.js`, `grid.component.js` | Retire un pion adverse, recrédite un token |
 | Mode VS Bot | FAIT | `bot.service.js`, `index.js`, `vs-bot-game.controller.js` | Bot EventEmitter, même API WS, stratégie basique |
 | **Authentification** | **NON** | — | Pas de `<AuthScreen>`, pas de contexte utilisateur |
 | **Base de données** | **NON** | — | Tout en mémoire |
@@ -56,6 +56,6 @@ Le moteur de jeu est désormais **fonctionnel** : combinaisons, scores par align
 
 | Cible | Tests | Couverture Stmts |
 |-------|-------|-----------------|
-| Backend (`game.service.js` + `bot.service.js`) | 96 | 99.18% |
-| Frontend (composants + screens + controllers) | 50 | 94.52% |
-| **Total** | **146** | **> 94%** |
+| Backend (`game.service.js` + `bot.service.js`) | 102 | 99.2% |
+| Frontend (composants + screens + controllers) | 63 | 95.83% |
+| **Total** | **165** | **> 95%** |

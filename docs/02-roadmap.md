@@ -32,9 +32,9 @@ Priorisation basée sur la grille d'évaluation (14pts obligatoires + 6pts au ch
 - [x] Écran "Résumé de la partie" dans `OnlineGameController` (vainqueur, perdant, scores, raison)
 - [x] Workflow post-partie : bouton "Retour au menu" + bouton "Rejouer"
 
-### 1.6 (Optionnel) Défi et Yam Predator
-- [ ] Implémenter le bouton "Défi" au 2e lancer (côté client + serveur)
-- [ ] Implémenter le Yam Predator (retirer un pion adverse au lieu d'en poser un)
+### 1.6 Défi et Yam Predator `FAIT`
+- [x] Bouton "Défi" au 2e lancer → active le flag `isDefi`, recalcule les combinaisons
+- [x] Yam Predator : bouton dans Choices quand Yam détecté → mode predator sur la Grid pour retirer un pion adverse
 
 ---
 

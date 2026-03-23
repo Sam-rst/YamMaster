@@ -850,3 +850,61 @@ describe('GameService.game.checkVictory', () => {
         expect(result).toBeNull();
     });
 });
+
+// =============================================================
+// DÉFI
+// =============================================================
+describe('Défi', () => {
+    const makeDices = (values) => values.map((v, i) => ({ id: i + 1, value: String(v), locked: false }));
+
+    it('le défi apparaît dans les combinaisons quand isDefi=true', () => {
+        const dices = makeDices([1, 3, 2, 6, 4]); // aucune combinaison normale
+        const combos = GameService.choices.findCombinations(dices, true, false);
+        expect(combos.some(c => c.id === 'defi')).toBe(true);
+    });
+
+    it('le défi n\'apparaît pas quand isDefi=false', () => {
+        const dices = makeDices([1, 3, 2, 6, 4]);
+        const combos = GameService.choices.findCombinations(dices, false, false);
+        expect(combos.some(c => c.id === 'defi')).toBe(false);
+    });
+});
+
+// =============================================================
+// YAM PREDATOR
+// =============================================================
+describe('GameService.grid.yamPredator', () => {
+
+    it('retire un pion adverse de la cellule ciblée', () => {
+        const grid = GameService.init.grid();
+        grid[0][0].owner = 'player:2';
+
+        const result = GameService.grid.yamPredator(0, 0, grid);
+        expect(result[0][0].owner).toBeNull();
+    });
+
+    it('ne modifie pas une cellule vide', () => {
+        const grid = GameService.init.grid();
+        const result = GameService.grid.yamPredator(0, 0, grid);
+        expect(result[0][0].owner).toBeNull();
+    });
+
+    it('ne modifie pas les autres cellules', () => {
+        const grid = GameService.init.grid();
+        grid[0][0].owner = 'player:2';
+        grid[1][1].owner = 'player:1';
+
+        const result = GameService.grid.yamPredator(0, 0, grid);
+        expect(result[0][0].owner).toBeNull();
+        expect(result[1][1].owner).toBe('player:1');
+    });
+
+    it('retourne une nouvelle grille (immutabilité)', () => {
+        const grid = GameService.init.grid();
+        grid[0][0].owner = 'player:2';
+
+        const result = GameService.grid.yamPredator(0, 0, grid);
+        expect(grid[0][0].owner).toBe('player:2'); // original non modifié
+        expect(result[0][0].owner).toBeNull();
+    });
+});
