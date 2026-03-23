@@ -40,12 +40,25 @@ describe('GameService.init', () => {
             });
         });
 
-        // BUG CONNU: shallow copy dans GAME_INIT — à fixer en Phase 1 (voir docs/01-audit.md)
-        it.skip('crée des instances indépendantes entre deux appels', () => {
+        it('crée des instances indépendantes entre deux appels (gameState)', () => {
             const game1 = GameService.init.gameState();
             const game2 = GameService.init.gameState();
             game1.gameState.timer = 10;
             expect(game2.gameState.timer).toBe(30);
+        });
+
+        it('crée des instances indépendantes (deck)', () => {
+            const game1 = GameService.init.gameState();
+            const game2 = GameService.init.gameState();
+            game1.gameState.deck.rollsCounter = 99;
+            expect(game2.gameState.deck.rollsCounter).toBe(1);
+        });
+
+        it('crée des instances indépendantes (choices)', () => {
+            const game1 = GameService.init.gameState();
+            const game2 = GameService.init.gameState();
+            game1.gameState.choices.isDefi = true;
+            expect(game2.gameState.choices.isDefi).toBe(false);
         });
     });
 

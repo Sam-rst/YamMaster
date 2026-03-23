@@ -94,8 +94,8 @@ const createGame = (player1Socket, player2Socket) => {
       // reset choices state
       games[gameIndex].gameState.choices = GameService.init.choices();
 
-      // reset grid state
-      games[gameIndex].gameState.grid = GameService.init.grid();
+      // reset canBeChecked flags on grid (but preserve owners/pions)
+      games[gameIndex].gameState.grid = GameService.grid.resetcanBeCheckedCells(games[gameIndex].gameState.grid);
 
       // reset views also
       updateClientsViewTimers(games[gameIndex]);
@@ -182,8 +182,8 @@ io.on('connection', socket => {
       const combinations = GameService.choices.findCombinations(dices, isDefi, isSec);
       games[gameIndex].gameState.choices.availableChoices = combinations;
 
-      // temporary put timer at 5 sec to test turn switching 
-      games[gameIndex].gameState.timer = 5;
+      // reduce timer for end of turn after last roll
+      games[gameIndex].gameState.timer = GameService.timer.getEndTurnDuration();
 
       // emit to views new state
       updateClientsViewDecks(games[gameIndex]);

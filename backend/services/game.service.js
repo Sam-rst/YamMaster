@@ -75,27 +75,21 @@ const GRID_INIT = [
     ]
 ];
 
-const GAME_INIT = {
-    gameState: {
-        currentTurn: 'player:1',
-        timer: null,
-        player1Score: 0,
-        player2Score: 0,
-        grid: [],
-        choices: {},
-        deck: {}
-    }
-}
-
 const GameService = {
 
     init: {
         gameState: () => {
-            const game = { ...GAME_INIT };
-            game['gameState']['timer'] = TURN_DURATION;
-            game['gameState']['deck'] = { ...DECK_INIT };
-            game['gameState']['choices'] = { ...CHOICES_INIT };
-            game['gameState']['grid'] = [...GRID_INIT];
+            const game = {
+                gameState: {
+                    currentTurn: 'player:1',
+                    timer: TURN_DURATION,
+                    player1Score: 0,
+                    player2Score: 0,
+                    grid: GRID_INIT.map(row => row.map(cell => ({ ...cell }))),
+                    choices: { ...CHOICES_INIT, availableChoices: [] },
+                    deck: { ...DECK_INIT, dices: DECK_INIT.dices.map(d => ({ ...d })) },
+                }
+            };
             return game;
         },
 
