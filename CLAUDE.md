@@ -52,3 +52,5 @@ Backend listens on `localhost:3000`. Frontend connects via hardcoded IP for nati
 - **TypeScript strict mode**: `strict: true`, no `any`. All WS payloads fully typed in `protocol.ts`.
 - **Error handling**: Wrap network/DB/engine calls in try/catch. Never let a WS error crash the game. Show "Connection lost" screen on host disconnect.
 - **TDD**: Toujours écrire les tests en premier (Red → Green → Refactor). Pour chaque nouvelle fonctionnalité ou correction de bug : 1) écrire un test qui échoue, 2) implémenter le minimum pour le faire passer, 3) refactoriser.
+- **Commit avant changement**: Avant de commencer tout nouveau changement, s'assurer que le working tree est propre (commit ou stash). Ne jamais empiler des changements non commités.
+- **Couverture de tests**: Viser **90%** de couverture minimum. Tous les tests doivent passer au vert avant de considérer un changement comme terminé.

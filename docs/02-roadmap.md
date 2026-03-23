@@ -1,0 +1,122 @@
+# Roadmap — Yam Master
+
+Priorisation basée sur la grille d'évaluation (14pts obligatoires + 6pts au choix).
+
+---
+
+## Phase 1 — Finition du moteur de jeu (6 pts) `PRIORITÉ CRITIQUE`
+
+> Pré-requis pour tout le reste. Sans moteur complet, aucune autre feature n'a de sens.
+
+### 1.1 Correction des bugs existants
+- [ ] Fix shallow copy dans `GameService.init.gameState()` (objets partagés entre parties)
+- [ ] Fix réinitialisation de la grille au timeout (les pions posés disparaissent)
+- [ ] Remplacer timer hardcodé `5` par `END_TURN_DURATION`
+- [ ] Ajouter validation côté serveur (vérifier que c'est le tour du joueur qui émet)
+
+### 1.2 Calcul des scores
+- [ ] Implémenter `GameService.grid.calculateScores(grid)` — détection des alignements 3, 4 et 5 pions (horizontal, vertical, diagonal)
+- [ ] Mettre à jour `player1Score` / `player2Score` dans le gameState après chaque pose
+- [ ] Émettre les scores aux clients via les composants `<PlayerScore>` / `<OpponentScore>`
+
+### 1.3 Gestion des 12 pions
+- [ ] Ajouter `player1Tokens: 12` et `player2Tokens: 12` dans `GAME_INIT`
+- [ ] Décrémenter le compteur à chaque pose de pion
+- [ ] Afficher le nombre de pions restants côté client
+
+### 1.4 Détection de victoire
+- [ ] Vérifier après chaque pose : alignement de 5 → victoire instantanée
+- [ ] Vérifier après chaque pose : un joueur à 0 pions → fin de partie, comparaison des scores
+- [ ] Émettre `game.end` avec les données de résultat (vainqueur, scores, raison)
+
+### 1.5 Écran de fin de partie
+- [ ] Créer un écran/modal "Résumé de la partie" (vainqueur, perdant, scores)
+- [ ] Workflow post-partie : bouton "Retour au menu" + bouton "Relancer"
+
+### 1.6 (Optionnel) Défi et Yam Predator
+- [ ] Implémenter le bouton "Défi" au 2e lancer (côté client + serveur)
+- [ ] Implémenter le Yam Predator (retirer un pion adverse au lieu d'en poser un)
+
+---
+
+## Phase 2 — Mode VS Bot (8 pts) `PRIORITÉ CRITIQUE`
+
+> Poids le plus lourd de l'évaluation. Factoriser au maximum avec le mode en ligne.
+
+### 2.1 Factorisation du moteur
+- [ ] Extraire la logique de `createGame` en méthodes réutilisables
+- [ ] Créer `createGameVsBot(playerSocket)` qui réutilise le même moteur
+
+### 2.2 Bot basique
+- [ ] Créer `backend/services/bot.service.js` — logique du bot externalisée
+- [ ] Le bot se connecte via la même API WebSocket que le client
+- [ ] Stratégie de base : lance les dés, choisit la meilleure combinaison disponible, pose sur la grille
+
+### 2.3 Frontend VsBot
+- [ ] Créer `VsBotGameController` (similaire à `OnlineGameController`)
+- [ ] Réutiliser le composant `<Board>` existant
+- [ ] Adapter l'écran `VsBotGameScreen` pour lancer une partie contre le bot
+
+### 2.4 (Optionnel) Niveaux de difficulté
+- [ ] Facile : choix aléatoire
+- [ ] Intermédiaire : privilégie les alignements
+- [ ] Pro : stratégie optimale (maximise score + bloque adversaire)
+
+---
+
+## Phase 3 — Feature au choix (6 pts) `PRIORITÉ HAUTE`
+
+> Au moins **une** des options suivantes à implémenter.
+
+### Option A — Auth + BDD + Sauvegarde
+- [ ] Choisir et mettre en place la BDD (SQLite local ou MongoDB Docker)
+- [ ] Implémenter Login/Logout (création auto si user inexistant)
+- [ ] Créer `<AuthScreen>` côté frontend
+- [ ] Ajouter contexte utilisateur authentifié dans `<App>`
+- [ ] Sauvegarder les résultats de parties en BDD
+- [ ] Écran historique de parties pour l'utilisateur connecté
+
+### Option B — UI Premium
+- [ ] Refonte graphique complète (thème cohérent, palette de couleurs, typographie)
+- [ ] Animations de dés (rotation, rebond)
+- [ ] Animations de pose de pions
+- [ ] Effets visuels sur les alignements (glow, pulse)
+- [ ] Écran d'attente stylisé
+- [ ] Responsive et soigné sur mobile
+
+### Option C — Replay de parties
+- [ ] Enregistrer chaque action (tour par tour) dans un historique
+- [ ] Interface de replay avec contrôles (suivant, précédent, play/pause)
+- [ ] Afficher la grille et les dés à chaque étape
+
+---
+
+## Phase 4 — Bonus créatifs `PRIORITÉ BASSE`
+
+> Points bonus et différenciation. À traiter uniquement si les phases 1–3 sont solides.
+
+- [ ] Mode classé MMR (score Elo, classement des joueurs)
+- [ ] Données interactives (joueurs en ligne, ratio victoires/défaites)
+- [ ] Bouton modal "Règles du jeu" accessible pendant la partie
+- [ ] Notifications mobiles natives (tour adverse terminé)
+- [ ] Interface Shi/Fu/Mi pour déterminer qui commence
+- [ ] Grille étendue / mode 4 joueurs
+
+---
+
+## Ordre d'implémentation recommandé
+
+```
+Phase 1.1  Corrections bugs       ██░░░░░░░░  (fondation)
+Phase 1.2  Scores                 ████░░░░░░
+Phase 1.3  12 pions               █████░░░░░
+Phase 1.4  Victoire               ██████░░░░
+Phase 1.5  Écran fin              ███████░░░
+Phase 2.1  Factorisation moteur   ████████░░
+Phase 2.2  Bot basique            █████████░
+Phase 2.3  Frontend VsBot         ██████████
+Phase 3    Feature au choix       ██████████  (en parallèle si possible)
+Phase 4    Bonus                  ██████████  (si le temps le permet)
+```
+
+Approche **TDD** : chaque tâche commence par l'écriture de tests avant l'implémentation.
