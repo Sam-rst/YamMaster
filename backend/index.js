@@ -78,7 +78,7 @@ const createGame = (player1Socket, player2Socket) => {
   updateClientsViewScores(games[gameIndex]);
 
   // timer every second
-  const gameInterval = setInterval(() => {
+  games[gameIndex].gameInterval = setInterval(() => {
 
     // timer variable decreased
     games[gameIndex].gameState.timer--;
@@ -113,11 +113,11 @@ const createGame = (player1Socket, player2Socket) => {
 
   // remove intervals at deconnection
   player1Socket.on('disconnect', () => {
-    clearInterval(gameInterval);
+    clearInterval(games[gameIndex] && games[gameIndex].gameInterval);
   });
 
   player2Socket.on('disconnect', () => {
-    clearInterval(gameInterval);
+    clearInterval(games[gameIndex] && games[gameIndex].gameInterval);
   });
 
 };
@@ -248,7 +248,8 @@ io.on('connection', socket => {
     // Vérification de victoire
     const victory = GameService.game.checkVictory(games[gameIndex].gameState);
     if (victory) {
-      // Fin de partie
+      // Fin de partie — arrêter le timer avant de supprimer
+      clearInterval(games[gameIndex].gameInterval);
       games[gameIndex].player1Socket.emit('game.end', victory);
       games[gameIndex].player2Socket.emit('game.end', victory);
       games.splice(gameIndex, 1);
