@@ -44,6 +44,10 @@ jest.mock('./infos/opponent-infos.component', () => {
     const React = require('react');
     return () => React.createElement('Text', {}, 'OpponentInfos');
 });
+jest.mock('./dev/dev-panel.component', () => {
+    const React = require('react');
+    return () => React.createElement('Text', {}, 'DevPanel');
+});
 jest.mock('./tokens/player-tokens.component', () => {
     const React = require('react');
     return () => React.createElement('Text', {}, 'PlayerTokens');

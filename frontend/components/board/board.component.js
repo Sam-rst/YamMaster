@@ -14,11 +14,13 @@ import PlayerInfos from "./infos/player-infos.component";
 import OpponentInfos from "./infos/opponent-infos.component";
 import PlayerTokens from "./tokens/player-tokens.component";
 import OpponentTokens from "./tokens/opponent-tokens.component";
+import DevPanel from "./dev/dev-panel.component";
 
 
 const Board = ({ gameViewState}) => {
   return (
     <View style={styles.container}>
+      <DevPanel />
       <View style={[styles.row, { height: '8%' }]}>
         <OpponentInfos />
         <View style={styles.opponentStatsContainer}>

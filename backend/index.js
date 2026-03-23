@@ -11,6 +11,7 @@ const BotService = require('./services/bot.service');
 // ---------------------------------------------------
 // -------- CONSTANTS AND GLOBAL VARIABLES -----------
 // ---------------------------------------------------
+const DEV_MODE = process.env.DEV_MODE === 'true' || true; // Mettre à false en production
 let games = [];
 let queue = [];
 
@@ -522,6 +523,46 @@ io.on('connection', socket => {
     updateClientsViewChoices(games[gameIndex]);
     updateClientsViewGrid(games[gameIndex]);
   });
+
+  // --- DEV MODE ---
+  if (DEV_MODE) {
+    // Place un pion directement sur la grille sans passer par le flow de jeu
+    // Payload: { rowIndex, cellIndex, owner: 'player:1' | 'player:2' }
+    socket.on('game.dev.place', (data) => {
+      const gameIndex = GameService.utils.findGameIndexBySocketId(games, socket.id);
+      if (gameIndex === -1) return;
+
+      const { rowIndex, cellIndex, owner } = data;
+      const cell = games[gameIndex].gameState.grid[rowIndex][cellIndex];
+      cell.owner = cell.owner === owner ? null : owner; // toggle
+
+      // Décrémenter/incrémenter les tokens
+      if (cell.owner === owner) {
+        if (owner === 'player:1') games[gameIndex].gameState.player1Tokens--;
+        else games[gameIndex].gameState.player2Tokens--;
+      } else {
+        if (owner === 'player:1') games[gameIndex].gameState.player1Tokens++;
+        else games[gameIndex].gameState.player2Tokens++;
+      }
+
+      // Recalculer les scores
+      const scores = GameService.grid.calculateScores(games[gameIndex].gameState.grid);
+      games[gameIndex].gameState.player1Score = scores.player1Score;
+      games[gameIndex].gameState.player2Score = scores.player2Score;
+
+      updateClientsViewGrid(games[gameIndex]);
+      updateClientsViewScores(games[gameIndex]);
+
+      // Check victoire
+      const victory = GameService.game.checkVictory(games[gameIndex].gameState);
+      if (victory) {
+        clearInterval(games[gameIndex].gameInterval);
+        games[gameIndex].player1Socket.emit('game.end', victory);
+        games[gameIndex].player2Socket.emit('game.end', victory);
+        games.splice(gameIndex, 1);
+      }
+    });
+  }
 
   socket.on('disconnect', reason => {
     console.log(`[${socket.id}] socket disconnected - ${reason}`);
