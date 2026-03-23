@@ -1,16 +1,14 @@
 // frontend/config.js
-// Configuration centralisée de l'application
+// Configuration centralisée — lit les variables depuis .env (EXPO_PUBLIC_*)
 
 import { Platform } from 'react-native';
 
-// Adresse du serveur WebSocket
-const SERVER_HOST_MOBILE = '10.61.8.6'; // IP pour mobile physique / émulateur
-const SERVER_HOST_WEB = 'localhost';
-const SERVER_PORT = '3000';
+const SERVER_HOST_WEB = process.env.EXPO_PUBLIC_SERVER_HOST_WEB || 'localhost';
+const SERVER_HOST_MOBILE = process.env.EXPO_PUBLIC_SERVER_HOST_MOBILE || '10.61.8.6';
+const SERVER_PORT = process.env.EXPO_PUBLIC_SERVER_PORT || '3000';
 
 export const SERVER_URL = Platform.OS === 'web'
     ? `http://${SERVER_HOST_WEB}:${SERVER_PORT}`
     : `http://${SERVER_HOST_MOBILE}:${SERVER_PORT}`;
 
-// Mode développeur (affiche le panneau DEV dans le Board)
-export const DEV_MODE = true;
+export const DEV_MODE = process.env.EXPO_PUBLIC_DEV_MODE === 'true';
