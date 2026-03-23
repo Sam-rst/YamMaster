@@ -1,6 +1,5 @@
 // backend/services/game.service.js
 const TURN_DURATION = 30;
-
 const END_TURN_DURATION = 5;
 
 const DECK_INIT = {
@@ -14,6 +13,29 @@ const DECK_INIT = {
     rollsCounter: 1,
     rollsMaximum: 3
 };
+
+const CHOICES_INIT = {
+    isDefi: false,
+    isSec: false,
+    idSelectedChoice: null,
+    availableChoices: [],
+};
+
+const ALL_COMBINATIONS = [
+    { value: 'Brelan1', id: 'brelan1' },
+    { value: 'Brelan2', id: 'brelan2' },
+    { value: 'Brelan3', id: 'brelan3' },
+    { value: 'Brelan4', id: 'brelan4' },
+    { value: 'Brelan5', id: 'brelan5' },
+    { value: 'Brelan6', id: 'brelan6' },
+    { value: 'Full', id: 'full' },
+    { value: 'Carré', id: 'carre' },
+    { value: 'Yam', id: 'yam' },
+    { value: 'Suite', id: 'suite' },
+    { value: '≤8', id: 'moinshuit' },
+    { value: 'Sec', id: 'sec' },
+    { value: 'Défi', id: 'defi' }
+];
 
 const GAME_INIT = {
     gameState: {
@@ -34,12 +56,17 @@ const GameService = {
             const game = { ...GAME_INIT };
             game['gameState']['timer'] = TURN_DURATION;
             game['gameState']['deck'] = { ...DECK_INIT };
+            game['gameState']['choices'] = { ...CHOICES_INIT };
             return game;
         },
 
         deck: () => {
             return { ...DECK_INIT };
         },
+
+        choices: () => {
+            return { ...CHOICES_INIT };
+        }
     },
 
     send: {
@@ -84,6 +111,16 @@ const GameService = {
                     dices: gameState.deck.dices
                 };
                 return deckViewState;
+            },
+
+            choicesViewState: (playerKey, gameState) => {
+                const choicesViewState = {
+                    displayChoices: true,
+                    canMakeChoice: playerKey === gameState.currentTurn,
+                    idSelectedChoice: gameState.choices.idSelectedChoice,
+                    availableChoices: gameState.choices.availableChoices
+                }
+                return choicesViewState;
             }
         }
     },
@@ -159,6 +196,79 @@ const GameService = {
             return lockedDices;
         }
     },
+    choices: {
+        findCombinations: (dices, isDefi, isSec) => {
+            const availableCombinations = [];
+            const allCombinations = ALL_COMBINATIONS;
+
+            const counts = Array(7).fill(0); // Tableau pour compter le nombre de dés de chaque valeur (de 1 à 6)
+            let hasPair = false; // Pour vérifier si une paire est présente
+            let threeOfAKindValue = null; // Stocker la valeur du brelan
+            let hasThreeOfAKind = false; // Pour vérifier si un brelan est présent
+            let hasFourOfAKind = false; // Pour vérifier si un carré est présent
+            let hasFiveOfAKind = false; // Pour vérifier si un Yam est présent
+            let hasStraight = false; // Pour vérifier si une suite est présente
+            let sum = 0; // Somme des valeurs des dés
+
+            // Compter le nombre de dés de chaque valeur et calculer la somme
+            for (let i = 0; i < dices.length; i++) {
+                const diceValue = parseInt(dices[i].value);
+                counts[diceValue]++;
+                sum += diceValue;
+            }
+
+            // Vérifier les combinaisons possibles
+            for (let i = 1; i <= 6; i++) {
+                if (counts[i] === 2) {
+                    hasPair = true;
+                } else if (counts[i] === 3) {
+                    threeOfAKindValue = i;
+                    hasThreeOfAKind = true;
+                } else if (counts[i] === 4) {
+                    threeOfAKindValue = i;
+                    hasThreeOfAKind = true;
+                    hasFourOfAKind = true;
+                } else if (counts[i] === 5) {
+                    threeOfAKindValue = i;
+                    hasThreeOfAKind = true;
+                    hasFourOfAKind = true;
+                    hasFiveOfAKind = true;
+                }
+            }
+
+            const sortedValues = dices.map(dice => parseInt(dice.value)).sort((a, b) => a - b); // Trie les valeurs de dé
+
+            // Vérifie si les valeurs triées forment une suite
+            hasStraight = sortedValues.every((value, index) => index === 0 || value === sortedValues[index - 1] + 1);
+
+            // Vérifier si la somme ne dépasse pas 8
+            const isLessThanEqual8 = sum <= 8;
+
+            // Retourner les combinaisons possibles via leur ID
+            allCombinations.forEach(combination => {
+                if (
+                    (combination.id.includes('brelan') && hasThreeOfAKind && parseInt(combination.id.slice(-1)) === threeOfAKindValue) ||
+                    (combination.id === 'full' && hasPair && hasThreeOfAKind) ||
+                    (combination.id === 'carre' && hasFourOfAKind) ||
+                    (combination.id === 'yam' && hasFiveOfAKind) ||
+                    (combination.id === 'suite' && hasStraight) ||
+                    (combination.id === 'moinshuit' && isLessThanEqual8) ||
+                    (combination.id === 'defi' && isDefi)
+                ) {
+                    availableCombinations.push(combination);
+                }
+            });
+
+
+            const notOnlyBrelan = availableCombinations.some(combination => !combination.id.includes('brelan'));
+
+            if (isSec && availableCombinations.length > 0 && notOnlyBrelan) {
+                availableCombinations.push(allCombinations.find(combination => combination.id === 'sec'));
+            }
+
+            return availableCombinations;
+        }
+    }
 }
 
 module.exports = GameService;
