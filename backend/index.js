@@ -223,6 +223,14 @@ io.on('connection', socket => {
     games[gameIndex].gameState.grid = GameService.grid.resetcanBeCheckedCells(games[gameIndex].gameState.grid);
     games[gameIndex].gameState.grid = GameService.grid.selectCell(data.cellId, data.rowIndex, data.cellIndex, games[gameIndex].gameState.currentTurn, games[gameIndex].gameState.grid);
 
+    // Décrémenter les pions du joueur qui vient de poser
+    const currentPlayer = games[gameIndex].gameState.currentTurn;
+    if (currentPlayer === 'player:1') {
+      games[gameIndex].gameState.player1Tokens--;
+    } else {
+      games[gameIndex].gameState.player2Tokens--;
+    }
+
     // Calcul des scores après pose de pion
     const scores = GameService.grid.calculateScores(games[gameIndex].gameState.grid);
     games[gameIndex].gameState.player1Score = scores.player1Score;

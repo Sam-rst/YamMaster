@@ -85,6 +85,8 @@ const GameService = {
                     timer: TURN_DURATION,
                     player1Score: 0,
                     player2Score: 0,
+                    player1Tokens: 12,
+                    player2Tokens: 12,
                     grid: GRID_INIT.map(row => row.map(cell => ({ ...cell }))),
                     choices: { ...CHOICES_INIT, availableChoices: [] },
                     deck: { ...DECK_INIT, dices: DECK_INIT.dices.map(d => ({ ...d })) },

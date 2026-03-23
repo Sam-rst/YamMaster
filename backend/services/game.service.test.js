@@ -13,6 +13,8 @@ describe('GameService.init', () => {
             expect(game.gameState.timer).toBe(30);
             expect(game.gameState.player1Score).toBe(0);
             expect(game.gameState.player2Score).toBe(0);
+            expect(game.gameState.player1Tokens).toBe(12);
+            expect(game.gameState.player2Tokens).toBe(12);
         });
 
         it('retourne un deck initialisé avec 5 dés verrouillés', () => {
