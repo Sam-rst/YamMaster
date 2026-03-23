@@ -38,18 +38,7 @@ jobs:
           cache: npm
           cache-dependency-path: backend/package-lock.json
       - run: npm ci
-      - run: npm run test:coverage
-      - name: Vérifier couverture >= 90%
-        run: |
-          COVERAGE=$(npx jest --coverage --coverageReporters=json-summary 2>/dev/null && cat coverage/coverage-summary.json | node -e "
-            const data = require('/dev/stdin');
-            console.log(Math.round(data.total.statements.pct));
-          " 2>/dev/null || echo "0")
-          echo "Couverture: ${COVERAGE}%"
-          if [ "$COVERAGE" -lt 90 ]; then
-            echo "::error::Couverture insuffisante: ${COVERAGE}% (minimum 90%)"
-            exit 1
-          fi
+      - run: npx jest --coverage --coverageThreshold='{"global":{"statements":90,"branches":80,"functions":90,"lines":90}}'
 
   frontend-lint:
     name: Frontend Lint
