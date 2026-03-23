@@ -315,7 +315,7 @@ const GameService = {
                     (combination.id === 'yam' && hasFiveOfAKind) ||
                     (combination.id === 'suite' && hasStraight) ||
                     (combination.id === 'moinshuit' && isLessThanEqual8) ||
-                    (combination.id === 'defi' && isDefi)
+                    false // défi géré après la boucle avec vérification non-brelan
                 ) {
                     availableCombinations.push(combination);
                 }
@@ -326,6 +326,11 @@ const GameService = {
 
             if (isSec && availableCombinations.length > 0 && notOnlyBrelan) {
                 availableCombinations.push(allCombinations.find(combination => combination.id === 'sec'));
+            }
+
+            // Le défi est réussi si isDefi=true ET il y a au moins une combinaison non-brelan
+            if (isDefi && notOnlyBrelan) {
+                availableCombinations.push(allCombinations.find(combination => combination.id === 'defi'));
             }
 
             return availableCombinations;

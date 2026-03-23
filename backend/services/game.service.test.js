@@ -357,8 +357,8 @@ describe('GameService.choices', () => {
         });
 
         // --- Défi ---
-        it('détecte le Défi quand isDefi est true', () => {
-            const dices = makeDices([1, 2, 3, 4, 6]);
+        it('détecte le Défi quand isDefi est true ET combinaison non-brelan (suite)', () => {
+            const dices = makeDices([1, 2, 3, 4, 5]); // suite
             const combos = GameService.choices.findCombinations(dices, true, false);
             expect(combos.some(c => c.id === 'defi')).toBe(true);
         });
@@ -857,14 +857,39 @@ describe('GameService.game.checkVictory', () => {
 describe('Défi', () => {
     const makeDices = (values) => values.map((v, i) => ({ id: i + 1, value: String(v), locked: false }));
 
-    it('le défi apparaît dans les combinaisons quand isDefi=true', () => {
-        const dices = makeDices([1, 3, 2, 6, 4]); // aucune combinaison normale
+    it('le défi apparaît quand isDefi=true ET une combinaison non-brelan existe (full)', () => {
+        const dices = makeDices([2, 2, 5, 5, 5]); // full
+        const combos = GameService.choices.findCombinations(dices, true, false);
+        expect(combos.some(c => c.id === 'defi')).toBe(true);
+        expect(combos.some(c => c.id === 'full')).toBe(true);
+    });
+
+    it('le défi apparaît quand isDefi=true ET une suite existe', () => {
+        const dices = makeDices([1, 2, 3, 4, 5]); // suite
         const combos = GameService.choices.findCombinations(dices, true, false);
         expect(combos.some(c => c.id === 'defi')).toBe(true);
     });
 
-    it('le défi n\'apparaît pas quand isDefi=false', () => {
-        const dices = makeDices([1, 3, 2, 6, 4]);
+    it('le défi apparaît quand isDefi=true ET ≤8 existe', () => {
+        const dices = makeDices([1, 1, 1, 1, 4]); // ≤8 + brelan1
+        const combos = GameService.choices.findCombinations(dices, true, false);
+        expect(combos.some(c => c.id === 'defi')).toBe(true);
+    });
+
+    it('le défi N\'apparaît PAS quand isDefi=true mais SEUL un brelan existe', () => {
+        const dices = makeDices([3, 3, 3, 1, 5]); // brelan3 uniquement (somme=15, pas de suite/full/carré)
+        const combos = GameService.choices.findCombinations(dices, true, false);
+        expect(combos.some(c => c.id === 'defi')).toBe(false);
+    });
+
+    it('le défi N\'apparaît PAS quand isDefi=true mais aucune combinaison', () => {
+        const dices = makeDices([1, 3, 2, 6, 4]); // rien (somme=16)
+        const combos = GameService.choices.findCombinations(dices, true, false);
+        expect(combos.some(c => c.id === 'defi')).toBe(false);
+    });
+
+    it('le défi n\'apparaît pas quand isDefi=false même avec des combinaisons', () => {
+        const dices = makeDices([1, 2, 3, 4, 5]); // suite
         const combos = GameService.choices.findCombinations(dices, false, false);
         expect(combos.some(c => c.id === 'defi')).toBe(false);
     });
