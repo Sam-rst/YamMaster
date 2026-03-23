@@ -460,6 +460,29 @@ const GameService = {
             return false; // aucune combinaison disponible pour le joueur actuel
         }
     },
+    game: {
+        checkVictory: (gameState) => {
+            const { player1Score, player2Score, player1Tokens, player2Tokens } = gameState;
+
+            // Victoire instantanée par alignement de 5
+            if (player1Score === Infinity) {
+                return { winner: 'player:1', reason: 'alignment5', player1Score, player2Score };
+            }
+            if (player2Score === Infinity) {
+                return { winner: 'player:2', reason: 'alignment5', player1Score, player2Score };
+            }
+
+            // Fin de partie quand un joueur n'a plus de pions
+            if (player1Tokens <= 0 || player2Tokens <= 0) {
+                let winner = null;
+                if (player1Score > player2Score) winner = 'player:1';
+                else if (player2Score > player1Score) winner = 'player:2';
+                return { winner, reason: 'noTokens', player1Score, player2Score };
+            }
+
+            return null; // La partie continue
+        }
+    },
 }
 
 module.exports = GameService;

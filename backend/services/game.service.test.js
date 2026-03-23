@@ -742,3 +742,91 @@ describe('GameService.grid.calculateScores', () => {
         expect(scores.player2Score).toBe(Infinity);
     });
 });
+
+// =============================================================
+// CHECK VICTORY
+// =============================================================
+describe('GameService.game.checkVictory', () => {
+
+    it('retourne null si la partie continue', () => {
+        const gameState = GameService.init.gameState().gameState;
+        const result = GameService.game.checkVictory(gameState);
+        expect(result).toBeNull();
+    });
+
+    it('retourne victoire instantanée pour player:1 avec score Infinity', () => {
+        const gameState = GameService.init.gameState().gameState;
+        gameState.player1Score = Infinity;
+        const result = GameService.game.checkVictory(gameState);
+        expect(result).toEqual({
+            winner: 'player:1',
+            reason: 'alignment5',
+            player1Score: Infinity,
+            player2Score: 0,
+        });
+    });
+
+    it('retourne victoire instantanée pour player:2 avec score Infinity', () => {
+        const gameState = GameService.init.gameState().gameState;
+        gameState.player2Score = Infinity;
+        const result = GameService.game.checkVictory(gameState);
+        expect(result).toEqual({
+            winner: 'player:2',
+            reason: 'alignment5',
+            player1Score: 0,
+            player2Score: Infinity,
+        });
+    });
+
+    it('retourne le gagnant quand player:1 n\'a plus de pions (player:1 a plus de points)', () => {
+        const gameState = GameService.init.gameState().gameState;
+        gameState.player1Tokens = 0;
+        gameState.player1Score = 5;
+        gameState.player2Score = 3;
+        const result = GameService.game.checkVictory(gameState);
+        expect(result).toEqual({
+            winner: 'player:1',
+            reason: 'noTokens',
+            player1Score: 5,
+            player2Score: 3,
+        });
+    });
+
+    it('retourne le gagnant quand player:2 n\'a plus de pions (player:2 a plus de points)', () => {
+        const gameState = GameService.init.gameState().gameState;
+        gameState.player2Tokens = 0;
+        gameState.player1Score = 2;
+        gameState.player2Score = 4;
+        const result = GameService.game.checkVictory(gameState);
+        expect(result).toEqual({
+            winner: 'player:2',
+            reason: 'noTokens',
+            player1Score: 2,
+            player2Score: 4,
+        });
+    });
+
+    it('retourne égalité quand plus de pions et scores identiques', () => {
+        const gameState = GameService.init.gameState().gameState;
+        gameState.player1Tokens = 0;
+        gameState.player1Score = 3;
+        gameState.player2Score = 3;
+        const result = GameService.game.checkVictory(gameState);
+        expect(result).toEqual({
+            winner: null,
+            reason: 'noTokens',
+            player1Score: 3,
+            player2Score: 3,
+        });
+    });
+
+    it('ne déclenche pas la fin si les deux joueurs ont encore des pions', () => {
+        const gameState = GameService.init.gameState().gameState;
+        gameState.player1Tokens = 5;
+        gameState.player2Tokens = 8;
+        gameState.player1Score = 3;
+        gameState.player2Score = 1;
+        const result = GameService.game.checkVictory(gameState);
+        expect(result).toBeNull();
+    });
+});

@@ -236,6 +236,16 @@ io.on('connection', socket => {
     games[gameIndex].gameState.player1Score = scores.player1Score;
     games[gameIndex].gameState.player2Score = scores.player2Score;
 
+    // Vérification de victoire
+    const victory = GameService.game.checkVictory(games[gameIndex].gameState);
+    if (victory) {
+      // Fin de partie
+      games[gameIndex].player1Socket.emit('game.end', victory);
+      games[gameIndex].player2Socket.emit('game.end', victory);
+      games.splice(gameIndex, 1);
+      return;
+    }
+
     // end turn
     games[gameIndex].gameState.currentTurn = games[gameIndex].gameState.currentTurn === 'player:1' ? 'player:2' : 'player:1';
     games[gameIndex].gameState.timer = GameService.timer.getTurnDuration();
