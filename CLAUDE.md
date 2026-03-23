@@ -8,10 +8,12 @@ YamMaster is a multiplayer Yahtzee-like dice game with a React Native/Expo front
 
 ## Commands
 
-### Backend (`backend/`)
+### Backend (`backend/`) — TypeScript
 ```bash
-cd backend && npm install   # Install dependencies
-cd backend && npm run start # Start server on port 3000
+cd backend && npm install    # Install dependencies
+cd backend && npm run build  # Compile TS → dist/
+cd backend && npm run start  # Start compiled server (dist/index.js)
+cd backend && npm run dev    # Start dev with ts-node
 ```
 
 ### Frontend (`frontend/`)
@@ -36,10 +38,12 @@ cd frontend && npm run lint         # ESLint frontend
 
 ### Build
 ```bash
+cd backend && npm run build         # Compile TypeScript → dist/
+cd backend && npm run typecheck     # Type check sans émission
 cd frontend && npm run build        # Export web Expo
 ```
 
-No build step for the backend (runs directly with Node). CI/CD via GitHub Actions (`.github/workflows/ci.yml`).
+CI/CD via GitHub Actions (`.github/workflows/ci.yml`).
 
 ## Architecture
 
