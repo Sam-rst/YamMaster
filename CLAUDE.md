@@ -45,9 +45,18 @@ cd frontend && npm run build        # Export web Expo
 
 CI/CD via GitHub Actions (`.github/workflows/ci.yml`).
 
+## Gitflow
+
+- **`main`** : production — lint, tests, build, déploiement prod
+- **`recette`** : pré-production — lint, tests, build, déploiement recette
+- **`develop`** : développement — lint, tests, build, déploiement dev
+- **`feature/*`**, **`bugfix/*`**, **`hotfix/*`** : lint, tests, build (pas de déploiement)
+- Branches mal nommées : **CI bloquée** (convention obligatoire)
+- Détails : voir `docs/05-gitflow.md`
+
 ## Architecture
 
-**Backend** — Single Express server (`backend/index.js`) using Socket.IO for real-time game state. Game logic lives in `backend/services/game.service.js` as a `GameService` module with sub-domains: `init`, `send`, `utils`, `timer`, `dices`, `choices`, `grid`. Global arrays (`games[]`, `queue[]`) hold active games and matchmaking queue in memory (no database).
+**Backend** (TypeScript) — Single Express server (`backend/src/index.ts`) using Socket.IO for real-time game state. Game logic lives in `backend/src/services/game.service.ts` as a `GameService` module with sub-domains: `init`, `send`, `utils`, `timer`, `dices`, `choices`, `grid`, `game`. Bot logic in `backend/src/services/bot.service.ts`. Types partagés dans `backend/src/types.ts`. Global arrays (`games[]`, `queue[]`) hold active games and matchmaking queue in memory (no database).
 
 **Frontend** — Expo/React Native app. Entry point: `frontend/App.js`. Uses React Navigation (stack) with three screens: `HomeScreen`, `OnlineGameScreen`, `VsBotGameScreen` (stub). Socket.IO connection is provided via React Context (`contexts/socket.context.js`). Game state is coordinated through `controllers/online-game.controller.js`.
 
