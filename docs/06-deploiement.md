@@ -58,7 +58,7 @@ Pour chaque environnement, créer un **Web Service** sur [render.com](https://re
 | Name | `yammaster-backend-dev` |
 | Branch | `develop` |
 | Root Directory | `backend` |
-| Build Command | `npm ci --legacy-peer-deps && npm run build` |
+| Build Command | `npm ci --legacy-peer-deps --include=dev && npm run build` |
 | Start Command | `node dist/index.js` |
 | Plan | Free |
 
