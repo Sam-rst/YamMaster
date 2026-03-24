@@ -1,5 +1,6 @@
 # render.yaml — Infrastructure as Code pour Render
 # Docs: https://docs.render.com/blueprint-spec
+# Note: le frontend est déployé sur Vercel (voir frontend/vercel.json)
 
 services:
   # Backend — WebSocket Server
@@ -17,20 +18,3 @@ services:
         value: false
       - key: NODE_ENV
         value: production
-
-  # Frontend — Static Site (Expo Web)
-  - type: web
-    name: yammaster-frontend
-    runtime: static
-    plan: free
-    rootDir: frontend
-    buildCommand: npm ci --legacy-peer-deps && npm run build
-    staticPublishPath: dist
-    headers:
-      - path: /*
-        name: Cache-Control
-        value: public, max-age=3600
-    routes:
-      - type: rewrite
-        source: /*
-        destination: /index.html

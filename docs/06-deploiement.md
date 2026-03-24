@@ -20,45 +20,82 @@ Pour arrêter :
 docker-compose down
 ```
 
-## Render (cloud gratuit)
+## Cloud (gratuit)
 
-### Architecture Render
+### Architecture
 
-| Service | Type | Plan | Branche |
-|---------|------|------|---------|
-| `yammaster-backend` | Web Service | Free | Configurable par environnement |
-| `yammaster-frontend` | Static Site | Free | Configurable par environnement |
+| Service | Plateforme | Plan | Raison |
+|---------|-----------|------|--------|
+| Backend | **Render** (Web Service) | Free | Support WebSocket natif, Node.js |
+| Frontend | **Vercel** (Static) | Free | CDN rapide, pas de cold start, build Expo web |
 
-### Mise en place
+### Backend — Render
 
 1. Créer un compte sur [render.com](https://render.com)
-2. Connecter le repo GitHub
-3. Créer un **Blueprint** depuis le fichier `render.yaml` à la racine
-4. (Optionnel) Configurer les deploy hooks dans GitHub Secrets :
-   - `RENDER_DEPLOY_HOOK_PROD` — pour le déploiement production
-   - `RENDER_DEPLOY_HOOK_DEV` — pour le déploiement dev
-   - `RENDER_DEPLOY_HOOK_RECETTE` — pour le déploiement recette
+2. **New → Web Service** → connecter le repo GitHub
+3. Configuration :
 
-### Limitations du free tier
+| Champ | Valeur |
+|-------|--------|
+| Name | `yammaster-backend-dev` |
+| Branch | `develop` (ou `recette` / `main` selon l'environnement) |
+| Root Directory | `backend` |
+| Build Command | `npm ci --legacy-peer-deps && npm run build` |
+| Start Command | `node dist/index.js` |
+| Plan | Free |
 
-- **Cold start** : le serveur s'endort après 15min d'inactivité (~30s de réveil)
-- **750h/mois** de temps de calcul (suffisant pour un projet)
-- Pas de custom domain HTTPS sur le plan gratuit
+4. Variables d'environnement : `PORT=3000`, `DEV_MODE=true`
+
+### Frontend — Vercel
+
+1. Créer un compte sur [vercel.com](https://vercel.com)
+2. **New Project** → importer le repo GitHub
+3. Configuration :
+
+| Champ | Valeur |
+|-------|--------|
+| Framework Preset | `Other` |
+| Root Directory | `frontend` |
+| Build Command | `npm ci --legacy-peer-deps && npm run build` |
+| Output Directory | `dist` |
+
+4. Variables d'environnement :
+
+| Key | Value |
+|-----|-------|
+| `EXPO_PUBLIC_SERVER_URL` | `https://yammaster-backend-dev.onrender.com` |
+| `EXPO_PUBLIC_DEV_MODE` | `true` |
+
+Le fichier `vercel.json` gère le rewrite SPA automatiquement.
+
+### Limitations free tier
+
+**Render (backend)** :
+- Cold start ~30s après 15min d'inactivité
+- 750h/mois
+
+**Vercel (frontend)** :
+- 100 Go de bande passante/mois
+- Builds illimités
+- Pas de cold start (CDN)
 
 ## Variables d'environnement
 
 ### Backend (`.env`)
 ```env
 PORT=3000
-DEV_MODE=false    # true pour activer le panneau dev
+DEV_MODE=false
 ```
 
 ### Frontend (`.env`)
 ```env
+# URL complète du backend (prioritaire — utilisé en cloud)
+EXPO_PUBLIC_SERVER_URL=https://yammaster-backend-dev.onrender.com
+
+# Configuration locale (utilisé si SERVER_URL n'est pas défini)
 EXPO_PUBLIC_SERVER_HOST_WEB=localhost
 EXPO_PUBLIC_SERVER_HOST_MOBILE=10.61.8.6
 EXPO_PUBLIC_SERVER_PORT=3000
+
 EXPO_PUBLIC_DEV_MODE=false
 ```
-
-En production Render, les variables sont configurées dans le dashboard ou dans `render.yaml`.
