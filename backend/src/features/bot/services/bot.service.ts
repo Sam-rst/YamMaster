@@ -1,6 +1,6 @@
-// backend/src/services/bot.service.ts
+// backend/src/features/bot/services/bot.service.ts
 
-import { Dice, Combination, Grid } from '../types';
+import { Dice, Combination, Grid } from '../../../shared/types';
 
 interface CellSelection {
     cellId: string;
