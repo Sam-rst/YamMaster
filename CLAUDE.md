@@ -56,13 +56,13 @@ CI/CD via GitHub Actions — workflows séparés par environnement dans `.github
 
 ## Architecture
 
-**Backend** (TypeScript) — Single Express server (`backend/src/index.ts`) using Socket.IO for real-time game state. Game logic lives in `backend/src/services/game.service.ts` as a `GameService` module with sub-domains: `init`, `send`, `utils`, `timer`, `dices`, `choices`, `grid`, `game`. Bot logic in `backend/src/services/bot.service.ts`. Types partagés dans `backend/src/types.ts`. Global arrays (`games[]`, `queue[]`) hold active games and matchmaking queue in memory (no database).
+**Feature-Sliced Architecture** — Frontend et backend suivent la même convention : chaque feature = `screens/` + `components/` + `services/` + `models/` (frontend) ou `handlers/` + `services/` + `models/` + `routes/` (backend). Pas d'exception, même pour les features simples. Détails : voir `docs/07-architecture-cible.md`.
 
-**Frontend** — Expo/React Native app. Entry point: `frontend/App.js`. Uses React Navigation (stack) with three screens: `HomeScreen`, `OnlineGameScreen`, `VsBotGameScreen` (stub). Socket.IO connection is provided via React Context (`contexts/socket.context.js`). Game state is coordinated through `controllers/online-game.controller.js`.
+**Backend** (TypeScript) — Express + Socket.IO. Features dans `backend/src/features/` (game, auth, matchmaking, bot, history, leaderboard). Infrastructure dans `backend/src/infrastructure/` (BDD, Socket.IO setup). Types partagés dans `backend/src/shared/`.
 
-**Component hierarchy**: `board.component.js` composes timers, decks (dice), choices (combination selection), grid (5×5), scores, and infos as child components under `components/board/`.
+**Frontend** (JavaScript/Expo) — Features dans `frontend/features/` (auth, home, game, history, replay, profile, leaderboard). Composants partagés dans `frontend/shared/`. Navigation centralisée dans `frontend/navigation/`.
 
-**Real-time protocol**: Socket.IO events use `domain.action` naming (e.g., `game.dices.roll`, `game.choices.selected`, `game.grid.selected`). Server emits view-state updates to both players via helper functions (`updateClientsViewDecks`, `updateClientsViewChoices`, etc.).
+**Real-time protocol**: Socket.IO events use `domain.action` naming (e.g., `game.dices.roll`, `game.choices.selected`, `game.grid.selected`). REST API pour les données persistées (auth, history, leaderboard).
 
 ## Key Conventions
 
@@ -89,3 +89,4 @@ Backend listens on `localhost:3000`. Frontend connects via hardcoded IP for nati
 - **Linter**: **0 erreur, 0 warning** sur backend ET frontend. Passer le lint après les tests verts et avant la mise à jour de la doc.
 - **Documentation**: Mettre à jour ou créer la documentation **après** que les tests et le lint passent et **juste avant** le commit.
 - **Ordre de validation**: code → tests verts → lint 0 erreur/warning → docs → commit.
+- **Architecture Feature-Sliced**: Toute nouvelle feature doit suivre la structure convention : `screens/` + `components/` + `services/` + `models/` (frontend) ou `handlers/` + `services/` + `models/` + `routes/` (backend). Toujours les 4 dossiers, même si un fichier est léger. Voir `docs/07-architecture-cible.md`.
