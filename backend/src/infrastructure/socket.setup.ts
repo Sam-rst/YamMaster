@@ -5,6 +5,7 @@ import http from 'http';
 import { Server, Socket } from 'socket.io';
 import GameService from '../features/game/services/game.service';
 import { Game, PlayerKey } from '../shared/types';
+import { logger } from '../shared/logger';
 import { newPlayerInQueue, createGameVsBot } from '../features/matchmaking/handlers/matchmaking.handler';
 import {
     handleDiceRoll,
@@ -25,66 +26,104 @@ export const createServer = (): { app: ReturnType<typeof express>; server: http.
     return { app, server, io };
 };
 
+const findGameOrWarn = (games: Game[], socketId: string, action: string): Game | null => {
+    const gameIndex = GameService.utils.findGameIndexBySocketId(games, socketId);
+
+    if (gameIndex === -1) {
+        logger.warn('Partie non trouvée pour l\'action', { socketId, action });
+        return null;
+    }
+
+    return games[gameIndex];
+};
+
+const safeHandler = (action: string, socketId: string, handler: () => void): void => {
+    try {
+        handler();
+    } catch (error) {
+        logger.error(`Erreur non gérée sur [${action}]`, {
+            socketId,
+            error: error as Error,
+        });
+    }
+};
+
 export const setupSocketHandlers = (io: Server, games: Game[]): void => {
     io.on('connection', (socket: Socket) => {
-        console.log(`[${socket.id}] socket connected`);
+        logger.info('Socket connecté', { socketId: socket.id });
 
         socket.on('queue.join', () => {
-            console.log(`[${socket.id}] new player in queue`);
-            newPlayerInQueue(socket, games);
+            safeHandler('queue.join', socket.id, () => {
+                newPlayerInQueue(socket, games);
+            });
         });
 
         socket.on('game.vsbot', () => {
-            console.log(`[${socket.id}] starting game vs bot`);
-            createGameVsBot(socket, games);
+            safeHandler('game.vsbot', socket.id, () => {
+                createGameVsBot(socket, games);
+            });
         });
 
         socket.on('game.dices.roll', () => {
-            const gi = GameService.utils.findGameIndexBySocketId(games, socket.id);
-            if (gi === -1) return;
-            handleDiceRoll(games[gi]);
+            safeHandler('game.dices.roll', socket.id, () => {
+                const game = findGameOrWarn(games, socket.id, 'game.dices.roll');
+                if (!game) return;
+                handleDiceRoll(game);
+            });
         });
 
-        socket.on('game.dices.lock', (idDice: number) => {
-            const gi = GameService.utils.findGameIndexBySocketId(games, socket.id);
-            if (gi === -1) return;
-            handleDiceLock(games[gi], idDice);
+        socket.on('game.dices.lock', (diceId: number) => {
+            safeHandler('game.dices.lock', socket.id, () => {
+                const game = findGameOrWarn(games, socket.id, 'game.dices.lock');
+                if (!game) return;
+                handleDiceLock(game, diceId);
+            });
         });
 
         socket.on('game.defi', () => {
-            const gi = GameService.utils.findGameIndexBySocketId(games, socket.id);
-            if (gi === -1) return;
-            handleDefi(games[gi]);
+            safeHandler('game.defi', socket.id, () => {
+                const game = findGameOrWarn(games, socket.id, 'game.defi');
+                if (!game) return;
+                handleDefi(game);
+            });
         });
 
         socket.on('game.grid.yamPredator', (data: { rowIndex: number; cellIndex: number }) => {
-            const gi = GameService.utils.findGameIndexBySocketId(games, socket.id);
-            if (gi === -1) return;
-            handleYamPredator(games[gi], games, data);
+            safeHandler('game.grid.yamPredator', socket.id, () => {
+                const game = findGameOrWarn(games, socket.id, 'game.grid.yamPredator');
+                if (!game) return;
+                handleYamPredator(game, data);
+            });
         });
 
         socket.on('game.choices.selected', (data: { choiceId: string }) => {
-            const gi = GameService.utils.findGameIndexBySocketId(games, socket.id);
-            if (gi === -1) return;
-            handleChoiceSelected(games[gi], data.choiceId);
+            safeHandler('game.choices.selected', socket.id, () => {
+                const game = findGameOrWarn(games, socket.id, 'game.choices.selected');
+                if (!game) return;
+                handleChoiceSelected(game, data.choiceId);
+            });
         });
 
         socket.on('game.grid.selected', (data: { cellId: string; rowIndex: number; cellIndex: number }) => {
-            const gi = GameService.utils.findGameIndexBySocketId(games, socket.id);
-            if (gi === -1) return;
-            handleGridSelected(games[gi], games, data);
+            safeHandler('game.grid.selected', socket.id, () => {
+                const game = findGameOrWarn(games, socket.id, 'game.grid.selected');
+                if (!game) return;
+                handleGridSelected(game, games, data);
+            });
         });
 
         if (DEV_MODE) {
             socket.on('game.dev.place', (data: { rowIndex: number; cellIndex: number; owner: PlayerKey }) => {
-                const gi = GameService.utils.findGameIndexBySocketId(games, socket.id);
-                if (gi === -1) return;
-                handleDevPlace(games[gi], games, data);
+                safeHandler('game.dev.place', socket.id, () => {
+                    const game = findGameOrWarn(games, socket.id, 'game.dev.place');
+                    if (!game) return;
+                    handleDevPlace(game, games, data);
+                });
             });
         }
 
         socket.on('disconnect', (reason: string) => {
-            console.log(`[${socket.id}] socket disconnected - ${reason}`);
+            logger.info('Socket déconnecté', { socketId: socket.id, action: reason });
         });
     });
 };

@@ -5,6 +5,7 @@ import uniqid from 'uniqid';
 import GameService from '../../game/services/game.service';
 import BotService from '../services/bot.service';
 import { Game, SocketLike } from '../../../shared/types';
+import { logger } from '../../../shared/logger';
 import {
     handleDiceRoll,
     handleDiceLock,
@@ -12,73 +13,107 @@ import {
     handleGridSelected,
 } from '../../game/handlers/game.handler';
 
+const BOT_PLAYER = 'player:2' as const;
+const DELAY_BEFORE_FIRST_ROLL_MS = 1000;
+const DELAY_ANALYSIS_MS = 600;
+const DELAY_BETWEEN_ROLLS_MS = 800;
+const DELAY_PLACE_ON_GRID_MS = 500;
+const DELAY_GAME_START_MS = 1500;
+const MINIMUM_ROLLS_TO_PLACE = 2;
+const MAXIMUM_ROLLS = 3;
+
 export const createBotSocket = (): SocketLike => {
     const emitter = new EventEmitter();
-    const botSocket: SocketLike = {
+    return {
         id: 'bot-' + uniqid(),
         emit: (event: string, ...args: unknown[]) => emitter.emit(event, ...args),
         on: (event: string, listener: (...args: unknown[]) => void) => { emitter.on(event, listener); },
     };
-    return botSocket;
+};
+
+const isGameActive = (game: Game, games: Game[]): boolean => {
+    return games.includes(game) && game.gameState.currentTurn === BOT_PLAYER;
+};
+
+const selectAndPlaceCombination = (game: Game, games: Game[], choiceId: string): void => {
+    handleChoiceSelected(game, choiceId);
+
+    setTimeout(() => {
+        if (!isGameActive(game, games)) return;
+        const cell = BotService.chooseBestCell(choiceId, game.gameState.grid);
+        if (cell) {
+            handleGridSelected(game, games, cell);
+            logger.info('Bot a posé un pion', { gameId: game.idGame, action: choiceId });
+        }
+    }, DELAY_PLACE_ON_GRID_MS);
+};
+
+const lockDicesForNextRoll = (game: Game): void => {
+    const diceIdsToLock = BotService.chooseDicesToLock(game.gameState.deck.dices);
+
+    for (const dice of game.gameState.deck.dices) {
+        const shouldBeLocked = diceIdsToLock.includes(dice.id);
+        const isCurrentlyLocked = dice.locked;
+        const hasValue = dice.value !== '';
+
+        if (shouldBeLocked && !isCurrentlyLocked) handleDiceLock(game, dice.id);
+        if (!shouldBeLocked && isCurrentlyLocked && hasValue) handleDiceLock(game, dice.id);
+    }
 };
 
 export const setupBotListeners = (botSocket: SocketLike, game: Game, games: Game[]): void => {
-    const botPlay = (): void => {
-        if (!games.includes(game)) return;
-        const gs = game.gameState;
-        if (gs.currentTurn !== 'player:2') return;
+    const playTurn = (rollNumber: number): void => {
+        if (!isGameActive(game, games)) return;
 
-        const playTurn = (rollNumber: number): void => {
-            if (!games.includes(game) || gs.currentTurn !== 'player:2') return;
+        try {
             handleDiceRoll(game);
 
             setTimeout(() => {
-                if (!games.includes(game) || gs.currentTurn !== 'player:2') return;
-                const bestChoice = BotService.chooseBestCombination(gs.choices.availableChoices, gs.grid);
+                if (!isGameActive(game, games)) return;
 
-                if (bestChoice && rollNumber >= 2) {
-                    handleChoiceSelected(game, bestChoice);
-                    setTimeout(() => {
-                        if (!games.includes(game) || gs.currentTurn !== 'player:2') return;
-                        const cell = BotService.chooseBestCell(bestChoice, gs.grid);
-                        if (cell) handleGridSelected(game, games, cell);
-                    }, 500);
-                } else if (rollNumber < 3) {
-                    const diceIdsToLock = BotService.chooseDicesToLock(gs.deck.dices);
-                    for (const dice of gs.deck.dices) {
-                        const shouldLock = diceIdsToLock.includes(dice.id);
-                        if (shouldLock && !dice.locked) handleDiceLock(game, dice.id);
-                        if (!shouldLock && dice.locked && dice.value !== '') handleDiceLock(game, dice.id);
-                    }
-                    setTimeout(() => playTurn(rollNumber + 1), 800);
-                } else {
-                    if (bestChoice) {
-                        handleChoiceSelected(game, bestChoice);
-                        setTimeout(() => {
-                            if (!games.includes(game) || gs.currentTurn !== 'player:2') return;
-                            const cell = BotService.chooseBestCell(bestChoice, gs.grid);
-                            if (cell) handleGridSelected(game, games, cell);
-                        }, 500);
-                    }
+                const bestChoice = BotService.chooseBestCombination(
+                    game.gameState.choices.availableChoices,
+                    game.gameState.grid,
+                );
+
+                const canPlaceNow = bestChoice && rollNumber >= MINIMUM_ROLLS_TO_PLACE;
+                const hasMoreRolls = rollNumber < MAXIMUM_ROLLS;
+                const isLastRoll = rollNumber >= MAXIMUM_ROLLS;
+
+                if (canPlaceNow) {
+                    selectAndPlaceCombination(game, games, bestChoice);
+                } else if (hasMoreRolls) {
+                    lockDicesForNextRoll(game);
+                    setTimeout(() => playTurn(rollNumber + 1), DELAY_BETWEEN_ROLLS_MS);
+                } else if (isLastRoll && bestChoice) {
+                    selectAndPlaceCombination(game, games, bestChoice);
                 }
-            }, 600);
-        };
+            }, DELAY_ANALYSIS_MS);
+        } catch (error) {
+            logger.error('Erreur pendant le tour du bot', {
+                gameId: game.idGame,
+                error: error as Error,
+            });
+        }
+    };
 
-        setTimeout(() => playTurn(1), 1000);
+    const startBotTurn = (): void => {
+        if (!isGameActive(game, games)) return;
+        logger.info('Le bot commence son tour', { gameId: game.idGame });
+        setTimeout(() => playTurn(1), DELAY_BEFORE_FIRST_ROLL_MS);
     };
 
     botSocket.on('game.timer', (...args: unknown[]) => {
         const data = args[0] as { playerTimer: number };
-        if (data.playerTimer > 0 && data.playerTimer === GameService.timer.getTurnDuration()) {
-            botPlay();
-        }
+        const isTurnStart = data.playerTimer > 0
+            && data.playerTimer === GameService.timer.getTurnDuration();
+
+        if (isTurnStart) startBotTurn();
     });
 
     botSocket.on('game.start', () => {
         setTimeout(() => {
-            if (games.includes(game) && game.gameState.currentTurn === 'player:2') {
-                botPlay();
-            }
-        }, 1500);
+            if (isGameActive(game, games)) startBotTurn();
+        }, DELAY_GAME_START_MS);
     });
 };
