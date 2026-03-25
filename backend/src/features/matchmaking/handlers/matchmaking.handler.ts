@@ -15,6 +15,9 @@ import { createBotSocket, setupBotListeners } from '../../bot/handlers/bot.handl
 
 const queue: Socket[] = [];
 
+/** Reset la queue (utilisé dans les tests) */
+export const resetQueue = (): void => { queue.length = 0; };
+
 export const createGame = (player1Socket: SocketLike, player2Socket: SocketLike, games: Game[]): void => {
     const newGame = GameService.init.gameState() as unknown as Game;
     newGame.idGame = uniqid();
