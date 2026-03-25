@@ -12,9 +12,8 @@ module.exports = {
         '^react-native$': '<rootDir>/__mocks__/react-native.mock.js',
     },
     collectCoverageFrom: [
-        'components/**/*.js',
-        'controllers/**/*.js',
-        'screens/**/*.js',
+        'features/**/*.js',
+        'shared/**/*.js',
         '!**/*.test.js',
     ],
 };
