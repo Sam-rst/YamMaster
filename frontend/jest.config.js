@@ -9,11 +9,12 @@ module.exports = {
     setupFiles: ['./jest.setup.js'],
     testPathIgnorePatterns: ['/node_modules/'],
     moduleNameMapper: {
-        '^react-native$': '<rootDir>/__mocks__/react-native.mock.js',
+        '^react-native$': '<rootDir>/src/__mocks__/react-native.mock.js',
+        '^@/(.*)$': '<rootDir>/src/$1',
     },
     collectCoverageFrom: [
-        'features/**/*.js',
-        'shared/**/*.js',
+        'src/features/**/*.js',
+        'src/shared/**/*.js',
         '!**/*.test.js',
     ],
 };
