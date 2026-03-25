@@ -1,5 +1,5 @@
 import BotService from './bot.service';
-import GameService from './game.service';
+import GameService from '../../game/services/game.service';
 
 describe('BotService', () => {
 

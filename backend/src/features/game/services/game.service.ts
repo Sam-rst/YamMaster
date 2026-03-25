@@ -1,9 +1,9 @@
-// backend/src/services/game.service.ts
+// backend/src/features/game/services/game.service.ts
 
 import {
     Dice, Combination, Grid, Choices, Deck,
     GameState, Game, PlayerKey, VictoryResult, Scores
-} from '../types';
+} from '../../../shared/types';
 
 const TURN_DURATION = 30;
 const END_TURN_DURATION = 5;
