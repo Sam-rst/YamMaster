@@ -31,6 +31,7 @@
     "@testing-library/react": "^16.3.2",
     "@testing-library/react-native": "^13.3.3",
     "babel-jest": "^30.3.0",
+    "babel-plugin-module-resolver": "^5.0.3",
     "eslint": "^10.1.0",
     "eslint-plugin-react": "^7.37.5",
     "jest": "^30.3.0",
