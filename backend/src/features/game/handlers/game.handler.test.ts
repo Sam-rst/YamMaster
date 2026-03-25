@@ -317,31 +317,31 @@ describe('Game Handler - handleDefi', () => {
 
 describe('Game Handler - handleYamPredator', () => {
     test('retire un pion adverse et rend le token', () => {
-        const { game, games } = createMockGame();
+        const { game } = createMockGame();
         game.gameState.currentTurn = 'player:1';
         game.gameState.grid[2][2].owner = 'player:2';
         game.gameState.player2Tokens = 10;
 
-        handleYamPredator(game, games, { rowIndex: 2, cellIndex: 2 });
+        handleYamPredator(game, { rowIndex: 2, cellIndex: 2 });
         expect(game.gameState.grid[2][2].owner).toBeNull();
         expect(game.gameState.player2Tokens).toBe(11);
     });
 
     test('ne fait rien si la case n\'appartient pas à l\'adversaire', () => {
-        const { game, games } = createMockGame();
+        const { game } = createMockGame();
         game.gameState.currentTurn = 'player:1';
         game.gameState.grid[2][2].owner = 'player:1'; // même joueur
 
-        handleYamPredator(game, games, { rowIndex: 2, cellIndex: 2 });
+        handleYamPredator(game, { rowIndex: 2, cellIndex: 2 });
         expect(game.gameState.grid[2][2].owner).toBe('player:1'); // pas changé
     });
 
     test('change de tour après le Yam Predator', () => {
-        const { game, games } = createMockGame();
+        const { game } = createMockGame();
         game.gameState.currentTurn = 'player:1';
         game.gameState.grid[2][2].owner = 'player:2';
 
-        handleYamPredator(game, games, { rowIndex: 2, cellIndex: 2 });
+        handleYamPredator(game, { rowIndex: 2, cellIndex: 2 });
         expect(game.gameState.currentTurn).toBe('player:2');
     });
 });
