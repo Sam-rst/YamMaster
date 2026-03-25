@@ -2,19 +2,19 @@
 
 import React from "react";
 import { View, StyleSheet } from 'react-native';
-import PlayerTimer from "../player-bar/player-timer.component";
-import OpponentTimer from "../player-bar/opponent-timer.component";
-import OpponentDeck from "../dice/opponent-deck.component";
-import PlayerDeck from "../dice/player-deck.component";
-import Choices from "../choices/choices.component";
-import Grid from "../grid/grid.component";
-import OpponentScore from "../player-bar/opponent-score.component";
-import PlayerScore from "../player-bar/player-score.component";
-import PlayerInfos from "../player-bar/player-infos.component";
-import OpponentInfos from "../player-bar/opponent-infos.component";
-import PlayerTokens from "../player-bar/player-tokens.component";
-import OpponentTokens from "../player-bar/opponent-tokens.component";
-import DevPanel from "../dev/dev-panel.component";
+import PlayerTimer from "./player-bar/player-timer.component";
+import OpponentTimer from "./player-bar/opponent-timer.component";
+import OpponentDeck from "./dice/opponent-deck.component";
+import PlayerDeck from "./dice/player-deck.component";
+import Choices from "./choices/choices.component";
+import Grid from "./grid/grid.component";
+import OpponentScore from "./player-bar/opponent-score.component";
+import PlayerScore from "./player-bar/player-score.component";
+import PlayerInfos from "./player-bar/player-infos.component";
+import OpponentInfos from "./player-bar/opponent-infos.component";
+import PlayerTokens from "./player-bar/player-tokens.component";
+import OpponentTokens from "./player-bar/opponent-tokens.component";
+import DevPanel from "./dev/dev-panel.component";
 import { DEV_MODE } from "@/shared/services/config";
 
 
