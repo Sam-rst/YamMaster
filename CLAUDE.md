@@ -83,7 +83,9 @@ Backend listens on `localhost:3000`. Frontend connects via hardcoded IP for nati
 - **Commit language**: Write commit messages in **French**.
 - **TypeScript strict mode**: `strict: true`, no `any`. All WS payloads fully typed in `protocol.ts`.
 - **Error handling**: Wrap network/DB/engine calls in try/catch. Never let a WS error crash the game. Show "Connection lost" screen on host disconnect.
-- **TDD**: Toujours écrire les tests en premier (Red → Green → Refactor). Pour chaque nouvelle fonctionnalité ou correction de bug : 1) écrire un test qui échoue, 2) implémenter le minimum pour le faire passer, 3) refactoriser.
+- **TDD (Red → Green → Blue)**: Pour chaque feature ou bugfix : 1) **RED** écrire les tests (unitaires + intégration + E2E) qui échouent, 2) **GREEN** implémenter le minimum pour les faire passer, 3) **BLUE** refactoriser en appliquant le Software Craftsmanship : logs (INFO/WARN/ERROR), exceptions custom, try/catch, et conventions clean code (voir ci-dessous).
+- **Software Craftsmanship (phase BLUE)**: Lors du refactoring, appliquer systématiquement : nommage explicite (pas d'abréviations), fonctions courtes (≤ 20 lignes, single responsibility), early return (éviter les niveaux d'indentation), constantes nommées (pas de magic numbers), logs structurés (INFO actions, WARN cas ignorés, ERROR exceptions), exceptions custom typées, try/catch sur tout code à effet de bord (socket, DB, timers).
+- **3 niveaux de tests obligatoires**: Chaque feature doit avoir des tests **unitaires** (services/logique pure), **d'intégration** (handlers avec mock sockets) et **E2E** (vrai serveur Socket.IO). Utiliser les helpers `createMockSocket`/`createMockGame` pour l'intégration.
 - **Commit avant changement**: Avant de commencer tout nouveau changement, s'assurer que le working tree est propre (commit ou stash). Ne jamais empiler des changements non commités.
 - **Couverture de tests**: Viser **90%** de couverture minimum. Tous les tests doivent passer au vert avant de considérer un changement comme terminé.
 - **Linter**: **0 erreur, 0 warning** sur backend ET frontend. Passer le lint après les tests verts et avant la mise à jour de la doc.
