@@ -15,23 +15,23 @@ import {
 
 // Mock uniquement les sous-composants qui font .map() sur des données socket
 // Le Board lui-même est RÉEL — on teste l'intégration controller↔board
-jest.mock('@/features/game/components/grid/grid.component', () => {
+jest.mock('@/features/game/components/board/grid/grid.component', () => {
     const React = require('react');
     return () => React.createElement('View', { testID: 'grid' });
 });
-jest.mock('@/features/game/components/choices/choices.component', () => {
+jest.mock('@/features/game/components/board/choices/choices.component', () => {
     const React = require('react');
     return () => React.createElement('View', { testID: 'choices' });
 });
-jest.mock('@/features/game/components/dice/player-deck.component', () => {
+jest.mock('@/features/game/components/board/dice/player-deck.component', () => {
     const React = require('react');
     return () => React.createElement('View', { testID: 'player-deck' });
 });
-jest.mock('@/features/game/components/dice/opponent-deck.component', () => {
+jest.mock('@/features/game/components/board/dice/opponent-deck.component', () => {
     const React = require('react');
     return () => React.createElement('View', { testID: 'opponent-deck' });
 });
-jest.mock('@/features/game/components/dev/dev-panel.component', () => {
+jest.mock('@/features/game/components/board/dev/dev-panel.component', () => {
     const React = require('react');
     return () => React.createElement('View', { testID: 'dev-panel' });
 });

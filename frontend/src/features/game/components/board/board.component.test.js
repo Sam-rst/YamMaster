@@ -4,55 +4,55 @@ import Board from './board.component';
 import { SocketContext } from '@/shared/contexts/socket.context';
 import { createMockSocket } from '@/__mocks__/socket.mock';
 
-jest.mock('../player-bar/player-timer.component', () => {
+jest.mock('./player-bar/player-timer.component', () => {
     const React = require('react');
     return () => React.createElement('Text', {}, 'PlayerTimer');
 });
-jest.mock('../player-bar/opponent-timer.component', () => {
+jest.mock('./player-bar/opponent-timer.component', () => {
     const React = require('react');
     return () => React.createElement('Text', {}, 'OpponentTimer');
 });
-jest.mock('../dice/opponent-deck.component', () => {
+jest.mock('./dice/opponent-deck.component', () => {
     const React = require('react');
     return () => React.createElement('Text', {}, 'OpponentDeck');
 });
-jest.mock('../dice/player-deck.component', () => {
+jest.mock('./dice/player-deck.component', () => {
     const React = require('react');
     return () => React.createElement('Text', {}, 'PlayerDeck');
 });
-jest.mock('../choices/choices.component', () => {
+jest.mock('./choices/choices.component', () => {
     const React = require('react');
     return () => React.createElement('Text', {}, 'Choices');
 });
-jest.mock('../grid/grid.component', () => {
+jest.mock('./grid/grid.component', () => {
     const React = require('react');
     return () => React.createElement('Text', {}, 'Grid');
 });
-jest.mock('../player-bar/opponent-score.component', () => {
+jest.mock('./player-bar/opponent-score.component', () => {
     const React = require('react');
     return () => React.createElement('Text', {}, 'OpponentScore');
 });
-jest.mock('../player-bar/player-score.component', () => {
+jest.mock('./player-bar/player-score.component', () => {
     const React = require('react');
     return () => React.createElement('Text', {}, 'PlayerScore');
 });
-jest.mock('../player-bar/player-infos.component', () => {
+jest.mock('./player-bar/player-infos.component', () => {
     const React = require('react');
     return () => React.createElement('Text', {}, 'PlayerInfos');
 });
-jest.mock('../player-bar/opponent-infos.component', () => {
+jest.mock('./player-bar/opponent-infos.component', () => {
     const React = require('react');
     return () => React.createElement('Text', {}, 'OpponentInfos');
 });
-jest.mock('../dev/dev-panel.component', () => {
+jest.mock('./dev/dev-panel.component', () => {
     const React = require('react');
     return () => React.createElement('Text', {}, 'DevPanel');
 });
-jest.mock('../player-bar/player-tokens.component', () => {
+jest.mock('./player-bar/player-tokens.component', () => {
     const React = require('react');
     return () => React.createElement('Text', {}, 'PlayerTokens');
 });
-jest.mock('../player-bar/opponent-tokens.component', () => {
+jest.mock('./player-bar/opponent-tokens.component', () => {
     const React = require('react');
     return () => React.createElement('Text', {}, 'OpponentTokens');
 });
