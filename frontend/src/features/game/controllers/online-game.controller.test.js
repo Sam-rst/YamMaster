@@ -1,5 +1,5 @@
 import React from 'react';
-import { render, act } from '@testing-library/react';
+import { render, act, fireEvent } from '@testing-library/react';
 import OnlineGameController from './online-game.controller';
 import { SocketContext } from '@/shared/contexts/socket.context';
 import { createMockSocket } from '@/__mocks__/socket.mock';
@@ -136,5 +136,142 @@ describe('OnlineGameController', () => {
         });
 
         expect(getByText('Retour au menu')).toBeTruthy();
+    });
+
+    it('le bouton "Return to home" navigue vers HomeScreen en état waiting', () => {
+        const navigation = { navigate: jest.fn() };
+        const { getByText } = render(
+            <SocketContext.Provider value={mockSocket}>
+                <OnlineGameController navigation={navigation} />
+            </SocketContext.Provider>
+        );
+
+        fireEvent.click(getByText('Return to home'));
+        expect(navigation.navigate).toHaveBeenCalledWith('HomeScreen');
+    });
+
+    it('le bouton "Return to home" navigue vers HomeScreen en file d\'attente', () => {
+        const navigation = { navigate: jest.fn() };
+        const { getByText } = render(
+            <SocketContext.Provider value={mockSocket}>
+                <OnlineGameController navigation={navigation} />
+            </SocketContext.Provider>
+        );
+
+        act(() => {
+            mockSocket.__simulateEvent('queue.added', { inQueue: true, inGame: false });
+        });
+
+        fireEvent.click(getByText('Return to home'));
+        expect(navigation.navigate).toHaveBeenCalledWith('HomeScreen');
+    });
+
+    it('le bouton "Rejouer" après game.end émet queue.join et réinitialise l\'état', () => {
+        const navigation = { navigate: jest.fn() };
+        const { getByText } = render(
+            <SocketContext.Provider value={mockSocket}>
+                <OnlineGameController navigation={navigation} />
+            </SocketContext.Provider>
+        );
+
+        act(() => {
+            mockSocket.__simulateEvent('game.start', {
+                inQueue: false, inGame: true, idOpponent: 'opp',
+            });
+        });
+        act(() => {
+            mockSocket.__simulateEvent('game.end', {
+                winner: 'player:1', reason: 'alignment5',
+                player1Score: 5, player2Score: 3,
+            });
+        });
+
+        mockSocket.emit.mockClear();
+        fireEvent.click(getByText('Rejouer'));
+
+        expect(mockSocket.emit).toHaveBeenCalledWith('queue.join');
+    });
+
+    it('le bouton "Retour au menu" après game.end navigue vers HomeScreen', () => {
+        const navigation = { navigate: jest.fn() };
+        const { getByText } = render(
+            <SocketContext.Provider value={mockSocket}>
+                <OnlineGameController navigation={navigation} />
+            </SocketContext.Provider>
+        );
+
+        act(() => {
+            mockSocket.__simulateEvent('game.start', {
+                inQueue: false, inGame: true, idOpponent: 'opp',
+            });
+        });
+        act(() => {
+            mockSocket.__simulateEvent('game.end', {
+                winner: 'player:1', reason: 'alignment5',
+                player1Score: 5, player2Score: 3,
+            });
+        });
+
+        fireEvent.click(getByText('Retour au menu'));
+        expect(navigation.navigate).toHaveBeenCalledWith('HomeScreen');
+    });
+
+    it('game.end avec reason noTokens affiche "Plus de pions disponibles"', () => {
+        const { getByText } = render(
+            <SocketContext.Provider value={mockSocket}>
+                <OnlineGameController />
+            </SocketContext.Provider>
+        );
+
+        act(() => {
+            mockSocket.__simulateEvent('game.start', {
+                inQueue: false, inGame: true, idOpponent: 'opp',
+            });
+        });
+        act(() => {
+            mockSocket.__simulateEvent('game.end', {
+                winner: 'player:1', reason: 'noTokens',
+                player1Score: 4, player2Score: 2,
+            });
+        });
+
+        expect(getByText(/Plus de pions disponibles/)).toBeTruthy();
+    });
+
+    it('game.end sans vainqueur affiche "Égalité !"', () => {
+        const { getByText } = render(
+            <SocketContext.Provider value={mockSocket}>
+                <OnlineGameController />
+            </SocketContext.Provider>
+        );
+
+        act(() => {
+            mockSocket.__simulateEvent('game.start', {
+                inQueue: false, inGame: true, idOpponent: 'opp',
+            });
+        });
+        act(() => {
+            mockSocket.__simulateEvent('game.end', {
+                winner: null, reason: 'noTokens',
+                player1Score: 3, player2Score: 3,
+            });
+        });
+
+        expect(getByText('Égalité !')).toBeTruthy();
+    });
+
+    it('appelle socket.off pour les 3 événements au démontage', () => {
+        const { unmount } = render(
+            <SocketContext.Provider value={mockSocket}>
+                <OnlineGameController />
+            </SocketContext.Provider>
+        );
+
+        unmount();
+
+        const offEvents = mockSocket.off.mock.calls.map(call => call[0]);
+        expect(offEvents).toContain('queue.added');
+        expect(offEvents).toContain('game.start');
+        expect(offEvents).toContain('game.end');
     });
 });

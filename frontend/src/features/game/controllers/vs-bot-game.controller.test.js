@@ -1,5 +1,5 @@
 import React from 'react';
-import { render, act } from '@testing-library/react';
+import { render, act, fireEvent } from '@testing-library/react';
 import VsBotGameController from './vs-bot-game.controller';
 import { SocketContext } from '@/shared/contexts/socket.context';
 import { createMockSocket } from '@/__mocks__/socket.mock';
@@ -93,5 +93,113 @@ describe('VsBotGameController', () => {
         const events = mockSocket.on.mock.calls.map(call => call[0]);
         expect(events).toContain('game.start');
         expect(events).toContain('game.end');
+    });
+
+    it('le bouton "Rejouer" après game.end émet game.vsbot et réinitialise l\'état', () => {
+        const navigation = { navigate: jest.fn() };
+        const { getByText } = render(
+            <SocketContext.Provider value={mockSocket}>
+                <VsBotGameController navigation={navigation} />
+            </SocketContext.Provider>
+        );
+
+        act(() => {
+            mockSocket.__simulateEvent('game.start', {
+                inQueue: false, inGame: true, idOpponent: 'bot-id',
+            });
+        });
+        act(() => {
+            mockSocket.__simulateEvent('game.end', {
+                winner: 'player:1', reason: 'alignment5',
+                player1Score: 5, player2Score: 2,
+            });
+        });
+
+        mockSocket.emit.mockClear();
+        fireEvent.click(getByText('Rejouer'));
+
+        expect(mockSocket.emit).toHaveBeenCalledWith('game.vsbot');
+    });
+
+    it('le bouton "Retour au menu" après game.end navigue vers HomeScreen', () => {
+        const navigation = { navigate: jest.fn() };
+        const { getByText } = render(
+            <SocketContext.Provider value={mockSocket}>
+                <VsBotGameController navigation={navigation} />
+            </SocketContext.Provider>
+        );
+
+        act(() => {
+            mockSocket.__simulateEvent('game.start', {
+                inQueue: false, inGame: true, idOpponent: 'bot-id',
+            });
+        });
+        act(() => {
+            mockSocket.__simulateEvent('game.end', {
+                winner: 'player:1', reason: 'alignment5',
+                player1Score: 5, player2Score: 2,
+            });
+        });
+
+        fireEvent.click(getByText('Retour au menu'));
+        expect(navigation.navigate).toHaveBeenCalledWith('HomeScreen');
+    });
+
+    it('game.end avec winner player:2 affiche "Bot"', () => {
+        const { getByText } = render(
+            <SocketContext.Provider value={mockSocket}>
+                <VsBotGameController />
+            </SocketContext.Provider>
+        );
+
+        act(() => {
+            mockSocket.__simulateEvent('game.start', {
+                inQueue: false, inGame: true, idOpponent: 'bot-id',
+            });
+        });
+        act(() => {
+            mockSocket.__simulateEvent('game.end', {
+                winner: 'player:2', reason: 'alignment5',
+                player1Score: 2, player2Score: 5,
+            });
+        });
+
+        expect(getByText(/Vainqueur.*Bot/)).toBeTruthy();
+    });
+
+    it('game.end sans vainqueur affiche "Égalité !"', () => {
+        const { getByText } = render(
+            <SocketContext.Provider value={mockSocket}>
+                <VsBotGameController />
+            </SocketContext.Provider>
+        );
+
+        act(() => {
+            mockSocket.__simulateEvent('game.start', {
+                inQueue: false, inGame: true, idOpponent: 'bot-id',
+            });
+        });
+        act(() => {
+            mockSocket.__simulateEvent('game.end', {
+                winner: null, reason: 'noTokens',
+                player1Score: 3, player2Score: 3,
+            });
+        });
+
+        expect(getByText('Égalité !')).toBeTruthy();
+    });
+
+    it('appelle socket.off pour game.start et game.end au démontage', () => {
+        const { unmount } = render(
+            <SocketContext.Provider value={mockSocket}>
+                <VsBotGameController />
+            </SocketContext.Provider>
+        );
+
+        unmount();
+
+        const offEvents = mockSocket.off.mock.calls.map(call => call[0]);
+        expect(offEvents).toContain('game.start');
+        expect(offEvents).toContain('game.end');
     });
 });
