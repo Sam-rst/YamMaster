@@ -92,3 +92,4 @@ Backend listens on `localhost:3000`. Frontend connects via hardcoded IP for nati
 - **Documentation**: Mettre à jour ou créer la documentation **après** que les tests et le lint passent et **juste avant** le commit.
 - **Ordre de validation**: code → tests verts → lint 0 erreur/warning → docs → commit.
 - **Architecture Feature-Sliced**: Toute nouvelle feature doit suivre la structure convention : `screens/` + `components/` + `services/` + `models/` (frontend) ou `handlers/` + `services/` + `models/` + `routes/` (backend). Toujours les 4 dossiers, même si un fichier est léger. Voir `docs/07-architecture-cible.md`.
+- **Hiérarchie des composants**: Les sous-composants d'un composant parent doivent être dans le dossier du parent. Si `Board` utilise `Grid`, `Choices`, `Dice`, alors ces dossiers sont **dans** `board/`, pas à côté. La structure des dossiers reflète l'arbre de rendu React.
