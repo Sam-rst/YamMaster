@@ -61,6 +61,11 @@ export interface Game {
     player1Socket: SocketLike;
     player2Socket: SocketLike;
     gameInterval?: ReturnType<typeof setInterval>;
+    turnRecorder?: {
+        recordAction: (action: { type: 'roll' | 'lock' | 'choice' | 'grid' | 'defi' | 'predator' | 'snapshot'; playerNumber: number; data: Record<string, unknown> }) => void;
+        recordGameState: (state: Record<string, unknown>) => void;
+        toJSON: () => unknown[];
+    };
 }
 
 export interface VictoryResult {

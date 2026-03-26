@@ -14,6 +14,7 @@ import {
 } from '../../game/handlers/game.handler';
 import { createBotSocket, setupBotListeners } from '../../bot/handlers/bot.handler';
 import HistoryService from '../../history/services/history.service';
+import TurnRecorderService from '../../game/services/turn-recorder.service';
 
 const MINIMUM_PLAYERS_FOR_MATCH = 2;
 const queue: Socket[] = [];
@@ -53,6 +54,7 @@ const initializeGame = (player1Socket: SocketLike, player2Socket: SocketLike): G
     newGame.idGame = uniqid();
     newGame.player1Socket = player1Socket;
     newGame.player2Socket = player2Socket;
+    newGame.turnRecorder = TurnRecorderService.createRecorder();
     return newGame;
 };
 

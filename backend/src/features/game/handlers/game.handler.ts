@@ -7,6 +7,14 @@ import HistoryService from '../../history/services/history.service';
 
 const EMIT_DELAY_MS = 200;
 const TIMER_INTERVAL_MS = 1000;
+
+type TurnType = 'roll' | 'lock' | 'choice' | 'grid' | 'defi' | 'predator' | 'snapshot';
+
+const recordTurn = (game: Game, type: TurnType, data: Record<string, unknown>): void => {
+    if (!game.turnRecorder) return;
+    const playerNumber = game.gameState.currentTurn === 'player:1' ? 1 : 2;
+    game.turnRecorder.recordAction({ type, playerNumber, data });
+};
 const TIMER_ZERO = 0;
 
 // ================================================================
@@ -124,6 +132,11 @@ export const handleDiceRoll = (game: Game): void => {
             logger.info('Aucune combinaison disponible, timer réduit', { gameId: game.idGame });
         }
 
+        recordTurn(game, 'roll', {
+            dices: gameState.deck.dices.map(d => ({ id: d.id, value: d.value })),
+            rollNumber: gameState.deck.rollsCounter,
+        });
+
         updateClientsViewDecks(game);
         updateClientsViewChoices(game);
 
@@ -152,6 +165,7 @@ export const handleDiceLock = (game: Game, diceId: number): void => {
     }
 
     game.gameState.deck.dices[diceIndex].locked = !game.gameState.deck.dices[diceIndex].locked;
+    recordTurn(game, 'lock', { diceId, locked: game.gameState.deck.dices[diceIndex].locked });
     updateClientsViewDecks(game);
 };
 
@@ -163,6 +177,7 @@ export const handleChoiceSelected = (game: Game, choiceId: string): void => {
     game.gameState.choices.idSelectedChoice = choiceId;
     game.gameState.grid = GameService.grid.resetcanBeCheckedCells(game.gameState.grid);
     game.gameState.grid = GameService.grid.updateGridAfterSelectingChoice(choiceId, game.gameState.grid);
+    recordTurn(game, 'choice', { choiceId });
 
     updateClientsViewChoices(game);
     updateClientsViewGrid(game);
@@ -189,6 +204,7 @@ export const handleGridSelected = (
 
         decrementTokens(game, gameState.currentTurn);
         updateScores(game);
+        recordTurn(game, 'grid', { rowIndex: data.rowIndex, cellIndex: data.cellIndex });
 
         logger.info('Pion posé sur la grille', {
             gameId: game.idGame,
@@ -244,8 +260,15 @@ const saveGameResult = (game: Game, victory: VictoryResult): void => {
                 result: getPlayerResult(victory.winner, 'player:2'),
             },
         ],
+    }).then(() => {
+        if (game.dbGameId && game.turnRecorder) {
+            return HistoryService.saveTurns(
+                game.dbGameId,
+                game.turnRecorder.toJSON() as Record<string, unknown>[],
+            );
+        }
     }).catch((error: Error) => {
-        logger.error('Échec sauvegarde résultat en BDD (non bloquant)', {
+        logger.error('Échec sauvegarde résultat/tours en BDD (non bloquant)', {
             gameId: game.idGame,
             error,
         });
