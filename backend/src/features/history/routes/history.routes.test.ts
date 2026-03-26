@@ -26,16 +26,25 @@ describe('History Routes', () => {
     });
 
     describe('GET /history/user/:userId', () => {
-        test('retourne 200 avec la liste des parties', async () => {
+        test('retourne 200 avec la liste des parties formatées', async () => {
             mockGetGamesByUserId.mockResolvedValue([
-                { id: 'game-1', mode: 'ONLINE', status: 'FINISHED', player1Score: 5, player2Score: 3 },
-                { id: 'game-2', mode: 'VS_BOT', status: 'FINISHED', player1Score: 2, player2Score: 6 },
+                {
+                    id: 'game-1', mode: 'ONLINE', status: 'FINISHED', reason: 'alignment5',
+                    createdAt: new Date(), endedAt: new Date(),
+                    players: [
+                        { playerNumber: 1, userId: 'user-1', isBot: false, score: 5, tokensLeft: 7, result: 'WIN', user: { id: 'user-1', username: 'alice' } },
+                        { playerNumber: 2, userId: 'user-2', isBot: false, score: 3, tokensLeft: 9, result: 'LOSE', user: { id: 'user-2', username: 'bob' } },
+                    ],
+                },
             ]);
 
             const response = await request(app).get('/history/user/user-1');
 
             expect(response.status).toBe(200);
-            expect(response.body).toHaveLength(2);
+            expect(response.body).toHaveLength(1);
+            expect(response.body[0].myResult).toBe('WIN');
+            expect(response.body[0].opponentName).toBe('bob');
+            expect(response.body[0].myScore).toBe(5);
         });
 
         test('retourne 200 avec un tableau vide si pas de parties', async () => {

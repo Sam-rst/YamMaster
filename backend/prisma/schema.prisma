@@ -21,42 +21,57 @@ model User {
   updatedAt DateTime @updatedAt
 
   // Relations
-  gamesAsPlayer1 Game[] @relation("player1")
-  gamesAsPlayer2 Game[] @relation("player2")
-  gamesWon       Game[] @relation("winner")
+  gamePlayers GamePlayer[]
 
   @@map("users")
 }
 
 // ================================================================
-// GAME — Historique des parties jouées
+// GAME — Partie jouée
 // ================================================================
 
 model Game {
-  id        String   @id @default(uuid())
+  id        String     @id @default(uuid())
   mode      GameMode
   status    GameStatus @default(IN_PROGRESS)
+  reason    String?
   createdAt DateTime   @default(now())
   endedAt   DateTime?
-
-  // Joueurs
-  player1Id String
-  player1   User   @relation("player1", fields: [player1Id], references: [id])
-
-  player2Id String?
-  player2   User?  @relation("player2", fields: [player2Id], references: [id])
-
-  // Résultat
-  winnerId     String?
-  winner       User?   @relation("winner", fields: [winnerId], references: [id])
-  player1Score Int     @default(0)
-  player2Score Int     @default(0)
-  reason       String?
 
   // Données de replay (JSON des tours)
   turns Json?
 
+  // Relations
+  players GamePlayer[]
+
   @@map("games")
+}
+
+// ================================================================
+// GAME_PLAYER — Participation d'un joueur à une partie (table de jointure)
+// Scalable : supporte 2, 4, N joueurs par partie
+// ================================================================
+
+model GamePlayer {
+  id           String           @id @default(uuid())
+
+  // Relation vers la partie
+  gameId       String
+  game         Game             @relation(fields: [gameId], references: [id], onDelete: Cascade)
+
+  // Relation vers le joueur (null si bot)
+  userId       String?
+  user         User?            @relation(fields: [userId], references: [id], onDelete: SetNull)
+
+  // Position et résultat
+  playerNumber Int              // 1, 2, 3, 4...
+  isBot        Boolean          @default(false)
+  score        Int              @default(0)
+  tokensLeft   Int              @default(12)
+  result       GamePlayerResult @default(PENDING)
+
+  @@unique([gameId, playerNumber])
+  @@map("game_players")
 }
 
 // ================================================================
@@ -71,4 +86,11 @@ enum GameMode {
 enum GameStatus {
   IN_PROGRESS
   FINISHED
+}
+
+enum GamePlayerResult {
+  PENDING
+  WIN
+  LOSE
+  DRAW
 }

@@ -3,27 +3,34 @@
 import React, { useEffect, useState } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, ScrollView } from 'react-native';
 import { useAuth } from '@/shared/contexts/auth.context';
-import HistoryService from '../services/history.service';
+import HistoryService, { GameSummary } from '../services/history.service';
 
 interface NavigationProp {
-    navigate: (screen: string, params?: Record<string, unknown>) => void;
+    navigate: (screen: string) => void;
 }
 
 interface Props {
     navigation: NavigationProp;
 }
 
-interface GameSummary {
-    id: string;
-    mode: string;
-    status: string;
-    player1Score: number;
-    player2Score: number;
-    player1: { id: string; username: string } | null;
-    player2: { id: string; username: string } | null;
-    winner: { id: string; username: string } | null;
-    createdAt: string;
-}
+const RESULT_LABELS: Record<string, string> = {
+    WIN: 'Victoire',
+    LOSE: 'Défaite',
+    DRAW: 'Égalité',
+    PENDING: 'En cours',
+};
+
+const RESULT_COLORS: Record<string, string> = {
+    WIN: '#4CAF50',
+    LOSE: '#F44336',
+    DRAW: '#FF9800',
+    PENDING: '#999',
+};
+
+const MODE_LABELS: Record<string, string> = {
+    ONLINE: 'En ligne',
+    VS_BOT: 'Vs Bot',
+};
 
 const HistoryScreen: React.FC<Props> = ({ navigation }) => {
     const { user } = useAuth();
@@ -41,23 +48,6 @@ const HistoryScreen: React.FC<Props> = ({ navigation }) => {
 
         loadGames();
     }, [user]);
-
-    const getOpponentName = (game: GameSummary): string => {
-        if (game.mode === 'VS_BOT') return 'Bot';
-        if (game.player1?.id === user?.id) return game.player2?.username || 'Inconnu';
-        return game.player1?.username || 'Inconnu';
-    };
-
-    const getResult = (game: GameSummary): 'victoire' | 'défaite' | 'égalité' => {
-        if (!game.winner) return 'égalité';
-        return game.winner.id === user?.id ? 'victoire' : 'défaite';
-    };
-
-    const getResultColor = (result: string): string => {
-        if (result === 'victoire') return '#4CAF50';
-        if (result === 'défaite') return '#F44336';
-        return '#FF9800';
-    };
 
     const formatDate = (dateStr: string): string => {
         const date = new Date(dateStr);
@@ -86,33 +76,27 @@ const HistoryScreen: React.FC<Props> = ({ navigation }) => {
                 <Text style={styles.emptyText}>Aucune partie jouée pour le moment</Text>
             )}
 
-            {games.map((game) => {
-                const result = getResult(game);
-                const resultColor = getResultColor(result);
-                const opponent = getOpponentName(game);
+            {games.map((game) => (
+                <View key={game.id} style={styles.card}>
+                    <View style={styles.cardHeader}>
+                        <Text style={styles.mode}>
+                            {MODE_LABELS[game.mode] || game.mode}
+                        </Text>
+                        <Text style={styles.date}>{formatDate(game.createdAt)}</Text>
+                    </View>
 
-                return (
-                    <View key={game.id} style={styles.card}>
-                        <View style={styles.cardHeader}>
-                            <Text style={styles.mode}>
-                                {game.mode === 'ONLINE' ? 'En ligne' : 'Vs Bot'}
-                            </Text>
-                            <Text style={styles.date}>{formatDate(game.createdAt)}</Text>
-                        </View>
-
-                        <View style={styles.cardBody}>
-                            <Text style={styles.opponent}>vs {opponent}</Text>
-                            <Text style={styles.score}>
-                                {game.player1Score} - {game.player2Score}
-                            </Text>
-                        </View>
-
-                        <Text style={[styles.result, { color: resultColor }]}>
-                            {result === 'victoire' ? 'Victoire' : result === 'défaite' ? 'Défaite' : 'Égalité'}
+                    <View style={styles.cardBody}>
+                        <Text style={styles.opponent}>vs {game.opponentName}</Text>
+                        <Text style={styles.score}>
+                            {game.myScore} - {game.opponentScore}
                         </Text>
                     </View>
-                );
-            })}
+
+                    <Text style={[styles.result, { color: RESULT_COLORS[game.myResult] || '#999' }]}>
+                        {RESULT_LABELS[game.myResult] || game.myResult}
+                    </Text>
+                </View>
+            ))}
 
             <TouchableOpacity
                 style={styles.backButton}

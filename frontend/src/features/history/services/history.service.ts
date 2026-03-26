@@ -4,22 +4,22 @@ import { SERVER_URL } from '@/shared/services/config';
 
 const HISTORY_API_URL = `${SERVER_URL}/api/history`;
 
-interface GameSummary {
+export interface GameSummary {
     id: string;
     mode: string;
     status: string;
-    player1Score: number;
-    player2Score: number;
-    player1: { id: string; username: string } | null;
-    player2: { id: string; username: string } | null;
-    winner: { id: string; username: string } | null;
+    reason: string | null;
+    myScore: number;
+    opponentScore: number;
+    myResult: string;
+    opponentName: string;
     createdAt: string;
+    endedAt: string | null;
+    myTokensLeft: number;
 }
 
-interface GameDetail extends GameSummary {
+export interface GameDetail extends GameSummary {
     turns: unknown[] | null;
-    reason: string | null;
-    endedAt: string | null;
 }
 
 const HistoryService = {

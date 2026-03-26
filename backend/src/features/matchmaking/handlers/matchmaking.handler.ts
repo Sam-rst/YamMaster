@@ -83,8 +83,10 @@ const saveGameToDatabase = async (game: Game, mode: 'ONLINE' | 'VS_BOT'): Promis
     try {
         const dbGame = await HistoryService.createGame({
             mode,
-            player1Id,
-            player2Id,
+            players: [
+                { userId: player1Id, playerNumber: 1, isBot: false },
+                { userId: player2Id || null, playerNumber: 2, isBot: !player2Id },
+            ],
         });
         game.dbGameId = dbGame.id;
         logger.info('Partie sauvegardée en BDD', { gameId: game.idGame, action: dbGame.id });

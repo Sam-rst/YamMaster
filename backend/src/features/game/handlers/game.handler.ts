@@ -220,20 +220,30 @@ export const handleGridSelected = (
 // GAME LIFECYCLE
 // ================================================================
 
+const getPlayerResult = (winner: PlayerKey | null, playerKey: PlayerKey): 'WIN' | 'LOSE' | 'DRAW' => {
+    if (!winner) return 'DRAW';
+    return winner === playerKey ? 'WIN' : 'LOSE';
+};
+
 const saveGameResult = (game: Game, victory: VictoryResult): void => {
     if (!game.dbGameId) return;
 
-    const winnerId = victory.winner === 'player:1'
-        ? game.player1Socket.userId
-        : victory.winner === 'player:2'
-            ? game.player2Socket.userId
-            : null;
-
     HistoryService.finishGame(game.dbGameId, {
-        winnerId: winnerId || null,
-        player1Score: victory.player1Score,
-        player2Score: victory.player2Score,
         reason: victory.reason,
+        playerResults: [
+            {
+                playerNumber: 1,
+                score: victory.player1Score,
+                tokensLeft: game.gameState.player1Tokens,
+                result: getPlayerResult(victory.winner, 'player:1'),
+            },
+            {
+                playerNumber: 2,
+                score: victory.player2Score,
+                tokensLeft: game.gameState.player2Tokens,
+                result: getPlayerResult(victory.winner, 'player:2'),
+            },
+        ],
     }).catch((error: Error) => {
         logger.error('Échec sauvegarde résultat en BDD (non bloquant)', {
             gameId: game.idGame,

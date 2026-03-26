@@ -35,12 +35,14 @@ describe('Matchmaking - Sauvegarde BDD', () => {
         const games: Game[] = [];
         createGame(p1, p2, games);
 
-        // HistoryService.createGame devrait être appelé
+        // HistoryService.createGame devrait être appelé avec le nouveau format
         expect(mockCreateGame).toHaveBeenCalledWith(
             expect.objectContaining({
                 mode: 'ONLINE',
-                player1Id: 'user-1',
-                player2Id: 'user-2',
+                players: expect.arrayContaining([
+                    expect.objectContaining({ userId: 'user-1', playerNumber: 1, isBot: false }),
+                    expect.objectContaining({ userId: 'user-2', playerNumber: 2, isBot: false }),
+                ]),
             }),
         );
     });
@@ -57,7 +59,10 @@ describe('Matchmaking - Sauvegarde BDD', () => {
         expect(mockCreateGame).toHaveBeenCalledWith(
             expect.objectContaining({
                 mode: 'VS_BOT',
-                player1Id: 'user-1',
+                players: expect.arrayContaining([
+                    expect.objectContaining({ userId: 'user-1', playerNumber: 1, isBot: false }),
+                    expect.objectContaining({ userId: null, playerNumber: 2, isBot: true }),
+                ]),
             }),
         );
     });

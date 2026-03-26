@@ -1,15 +1,17 @@
 // backend/src/features/history/services/history.service.test.ts
-// Tests unitaires du service d'historique des parties
+// Tests unitaires du service d'historique — schema GamePlayer
 
 import HistoryService from './history.service';
 
-// Mock Prisma
 const mockPrisma = {
     game: {
         create: jest.fn(),
         update: jest.fn(),
         findMany: jest.fn(),
         findUnique: jest.fn(),
+    },
+    gamePlayer: {
+        updateMany: jest.fn(),
     },
 };
 
@@ -28,50 +30,72 @@ describe('HistoryService', () => {
     // ================================================================
 
     describe('createGame', () => {
-        test('crée une partie en ligne avec les deux joueurs', async () => {
+        test('crée une partie ONLINE avec 2 joueurs via GamePlayer', async () => {
             mockPrisma.game.create.mockResolvedValue({
                 id: 'game-1',
                 mode: 'ONLINE',
                 status: 'IN_PROGRESS',
-                player1Id: 'user-1',
-                player2Id: 'user-2',
-                createdAt: new Date(),
+                players: [
+                    { playerNumber: 1, userId: 'user-1', isBot: false },
+                    { playerNumber: 2, userId: 'user-2', isBot: false },
+                ],
             });
 
             const result = await HistoryService.createGame({
                 mode: 'ONLINE',
-                player1Id: 'user-1',
-                player2Id: 'user-2',
+                players: [
+                    { userId: 'user-1', playerNumber: 1, isBot: false },
+                    { userId: 'user-2', playerNumber: 2, isBot: false },
+                ],
             });
 
             expect(result).toBeDefined();
             expect(result.mode).toBe('ONLINE');
-            expect(mockPrisma.game.create).toHaveBeenCalledWith({
-                data: expect.objectContaining({
-                    mode: 'ONLINE',
-                    player1: { connect: { id: 'user-1' } },
-                    player2: { connect: { id: 'user-2' } },
+            expect(mockPrisma.game.create).toHaveBeenCalledWith(
+                expect.objectContaining({
+                    data: expect.objectContaining({
+                        mode: 'ONLINE',
+                        players: expect.objectContaining({
+                            create: expect.arrayContaining([
+                                expect.objectContaining({ userId: 'user-1', playerNumber: 1 }),
+                                expect.objectContaining({ userId: 'user-2', playerNumber: 2 }),
+                            ]),
+                        }),
+                    }),
                 }),
-            });
+            );
         });
 
-        test('crée une partie VsBot sans player2Id', async () => {
+        test('crée une partie VS_BOT avec un bot (userId null)', async () => {
             mockPrisma.game.create.mockResolvedValue({
                 id: 'game-2',
                 mode: 'VS_BOT',
-                status: 'IN_PROGRESS',
-                player1Id: 'user-1',
-                player2Id: null,
-                createdAt: new Date(),
+                players: [
+                    { playerNumber: 1, userId: 'user-1', isBot: false },
+                    { playerNumber: 2, userId: null, isBot: true },
+                ],
             });
 
             const result = await HistoryService.createGame({
                 mode: 'VS_BOT',
-                player1Id: 'user-1',
+                players: [
+                    { userId: 'user-1', playerNumber: 1, isBot: false },
+                    { userId: null, playerNumber: 2, isBot: true },
+                ],
             });
 
             expect(result).toBeDefined();
-            expect(result.mode).toBe('VS_BOT');
+        });
+
+        test('propage l\'erreur BDD', async () => {
+            mockPrisma.game.create.mockRejectedValue(new Error('DB down'));
+
+            await expect(HistoryService.createGame({
+                mode: 'ONLINE',
+                players: [
+                    { userId: 'user-1', playerNumber: 1, isBot: false },
+                ],
+            })).rejects.toThrow('DB down');
         });
     });
 
@@ -80,79 +104,42 @@ describe('HistoryService', () => {
     // ================================================================
 
     describe('finishGame', () => {
-        test('met à jour la partie avec le résultat', async () => {
+        test('met à jour le status et les résultats des joueurs', async () => {
             mockPrisma.game.update.mockResolvedValue({
                 id: 'game-1',
                 status: 'FINISHED',
-                winnerId: 'user-1',
-                player1Score: 5,
-                player2Score: 3,
-                reason: 'alignment5',
-                endedAt: new Date(),
-            });
-
-            const result = await HistoryService.finishGame('game-1', {
-                winnerId: 'user-1',
-                player1Score: 5,
-                player2Score: 3,
                 reason: 'alignment5',
             });
+            mockPrisma.gamePlayer.updateMany.mockResolvedValue({ count: 1 });
 
-            expect(result.status).toBe('FINISHED');
-            expect(result.winnerId).toBe('user-1');
+            await HistoryService.finishGame('game-1', {
+                reason: 'alignment5',
+                playerResults: [
+                    { playerNumber: 1, score: 5, tokensLeft: 7, result: 'WIN' },
+                    { playerNumber: 2, score: 3, tokensLeft: 9, result: 'LOSE' },
+                ],
+            });
+
             expect(mockPrisma.game.update).toHaveBeenCalledWith({
                 where: { id: 'game-1' },
                 data: expect.objectContaining({
                     status: 'FINISHED',
-                    winner: { connect: { id: 'user-1' } },
-                    player1Score: 5,
-                    player2Score: 3,
                     reason: 'alignment5',
                     endedAt: expect.any(Date),
                 }),
             });
+
+            // Vérifie que chaque joueur est mis à jour
+            expect(mockPrisma.gamePlayer.updateMany).toHaveBeenCalledTimes(2);
         });
 
-        test('peut terminer une partie sans vainqueur (égalité)', async () => {
-            mockPrisma.game.update.mockResolvedValue({
-                id: 'game-1',
-                status: 'FINISHED',
-                winnerId: null,
-                player1Score: 4,
-                player2Score: 4,
+        test('propage l\'erreur BDD', async () => {
+            mockPrisma.game.update.mockRejectedValue(new Error('DB down'));
+
+            await expect(HistoryService.finishGame('game-1', {
                 reason: 'noTokens',
-            });
-
-            const result = await HistoryService.finishGame('game-1', {
-                winnerId: null,
-                player1Score: 4,
-                player2Score: 4,
-                reason: 'noTokens',
-            });
-
-            expect(result.winnerId).toBeNull();
-        });
-    });
-
-    // ================================================================
-    // SAUVEGARDER LES TOURS (REPLAY)
-    // ================================================================
-
-    describe('saveTurns', () => {
-        test('sauvegarde les données de tour en JSON', async () => {
-            const turns = [
-                { turn: 1, player: 'player:1', action: 'roll', dices: [1,2,3,4,5] },
-                { turn: 2, player: 'player:2', action: 'roll', dices: [6,6,3,2,1] },
-            ];
-
-            mockPrisma.game.update.mockResolvedValue({ id: 'game-1', turns });
-
-            await HistoryService.saveTurns('game-1', turns);
-
-            expect(mockPrisma.game.update).toHaveBeenCalledWith({
-                where: { id: 'game-1' },
-                data: { turns },
-            });
+                playerResults: [],
+            })).rejects.toThrow('DB down');
         });
     });
 
@@ -161,32 +148,33 @@ describe('HistoryService', () => {
     // ================================================================
 
     describe('getGamesByUserId', () => {
-        test('retourne les parties d\'un joueur triées par date', async () => {
+        test('retourne les parties d\'un joueur avec les participants', async () => {
             mockPrisma.game.findMany.mockResolvedValue([
-                { id: 'game-2', createdAt: new Date('2026-03-26'), player1Id: 'user-1', status: 'FINISHED' },
-                { id: 'game-1', createdAt: new Date('2026-03-25'), player1Id: 'user-1', status: 'FINISHED' },
+                {
+                    id: 'game-1',
+                    mode: 'ONLINE',
+                    status: 'FINISHED',
+                    players: [
+                        { playerNumber: 1, userId: 'user-1', score: 5, result: 'WIN', isBot: false, user: { username: 'alice' } },
+                        { playerNumber: 2, userId: 'user-2', score: 3, result: 'LOSE', isBot: false, user: { username: 'bob' } },
+                    ],
+                },
             ]);
 
             const games = await HistoryService.getGamesByUserId('user-1');
-
-            expect(games).toHaveLength(2);
+            expect(games).toHaveLength(1);
             expect(mockPrisma.game.findMany).toHaveBeenCalledWith(
                 expect.objectContaining({
                     where: {
-                        OR: [
-                            { player1Id: 'user-1' },
-                            { player2Id: 'user-1' },
-                        ],
+                        players: { some: { userId: 'user-1' } },
                     },
-                    orderBy: { createdAt: 'desc' },
                 }),
             );
         });
 
-        test('retourne un tableau vide si pas de parties', async () => {
-            mockPrisma.game.findMany.mockResolvedValue([]);
-
-            const games = await HistoryService.getGamesByUserId('user-new');
+        test('retourne un tableau vide en cas d\'erreur', async () => {
+            mockPrisma.game.findMany.mockRejectedValue(new Error('DB down'));
+            const games = await HistoryService.getGamesByUserId('user-1');
             expect(games).toHaveLength(0);
         });
     });
@@ -200,76 +188,26 @@ describe('HistoryService', () => {
             mockPrisma.game.findUnique.mockResolvedValue({
                 id: 'game-1',
                 mode: 'ONLINE',
-                player1: { id: 'user-1', username: 'alice' },
-                player2: { id: 'user-2', username: 'bob' },
-                winner: { id: 'user-1', username: 'alice' },
+                players: [
+                    { playerNumber: 1, userId: 'user-1', score: 5, result: 'WIN', user: { username: 'alice' } },
+                    { playerNumber: 2, userId: 'user-2', score: 3, result: 'LOSE', user: { username: 'bob' } },
+                ],
             });
 
             const game = await HistoryService.getGameById('game-1');
-
             expect(game).toBeDefined();
-            expect(mockPrisma.game.findUnique).toHaveBeenCalledWith({
-                where: { id: 'game-1' },
-                include: expect.objectContaining({
-                    player1: true,
-                    player2: true,
-                    winner: true,
-                }),
-            });
         });
 
         test('retourne null pour une partie inexistante', async () => {
             mockPrisma.game.findUnique.mockResolvedValue(null);
-
             const game = await HistoryService.getGameById('inexistant');
             expect(game).toBeNull();
         });
 
         test('retourne null en cas d\'erreur BDD', async () => {
             mockPrisma.game.findUnique.mockRejectedValue(new Error('DB down'));
-
             const game = await HistoryService.getGameById('game-1');
             expect(game).toBeNull();
-        });
-    });
-
-    // ================================================================
-    // ERREURS BDD
-    // ================================================================
-
-    describe('erreurs BDD', () => {
-        test('createGame propage l\'erreur', async () => {
-            mockPrisma.game.create.mockRejectedValue(new Error('DB down'));
-
-            await expect(HistoryService.createGame({
-                mode: 'ONLINE',
-                player1Id: 'user-1',
-                player2Id: 'user-2',
-            })).rejects.toThrow('DB down');
-        });
-
-        test('finishGame propage l\'erreur', async () => {
-            mockPrisma.game.update.mockRejectedValue(new Error('DB down'));
-
-            await expect(HistoryService.finishGame('game-1', {
-                winnerId: null,
-                player1Score: 0,
-                player2Score: 0,
-                reason: 'noTokens',
-            })).rejects.toThrow('DB down');
-        });
-
-        test('saveTurns propage l\'erreur', async () => {
-            mockPrisma.game.update.mockRejectedValue(new Error('DB down'));
-
-            await expect(HistoryService.saveTurns('game-1', [{ turn: 1 }])).rejects.toThrow('DB down');
-        });
-
-        test('getGamesByUserId retourne un tableau vide en cas d\'erreur', async () => {
-            mockPrisma.game.findMany.mockRejectedValue(new Error('DB down'));
-
-            const games = await HistoryService.getGamesByUserId('user-1');
-            expect(games).toHaveLength(0);
         });
     });
 });

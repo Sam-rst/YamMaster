@@ -1,5 +1,5 @@
 // frontend/src/features/history/screens/history.screen.test.tsx
-// Tests d'intégration de l'écran d'historique
+// Tests de l'écran d'historique — données pré-formatées par le backend
 
 import React from 'react';
 import { render, waitFor } from '@testing-library/react';
@@ -54,17 +54,17 @@ describe('HistoryScreen', () => {
         });
     });
 
-    test('affiche la liste des parties', async () => {
+    test('affiche la liste des parties avec le format backend', async () => {
         mockGetGamesByUserId.mockResolvedValue([
             {
                 id: 'game-1',
                 mode: 'ONLINE',
                 status: 'FINISHED',
-                player1Score: 5,
-                player2Score: 3,
-                player1: { id: 'user-1', username: 'alice' },
-                player2: { id: 'user-2', username: 'bob' },
-                winner: { id: 'user-1', username: 'alice' },
+                reason: 'alignment5',
+                myScore: 5,
+                opponentScore: 3,
+                myResult: 'WIN',
+                opponentName: 'bob',
                 createdAt: '2026-03-26T10:00:00Z',
             },
         ]);
@@ -73,7 +73,8 @@ describe('HistoryScreen', () => {
 
         await waitFor(() => {
             expect(getByText(/bob/)).toBeTruthy();
-            expect(getByText(/5.*3|3.*5/)).toBeTruthy();
+            expect(getByText(/5.*3/)).toBeTruthy();
+            expect(getByText(/victoire/i)).toBeTruthy();
         });
     });
 
@@ -86,28 +87,26 @@ describe('HistoryScreen', () => {
         });
     });
 
-    test('affiche "Victoire" ou "Défaite" selon le résultat', async () => {
+    test('affiche Victoire, Défaite et Égalité correctement', async () => {
         mockGetGamesByUserId.mockResolvedValue([
             {
                 id: 'game-1',
                 mode: 'ONLINE',
                 status: 'FINISHED',
-                player1Score: 5,
-                player2Score: 3,
-                player1: { id: 'user-1', username: 'alice' },
-                player2: { id: 'user-2', username: 'bob' },
-                winner: { id: 'user-1', username: 'alice' },
+                myScore: 5,
+                opponentScore: 3,
+                myResult: 'WIN',
+                opponentName: 'bob',
                 createdAt: '2026-03-26T10:00:00Z',
             },
             {
                 id: 'game-2',
                 mode: 'VS_BOT',
                 status: 'FINISHED',
-                player1Score: 2,
-                player2Score: 6,
-                player1: { id: 'user-1', username: 'alice' },
-                player2: null,
-                winner: { id: 'user-bot', username: 'bot' },
+                myScore: 2,
+                opponentScore: 6,
+                myResult: 'LOSE',
+                opponentName: 'Bot',
                 createdAt: '2026-03-25T10:00:00Z',
             },
         ]);
@@ -117,6 +116,28 @@ describe('HistoryScreen', () => {
         await waitFor(() => {
             expect(getByText(/victoire/i)).toBeTruthy();
             expect(getByText(/défaite/i)).toBeTruthy();
+        });
+    });
+
+    test('affiche le mode de jeu en français', async () => {
+        mockGetGamesByUserId.mockResolvedValue([
+            {
+                id: 'game-1',
+                mode: 'VS_BOT',
+                status: 'FINISHED',
+                myScore: 3,
+                opponentScore: 1,
+                myResult: 'WIN',
+                opponentName: 'Bot',
+                createdAt: '2026-03-26T10:00:00Z',
+            },
+        ]);
+
+        const { getByText } = renderHistoryScreen();
+
+        await waitFor(() => {
+            expect(getByText('Vs Bot')).toBeTruthy();
+            expect(getByText('vs Bot')).toBeTruthy();
         });
     });
 });
