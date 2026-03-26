@@ -9,8 +9,10 @@ export interface GameSummary {
     mode: string;
     status: string;
     reason: string | null;
+    reasonLabel: string | null;
     myScore: number;
     opponentScore: number;
+    scoreDisplay: string;
     myResult: string;
     opponentName: string;
     createdAt: string;

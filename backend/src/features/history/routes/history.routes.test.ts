@@ -44,7 +44,8 @@ describe('History Routes', () => {
             expect(response.body).toHaveLength(1);
             expect(response.body[0].myResult).toBe('WIN');
             expect(response.body[0].opponentName).toBe('bob');
-            expect(response.body[0].myScore).toBe(5);
+            expect(response.body[0].scoreDisplay).toBe('Alignement de 5');
+            expect(response.body[0].reasonLabel).toBe('Alignement de 5 pions');
         });
 
         test('retourne 200 avec un tableau vide si pas de parties', async () => {

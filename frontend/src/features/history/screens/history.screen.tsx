@@ -87,9 +87,7 @@ const HistoryScreen: React.FC<Props> = ({ navigation }) => {
 
                     <View style={styles.cardBody}>
                         <Text style={styles.opponent}>vs {game.opponentName}</Text>
-                        <Text style={styles.score}>
-                            {game.myScore} - {game.opponentScore}
-                        </Text>
+                        <Text style={styles.score}>{game.scoreDisplay}</Text>
                     </View>
 
                     <Text style={[styles.result, { color: RESULT_COLORS[game.myResult] || '#999' }]}>

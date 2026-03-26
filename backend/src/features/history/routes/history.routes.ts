@@ -30,21 +30,35 @@ interface GameWithPlayers {
     players: GamePlayerWithUser[];
 }
 
+const REASON_LABELS: Record<string, string> = {
+    alignment5: 'Alignement de 5 pions',
+    noTokens: 'Plus de pions disponibles',
+};
+
+const formatScoreDisplay = (reason: string | null, myScore: number, opponentScore: number): string => {
+    if (reason === 'alignment5') return 'Alignement de 5';
+    return `${myScore} - ${opponentScore}`;
+};
+
 const formatGameForUser = (game: GameWithPlayers, userId: string) => {
     const myPlayer = game.players.find(p => p.userId === userId);
     const opponent = game.players.find(p => p.userId !== userId);
 
     const opponentName = opponent?.isBot ? 'Bot' : (opponent?.user?.username || 'Inconnu');
+    const myScore = myPlayer?.score ?? 0;
+    const opponentScore = opponent?.score ?? 0;
 
     return {
         id: game.id,
         mode: game.mode,
         status: game.status,
         reason: game.reason,
+        reasonLabel: game.reason ? (REASON_LABELS[game.reason] || game.reason) : null,
         createdAt: game.createdAt,
         endedAt: game.endedAt,
-        myScore: myPlayer?.score ?? 0,
-        opponentScore: opponent?.score ?? 0,
+        myScore,
+        opponentScore,
+        scoreDisplay: formatScoreDisplay(game.reason, myScore, opponentScore),
         myResult: myPlayer?.result ?? 'PENDING',
         opponentName,
         myTokensLeft: myPlayer?.tokensLeft ?? 0,

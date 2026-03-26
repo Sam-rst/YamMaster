@@ -61,8 +61,10 @@ describe('HistoryScreen', () => {
                 mode: 'ONLINE',
                 status: 'FINISHED',
                 reason: 'alignment5',
-                myScore: 5,
-                opponentScore: 3,
+                reasonLabel: 'Alignement de 5 pions',
+                myScore: 0,
+                opponentScore: 0,
+                scoreDisplay: 'Alignement de 5',
                 myResult: 'WIN',
                 opponentName: 'bob',
                 createdAt: '2026-03-26T10:00:00Z',
@@ -73,7 +75,7 @@ describe('HistoryScreen', () => {
 
         await waitFor(() => {
             expect(getByText(/bob/)).toBeTruthy();
-            expect(getByText(/5.*3/)).toBeTruthy();
+            expect(getByText(/Alignement de 5/)).toBeTruthy();
             expect(getByText(/victoire/i)).toBeTruthy();
         });
     });
@@ -95,6 +97,7 @@ describe('HistoryScreen', () => {
                 status: 'FINISHED',
                 myScore: 5,
                 opponentScore: 3,
+                scoreDisplay: '5 - 3',
                 myResult: 'WIN',
                 opponentName: 'bob',
                 createdAt: '2026-03-26T10:00:00Z',
@@ -105,6 +108,7 @@ describe('HistoryScreen', () => {
                 status: 'FINISHED',
                 myScore: 2,
                 opponentScore: 6,
+                scoreDisplay: '2 - 6',
                 myResult: 'LOSE',
                 opponentName: 'Bot',
                 createdAt: '2026-03-25T10:00:00Z',
@@ -127,6 +131,7 @@ describe('HistoryScreen', () => {
                 status: 'FINISHED',
                 myScore: 3,
                 opponentScore: 1,
+                scoreDisplay: '3 - 1',
                 myResult: 'WIN',
                 opponentName: 'Bot',
                 createdAt: '2026-03-26T10:00:00Z',
