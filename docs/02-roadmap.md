@@ -11,7 +11,7 @@ Priorisation basée sur la grille d'évaluation (14pts obligatoires + 6pts au ch
 - [x] Fix réinitialisation de la grille au timeout (les pions posés disparaissent)
 - [x] Remplacer timer hardcodé `5` par `END_TURN_DURATION`
 - [x] Fix crash serveur en fin de partie (interval non nettoyé après splice)
-- [ ] Ajouter validation côté serveur (vérifier que c'est le tour du joueur qui émet)
+- [x] Ajouter validation côté serveur (vérifier que c'est le tour du joueur qui émet)
 
 ### 1.2 Calcul des scores `FAIT`
 - [x] Implémenter `GameService.grid.calculateScores(grid)` — détection des alignements 3, 4 et 5 pions (horizontal, vertical, diagonal)

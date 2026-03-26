@@ -19,11 +19,34 @@ import {
 
 const DEV_MODE = process.env.DEV_MODE === 'true';
 
+export const getPlayerKeyFromSocket = (game: Game, socketId: string): PlayerKey | null => {
+    if (game.player1Socket.id === socketId) return 'player:1';
+    if (game.player2Socket.id === socketId) return 'player:2';
+    return null;
+};
+
+export const isCurrentPlayerTurn = (game: Game, socketId: string): boolean => {
+    const playerKey = getPlayerKeyFromSocket(game, socketId);
+    return playerKey !== null && playerKey === game.gameState.currentTurn;
+};
+
 export const createServer = (): { app: ReturnType<typeof express>; server: http.Server; io: Server } => {
     const app = express();
     const server = http.createServer(app);
     const io = new Server(server);
     return { app, server, io };
+};
+
+const findGameAndValidateTurn = (games: Game[], socketId: string, action: string): Game | null => {
+    const game = findGameOrWarn(games, socketId, action);
+    if (!game) return null;
+
+    if (!isCurrentPlayerTurn(game, socketId)) {
+        logger.warn('Action rejetée : pas le tour du joueur', { socketId, action });
+        return null;
+    }
+
+    return game;
 };
 
 const findGameOrWarn = (games: Game[], socketId: string, action: string): Game | null => {
@@ -66,7 +89,7 @@ export const setupSocketHandlers = (io: Server, games: Game[]): void => {
 
         socket.on('game.dices.roll', () => {
             safeHandler('game.dices.roll', socket.id, () => {
-                const game = findGameOrWarn(games, socket.id, 'game.dices.roll');
+                const game = findGameAndValidateTurn(games, socket.id, 'game.dices.roll');
                 if (!game) return;
                 handleDiceRoll(game);
             });
@@ -74,7 +97,7 @@ export const setupSocketHandlers = (io: Server, games: Game[]): void => {
 
         socket.on('game.dices.lock', (diceId: number) => {
             safeHandler('game.dices.lock', socket.id, () => {
-                const game = findGameOrWarn(games, socket.id, 'game.dices.lock');
+                const game = findGameAndValidateTurn(games, socket.id, 'game.dices.lock');
                 if (!game) return;
                 handleDiceLock(game, diceId);
             });
@@ -82,7 +105,7 @@ export const setupSocketHandlers = (io: Server, games: Game[]): void => {
 
         socket.on('game.defi', () => {
             safeHandler('game.defi', socket.id, () => {
-                const game = findGameOrWarn(games, socket.id, 'game.defi');
+                const game = findGameAndValidateTurn(games, socket.id, 'game.defi');
                 if (!game) return;
                 handleDefi(game);
             });
@@ -90,7 +113,7 @@ export const setupSocketHandlers = (io: Server, games: Game[]): void => {
 
         socket.on('game.grid.yamPredator', (data: { rowIndex: number; cellIndex: number }) => {
             safeHandler('game.grid.yamPredator', socket.id, () => {
-                const game = findGameOrWarn(games, socket.id, 'game.grid.yamPredator');
+                const game = findGameAndValidateTurn(games, socket.id, 'game.grid.yamPredator');
                 if (!game) return;
                 handleYamPredator(game, data);
             });
@@ -98,7 +121,7 @@ export const setupSocketHandlers = (io: Server, games: Game[]): void => {
 
         socket.on('game.choices.selected', (data: { choiceId: string }) => {
             safeHandler('game.choices.selected', socket.id, () => {
-                const game = findGameOrWarn(games, socket.id, 'game.choices.selected');
+                const game = findGameAndValidateTurn(games, socket.id, 'game.choices.selected');
                 if (!game) return;
                 handleChoiceSelected(game, data.choiceId);
             });
@@ -106,7 +129,7 @@ export const setupSocketHandlers = (io: Server, games: Game[]): void => {
 
         socket.on('game.grid.selected', (data: { cellId: string; rowIndex: number; cellIndex: number }) => {
             safeHandler('game.grid.selected', socket.id, () => {
-                const game = findGameOrWarn(games, socket.id, 'game.grid.selected');
+                const game = findGameAndValidateTurn(games, socket.id, 'game.grid.selected');
                 if (!game) return;
                 handleGridSelected(game, games, data);
             });
