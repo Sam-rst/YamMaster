@@ -49,8 +49,8 @@ describe('HistoryService', () => {
             expect(mockPrisma.game.create).toHaveBeenCalledWith({
                 data: expect.objectContaining({
                     mode: 'ONLINE',
-                    player1Id: 'user-1',
-                    player2Id: 'user-2',
+                    player1: { connect: { id: 'user-1' } },
+                    player2: { connect: { id: 'user-2' } },
                 }),
             });
         });
@@ -104,7 +104,7 @@ describe('HistoryService', () => {
                 where: { id: 'game-1' },
                 data: expect.objectContaining({
                     status: 'FINISHED',
-                    winnerId: 'user-1',
+                    winner: { connect: { id: 'user-1' } },
                     player1Score: 5,
                     player2Score: 3,
                     reason: 'alignment5',

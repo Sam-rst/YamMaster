@@ -25,8 +25,8 @@ const HistoryService = {
             const game = await prisma.game.create({
                 data: {
                     mode: input.mode,
-                    player1Id: input.player1Id,
-                    player2Id: input.player2Id || null,
+                    player1: { connect: { id: input.player1Id } },
+                    ...(input.player2Id ? { player2: { connect: { id: input.player2Id } } } : {}),
                 },
             });
 
@@ -41,13 +41,16 @@ const HistoryService = {
     finishGame: async (gameId: string, result: FinishGameInput) => {
         try {
             const prisma = getPrismaClient();
+            const safeScore = (score: number): number =>
+                Number.isFinite(score) ? score : 0;
+
             const game = await prisma.game.update({
                 where: { id: gameId },
                 data: {
                     status: 'FINISHED',
-                    winnerId: result.winnerId,
-                    player1Score: result.player1Score,
-                    player2Score: result.player2Score,
+                    ...(result.winnerId ? { winner: { connect: { id: result.winnerId } } } : {}),
+                    player1Score: safeScore(result.player1Score),
+                    player2Score: safeScore(result.player2Score),
                     reason: result.reason,
                     endedAt: new Date(),
                 },
