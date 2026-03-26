@@ -40,8 +40,8 @@ authRouter.post('/login', async (req: Request, res: Response): Promise<void> => 
     }
 });
 
-authRouter.get('/check/:username', async (req: Request, res: Response): Promise<void> => {
-    const { username } = req.params;
+authRouter.get('/check/:username', async (req: Request<{ username: string }>, res: Response): Promise<void> => {
+    const username = req.params.username;
 
     try {
         const result = await AuthService.checkUsername(username);
