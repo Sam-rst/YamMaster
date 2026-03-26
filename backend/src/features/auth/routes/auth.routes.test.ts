@@ -7,10 +7,12 @@ import { authRouter } from './auth.routes';
 
 // Mock AuthService
 const mockLoginOrRegister = jest.fn();
+const mockCheckUsername = jest.fn();
 jest.mock('../services/auth.service', () => ({
     __esModule: true,
     default: {
         loginOrRegister: (...args: unknown[]) => mockLoginOrRegister(...args),
+        checkUsername: (...args: unknown[]) => mockCheckUsername(...args),
     },
 }));
 
@@ -86,6 +88,33 @@ describe('Auth Routes', () => {
                 .send({ username: 'alice' });
 
             expect(response.status).toBe(400);
+        });
+    });
+
+    describe('GET /auth/check/:username', () => {
+        test('retourne exists: true pour un username existant', async () => {
+            mockCheckUsername.mockResolvedValue({ exists: true });
+
+            const response = await request(app).get('/auth/check/alice');
+
+            expect(response.status).toBe(200);
+            expect(response.body.exists).toBe(true);
+        });
+
+        test('retourne exists: false pour un username inexistant', async () => {
+            mockCheckUsername.mockResolvedValue({ exists: false });
+
+            const response = await request(app).get('/auth/check/newplayer');
+
+            expect(response.status).toBe(200);
+            expect(response.body.exists).toBe(false);
+        });
+
+        test('retourne 400 pour un username vide', async () => {
+            const response = await request(app).get('/auth/check/');
+
+            // Express route /check/:username ne matche pas /check/
+            expect(response.status).toBe(404);
         });
     });
 });

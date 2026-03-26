@@ -1,73 +1,136 @@
 // frontend/src/features/auth/screens/auth.screen.test.tsx
-// Tests d'intégration de l'écran d'authentification
+// Tests d'intégration de l'écran d'authentification Smart Login
 
 import React from 'react';
 import { render, fireEvent, act, waitFor } from '@testing-library/react';
 import AuthScreen from './auth.screen';
+import { AuthProvider } from '@/shared/contexts/auth.context';
 
 // Mock AuthService
 const mockLogin = jest.fn();
+const mockCheckUsername = jest.fn();
 jest.mock('../services/auth.service', () => ({
     __esModule: true,
     default: {
         login: (...args: unknown[]) => mockLogin(...args),
+        checkUsername: (...args: unknown[]) => mockCheckUsername(...args),
     },
 }));
 
-// Mock navigation
 const mockNavigate = jest.fn();
 const navigation = { navigate: mockNavigate };
 
-describe('AuthScreen', () => {
+const renderAuthScreen = () => {
+    return render(
+        <AuthProvider>
+            <AuthScreen navigation={navigation} />
+        </AuthProvider>
+    );
+};
+
+describe('AuthScreen — Smart Login', () => {
 
     beforeEach(() => {
         jest.clearAllMocks();
+        jest.useFakeTimers();
+        mockCheckUsername.mockResolvedValue({ exists: false });
     });
 
-    test('affiche les champs username et password', () => {
-        const { getByPlaceholderText } = render(<AuthScreen navigation={navigation} />);
+    afterEach(() => {
+        jest.useRealTimers();
+    });
 
+    test('affiche le titre et les champs', () => {
+        const { getByText, getByPlaceholderText } = renderAuthScreen();
+
+        expect(getByText('Yam Master')).toBeTruthy();
         expect(getByPlaceholderText(/nom d'utilisateur/i)).toBeTruthy();
-        expect(getByPlaceholderText(/mot de passe/i)).toBeTruthy();
     });
 
     test('affiche un bouton de connexion', () => {
-        const { getByText } = render(<AuthScreen navigation={navigation} />);
-        expect(getByText(/connexion/i)).toBeTruthy();
+        const { getByText } = renderAuthScreen();
+        expect(getByText(/connecter|Créer mon compte|Chargement/i)).toBeTruthy();
     });
 
-    test('appelle AuthService.login avec les valeurs saisies', async () => {
+    test('appelle checkUsername avec debounce quand on tape un username', async () => {
+        mockCheckUsername.mockResolvedValue({ exists: true });
+
+        const { getByPlaceholderText } = renderAuthScreen();
+
+        await act(async () => {
+            fireEvent.change(getByPlaceholderText(/nom d'utilisateur/i), { target: { value: 'alice' } });
+        });
+
+        // Avancer le debounce
+        await act(async () => {
+            jest.advanceTimersByTime(600);
+        });
+
+        expect(mockCheckUsername).toHaveBeenCalledWith('alice');
+    });
+
+    test('affiche "Bon retour" pour un utilisateur existant', async () => {
+        mockCheckUsername.mockResolvedValue({ exists: true });
+
+        const { getByPlaceholderText, getByText } = renderAuthScreen();
+
+        await act(async () => {
+            fireEvent.change(getByPlaceholderText(/nom d'utilisateur/i), { target: { value: 'alice' } });
+        });
+
+        await act(async () => {
+            jest.advanceTimersByTime(600);
+        });
+
+        await waitFor(() => {
+            expect(getByText(/Bon retour/)).toBeTruthy();
+        });
+    });
+
+    test('affiche "Nouveau joueur" pour un username inexistant', async () => {
+        mockCheckUsername.mockResolvedValue({ exists: false });
+
+        const { getByPlaceholderText, getByText } = renderAuthScreen();
+
+        await act(async () => {
+            fireEvent.change(getByPlaceholderText(/nom d'utilisateur/i), { target: { value: 'newplayer' } });
+        });
+
+        await act(async () => {
+            jest.advanceTimersByTime(600);
+        });
+
+        await waitFor(() => {
+            expect(getByText(/Nouveau joueur/)).toBeTruthy();
+        });
+    });
+
+    test('le bouton change de texte selon le type d\'utilisateur', async () => {
+        mockCheckUsername.mockResolvedValue({ exists: false });
+
+        const { getByPlaceholderText, getByText } = renderAuthScreen();
+
+        await act(async () => {
+            fireEvent.change(getByPlaceholderText(/nom d'utilisateur/i), { target: { value: 'newplayer' } });
+        });
+
+        await act(async () => {
+            jest.advanceTimersByTime(600);
+        });
+
+        await waitFor(() => {
+            expect(getByText(/Créer mon compte/)).toBeTruthy();
+        });
+    });
+
+    test('appelle AuthService.login au submit', async () => {
         mockLogin.mockResolvedValue({
             success: true,
-            user: { id: 'user-1', username: 'alice' },
+            user: { id: 'u1', username: 'alice', createdAt: '2026-01-01' },
             isNewUser: false,
         });
 
-        const { getByPlaceholderText, getByText } = render(<AuthScreen navigation={navigation} />);
-
-        const usernameInput = getByPlaceholderText(/nom d'utilisateur/i);
-        const passwordInput = getByPlaceholderText(/mot de passe/i);
-
-        await act(async () => {
-            fireEvent.change(usernameInput, { target: { value: 'alice' } });
-            fireEvent.change(passwordInput, { target: { value: 'secret' } });
-        });
-
-        await act(async () => {
-            fireEvent.click(getByText(/connexion/i));
-        });
-
-        expect(mockLogin).toHaveBeenCalledWith('alice', 'secret');
-    });
-
-    test('navigue vers HomeScreen après un login réussi', async () => {
-        mockLogin.mockResolvedValue({
-            success: true,
-            user: { id: 'user-1', username: 'alice' },
-            isNewUser: false,
-        });
-
-        const { getByPlaceholderText, getByText } = render(<AuthScreen navigation={navigation} />);
+        const { getByPlaceholderText, getByText } = renderAuthScreen();
 
         await act(async () => {
             fireEvent.change(getByPlaceholderText(/nom d'utilisateur/i), { target: { value: 'alice' } });
@@ -75,21 +138,50 @@ describe('AuthScreen', () => {
         });
 
         await act(async () => {
-            fireEvent.click(getByText(/connexion/i));
+            fireEvent.click(getByText(/connecter|Créer mon compte|Chargement/i));
+        });
+
+        expect(mockLogin).toHaveBeenCalledWith('alice', 'secret');
+    });
+
+    test('affiche un message de succès puis redirige', async () => {
+        mockLogin.mockResolvedValue({
+            success: true,
+            user: { id: 'u1', username: 'alice', createdAt: '2026-01-01' },
+            isNewUser: false,
+        });
+
+        const { getByPlaceholderText, getByText } = renderAuthScreen();
+
+        await act(async () => {
+            fireEvent.change(getByPlaceholderText(/nom d'utilisateur/i), { target: { value: 'alice' } });
+            fireEvent.change(getByPlaceholderText(/mot de passe/i), { target: { value: 'secret' } });
+        });
+
+        await act(async () => {
+            fireEvent.click(getByText(/connecter|Créer mon compte|Chargement/i));
         });
 
         await waitFor(() => {
-            expect(mockNavigate).toHaveBeenCalledWith('HomeScreen');
+            expect(getByText(/Bon retour, alice/)).toBeTruthy();
+            expect(getByText(/Redirection/)).toBeTruthy();
         });
+
+        // Avancer le timer de redirection
+        await act(async () => {
+            jest.advanceTimersByTime(2000);
+        });
+
+        expect(mockNavigate).toHaveBeenCalledWith('HomeScreen');
     });
 
-    test('affiche un message d\'erreur en cas d\'échec', async () => {
+    test('affiche une erreur pour un mauvais mot de passe', async () => {
         mockLogin.mockResolvedValue({
             success: false,
             error: 'Mot de passe incorrect',
         });
 
-        const { getByPlaceholderText, getByText } = render(<AuthScreen navigation={navigation} />);
+        const { getByPlaceholderText, getByText } = renderAuthScreen();
 
         await act(async () => {
             fireEvent.change(getByPlaceholderText(/nom d'utilisateur/i), { target: { value: 'alice' } });
@@ -97,34 +189,11 @@ describe('AuthScreen', () => {
         });
 
         await act(async () => {
-            fireEvent.click(getByText(/connexion/i));
+            fireEvent.click(getByText(/connecter|Créer mon compte|Chargement/i));
         });
 
         await waitFor(() => {
             expect(getByText(/Mot de passe incorrect/)).toBeTruthy();
-        });
-    });
-
-    test('affiche un message de bienvenue pour un nouvel utilisateur', async () => {
-        mockLogin.mockResolvedValue({
-            success: true,
-            user: { id: 'user-1', username: 'newbie' },
-            isNewUser: true,
-        });
-
-        const { getByPlaceholderText, getByText } = render(<AuthScreen navigation={navigation} />);
-
-        await act(async () => {
-            fireEvent.change(getByPlaceholderText(/nom d'utilisateur/i), { target: { value: 'newbie' } });
-            fireEvent.change(getByPlaceholderText(/mot de passe/i), { target: { value: 'secret' } });
-        });
-
-        await act(async () => {
-            fireEvent.click(getByText(/connexion/i));
-        });
-
-        await waitFor(() => {
-            expect(mockNavigate).toHaveBeenCalledWith('HomeScreen');
         });
     });
 });

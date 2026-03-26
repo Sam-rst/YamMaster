@@ -93,4 +93,43 @@ describe('AuthService', () => {
             );
         });
     });
+
+    describe('checkUsername', () => {
+        test('retourne exists: true pour un username existant', async () => {
+            mockFetch.mockResolvedValue({
+                ok: true,
+                json: () => Promise.resolve({ exists: true }),
+            });
+
+            const result = await AuthService.checkUsername('alice');
+            expect(result.exists).toBe(true);
+        });
+
+        test('retourne exists: false pour un username inexistant', async () => {
+            mockFetch.mockResolvedValue({
+                ok: true,
+                json: () => Promise.resolve({ exists: false }),
+            });
+
+            const result = await AuthService.checkUsername('newplayer');
+            expect(result.exists).toBe(false);
+        });
+
+        test('retourne exists: false en cas d\'erreur réseau', async () => {
+            mockFetch.mockRejectedValue(new Error('Network error'));
+
+            const result = await AuthService.checkUsername('alice');
+            expect(result.exists).toBe(false);
+        });
+
+        test('appelle la bonne URL', async () => {
+            mockFetch.mockResolvedValue({
+                ok: true,
+                json: () => Promise.resolve({ exists: true }),
+            });
+
+            await AuthService.checkUsername('alice');
+            expect(mockFetch).toHaveBeenCalledWith(expect.stringContaining('/api/auth/check/alice'));
+        });
+    });
 });
