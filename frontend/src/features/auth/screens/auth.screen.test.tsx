@@ -47,9 +47,20 @@ describe('AuthScreen — Smart Login', () => {
         expect(getByPlaceholderText(/nom d'utilisateur/i)).toBeTruthy();
     });
 
-    test('affiche un bouton de connexion', () => {
-        const { getByText } = renderAuthScreen();
-        expect(getByText(/connecter|Créer mon compte|Chargement/i)).toBeTruthy();
+    test('affiche le bouton de connexion après vérification du username', async () => {
+        mockCheckUsername.mockResolvedValue({ exists: true });
+        const { getByPlaceholderText, getByText } = renderAuthScreen();
+
+        await act(async () => {
+            fireEvent.change(getByPlaceholderText(/nom d'utilisateur/i), { target: { value: 'alice' } });
+        });
+        await act(async () => {
+            jest.advanceTimersByTime(600);
+        });
+
+        await waitFor(() => {
+            expect(getByText(/connecter|Créer mon compte/i)).toBeTruthy();
+        });
     });
 
     test('appelle checkUsername avec debounce quand on tape un username', async () => {
@@ -124,6 +135,7 @@ describe('AuthScreen — Smart Login', () => {
     });
 
     test('appelle AuthService.login au submit', async () => {
+        mockCheckUsername.mockResolvedValue({ exists: true });
         mockLogin.mockResolvedValue({
             success: true,
             user: { id: 'u1', username: 'alice', createdAt: '2026-01-01' },
@@ -132,19 +144,26 @@ describe('AuthScreen — Smart Login', () => {
 
         const { getByPlaceholderText, getByText } = renderAuthScreen();
 
+        // Étape 1 : saisir le username et attendre le check
         await act(async () => {
             fireEvent.change(getByPlaceholderText(/nom d'utilisateur/i), { target: { value: 'alice' } });
+        });
+        await act(async () => { jest.advanceTimersByTime(600); });
+
+        // Étape 2 : saisir le password et soumettre
+        await waitFor(() => {
             fireEvent.change(getByPlaceholderText(/mot de passe/i), { target: { value: 'secret' } });
         });
 
         await act(async () => {
-            fireEvent.click(getByText(/connecter|Créer mon compte|Chargement/i));
+            fireEvent.click(getByText(/connecter|Créer mon compte/i));
         });
 
         expect(mockLogin).toHaveBeenCalledWith('alice', 'secret');
     });
 
     test('affiche un message de succès puis redirige', async () => {
+        mockCheckUsername.mockResolvedValue({ exists: true });
         mockLogin.mockResolvedValue({
             success: true,
             user: { id: 'u1', username: 'alice', createdAt: '2026-01-01' },
@@ -155,11 +174,15 @@ describe('AuthScreen — Smart Login', () => {
 
         await act(async () => {
             fireEvent.change(getByPlaceholderText(/nom d'utilisateur/i), { target: { value: 'alice' } });
+        });
+        await act(async () => { jest.advanceTimersByTime(600); });
+
+        await waitFor(() => {
             fireEvent.change(getByPlaceholderText(/mot de passe/i), { target: { value: 'secret' } });
         });
 
         await act(async () => {
-            fireEvent.click(getByText(/connecter|Créer mon compte|Chargement/i));
+            fireEvent.click(getByText(/connecter|Créer mon compte/i));
         });
 
         await waitFor(() => {
@@ -167,7 +190,6 @@ describe('AuthScreen — Smart Login', () => {
             expect(getByText(/Redirection/)).toBeTruthy();
         });
 
-        // Avancer le timer de redirection
         await act(async () => {
             jest.advanceTimersByTime(2000);
         });
@@ -176,6 +198,7 @@ describe('AuthScreen — Smart Login', () => {
     });
 
     test('affiche une erreur pour un mauvais mot de passe', async () => {
+        mockCheckUsername.mockResolvedValue({ exists: true });
         mockLogin.mockResolvedValue({
             success: false,
             error: 'Mot de passe incorrect',
@@ -185,11 +208,15 @@ describe('AuthScreen — Smart Login', () => {
 
         await act(async () => {
             fireEvent.change(getByPlaceholderText(/nom d'utilisateur/i), { target: { value: 'alice' } });
+        });
+        await act(async () => { jest.advanceTimersByTime(600); });
+
+        await waitFor(() => {
             fireEvent.change(getByPlaceholderText(/mot de passe/i), { target: { value: 'wrong' } });
         });
 
         await act(async () => {
-            fireEvent.click(getByText(/connecter|Créer mon compte|Chargement/i));
+            fireEvent.click(getByText(/connecter|Créer mon compte/i));
         });
 
         await waitFor(() => {

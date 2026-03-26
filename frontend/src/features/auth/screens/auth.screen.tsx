@@ -128,23 +128,27 @@ const AuthScreen: React.FC<Props> = ({ navigation }) => {
                 <Text style={styles.hintNew}>Nouveau joueur ? Bienvenue !</Text>
             )}
 
-            <TextInput
-                style={styles.input}
-                placeholder={passwordPlaceholder}
-                value={password}
-                onChangeText={setPassword}
-                secureTextEntry
-            />
+            {userExists !== null && (
+                <TextInput
+                    style={styles.passwordInput}
+                    placeholder={passwordPlaceholder}
+                    value={password}
+                    onChangeText={setPassword}
+                    secureTextEntry
+                />
+            )}
 
             {error && <Text style={styles.error}>{error}</Text>}
 
-            <TouchableOpacity
-                style={[styles.button, !isFormValid && styles.buttonDisabled]}
-                onPress={handleSubmit}
-                disabled={!isFormValid || loading}
-            >
-                <Text style={styles.buttonText}>{buttonLabel}</Text>
-            </TouchableOpacity>
+            {userExists !== null && (
+                <TouchableOpacity
+                    style={[styles.button, !isFormValid && styles.buttonDisabled]}
+                    onPress={handleSubmit}
+                    disabled={!isFormValid || loading}
+                >
+                    <Text style={styles.buttonText}>{buttonLabel}</Text>
+                </TouchableOpacity>
+            )}
         </View>
     );
 };
@@ -171,6 +175,17 @@ const styles = StyleSheet.create({
     },
     input: {
         flex: 1,
+        height: 48,
+        borderWidth: 1,
+        borderColor: '#ccc',
+        borderRadius: 8,
+        paddingHorizontal: 16,
+        marginBottom: 8,
+        fontSize: 16,
+    },
+    passwordInput: {
+        width: '100%',
+        maxWidth: 300,
         height: 48,
         borderWidth: 1,
         borderColor: '#ccc',
