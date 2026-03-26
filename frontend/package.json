@@ -30,12 +30,17 @@
     "@testing-library/jest-native": "^5.4.3",
     "@testing-library/react": "^16.3.2",
     "@testing-library/react-native": "^13.3.3",
+    "@types/react": "^19.2.14",
+    "@types/react-native": "^0.72.8",
+    "@typescript-eslint/eslint-plugin": "^8.57.2",
+    "@typescript-eslint/parser": "^8.57.2",
     "babel-jest": "^30.3.0",
     "babel-plugin-module-resolver": "^5.0.3",
     "eslint": "^10.1.0",
     "eslint-plugin-react": "^7.37.5",
     "jest": "^30.3.0",
     "jest-expo": "^55.0.11",
-    "react-test-renderer": "^19.1.0"
+    "react-test-renderer": "^19.1.0",
+    "typescript": "^6.0.2"
   }
 }
