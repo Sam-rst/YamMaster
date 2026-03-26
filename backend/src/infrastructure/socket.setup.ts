@@ -1,6 +1,7 @@
 // backend/src/infrastructure/socket.setup.ts
 
 import express from 'express';
+import cors from 'cors';
 import http from 'http';
 import { Server, Socket } from 'socket.io';
 import GameService from '../features/game/services/game.service';
@@ -34,11 +35,14 @@ import { authRouter } from '../features/auth/routes/auth.routes';
 
 export const createServer = (): { app: ReturnType<typeof express>; server: http.Server; io: Server } => {
     const app = express();
+    app.use(cors());
     app.use(express.json());
     app.use('/api/auth', authRouter);
 
     const server = http.createServer(app);
-    const io = new Server(server);
+    const io = new Server(server, {
+        cors: { origin: '*' },
+    });
     return { app, server, io };
 };
 
