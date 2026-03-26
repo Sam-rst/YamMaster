@@ -11,6 +11,7 @@ import { AuthProvider } from '@/shared/contexts/auth.context';
 import OnlineGameScreen from '@/features/game/screens/online-game.screen';
 import VsBotGameScreen from '@/features/game/screens/vs-bot-game.screen';
 import HistoryScreen from '@/features/history/screens/history.screen';
+import ReplayScreen from '@/features/replay/screens/replay.screen';
 
 type RootStackParamList = {
   AuthScreen: undefined;
@@ -18,6 +19,7 @@ type RootStackParamList = {
   OnlineGameScreen: undefined;
   VsBotGameScreen: undefined;
   HistoryScreen: undefined;
+  ReplayScreen: { gameId: string };
 };
 
 const Stack = createStackNavigator<RootStackParamList>();
@@ -34,6 +36,7 @@ const App: React.FC = () => {
             <Stack.Screen name="OnlineGameScreen" component={OnlineGameScreen} />
             <Stack.Screen name="VsBotGameScreen" component={VsBotGameScreen} />
             <Stack.Screen name="HistoryScreen" component={HistoryScreen} />
+            <Stack.Screen name="ReplayScreen" component={ReplayScreen} />
           </Stack.Navigator>
         </NavigationContainer>
       </SocketProvider>

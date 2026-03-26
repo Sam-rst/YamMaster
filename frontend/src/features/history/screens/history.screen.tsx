@@ -6,7 +6,7 @@ import { useAuth } from '@/shared/contexts/auth.context';
 import HistoryService, { GameSummary } from '../services/history.service';
 
 interface NavigationProp {
-    navigate: (screen: string) => void;
+    navigate: (screen: string, params?: Record<string, unknown>) => void;
 }
 
 interface Props {
@@ -90,9 +90,17 @@ const HistoryScreen: React.FC<Props> = ({ navigation }) => {
                         <Text style={styles.score}>{game.scoreDisplay}</Text>
                     </View>
 
-                    <Text style={[styles.result, { color: RESULT_COLORS[game.myResult] || '#999' }]}>
-                        {RESULT_LABELS[game.myResult] || game.myResult}
-                    </Text>
+                    <View style={styles.cardFooter}>
+                        <Text style={[styles.result, { color: RESULT_COLORS[game.myResult] || '#999' }]}>
+                            {RESULT_LABELS[game.myResult] || game.myResult}
+                        </Text>
+                        <TouchableOpacity
+                            style={styles.replayButton}
+                            onPress={() => navigation.navigate('ReplayScreen', { gameId: game.id })}
+                        >
+                            <Text style={styles.replayButtonText}>Replay</Text>
+                        </TouchableOpacity>
+                    </View>
                 </View>
             ))}
 
@@ -161,10 +169,26 @@ const styles = StyleSheet.create({
         fontSize: 18,
         fontWeight: 'bold',
     },
+    cardFooter: {
+        flexDirection: 'row',
+        justifyContent: 'space-between',
+        alignItems: 'center',
+    },
     result: {
         fontSize: 14,
         fontWeight: 'bold',
         textTransform: 'uppercase',
+    },
+    replayButton: {
+        backgroundColor: '#007AFF',
+        paddingVertical: 6,
+        paddingHorizontal: 12,
+        borderRadius: 4,
+    },
+    replayButtonText: {
+        color: '#fff',
+        fontSize: 12,
+        fontWeight: 'bold',
     },
     backButton: {
         marginTop: 20,
