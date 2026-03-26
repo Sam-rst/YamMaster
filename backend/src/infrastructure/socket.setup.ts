@@ -32,12 +32,14 @@ export const isCurrentPlayerTurn = (game: Game, socketId: string): boolean => {
 };
 
 import { authRouter } from '../features/auth/routes/auth.routes';
+import { historyRouter } from '../features/history/routes/history.routes';
 
 export const createServer = (): { app: ReturnType<typeof express>; server: http.Server; io: Server } => {
     const app = express();
     app.use(cors());
     app.use(express.json());
     app.use('/api/auth', authRouter);
+    app.use('/api/history', historyRouter);
 
     const server = http.createServer(app);
     const io = new Server(server, {
