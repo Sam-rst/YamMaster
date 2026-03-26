@@ -224,5 +224,52 @@ describe('HistoryService', () => {
             const game = await HistoryService.getGameById('inexistant');
             expect(game).toBeNull();
         });
+
+        test('retourne null en cas d\'erreur BDD', async () => {
+            mockPrisma.game.findUnique.mockRejectedValue(new Error('DB down'));
+
+            const game = await HistoryService.getGameById('game-1');
+            expect(game).toBeNull();
+        });
+    });
+
+    // ================================================================
+    // ERREURS BDD
+    // ================================================================
+
+    describe('erreurs BDD', () => {
+        test('createGame propage l\'erreur', async () => {
+            mockPrisma.game.create.mockRejectedValue(new Error('DB down'));
+
+            await expect(HistoryService.createGame({
+                mode: 'ONLINE',
+                player1Id: 'user-1',
+                player2Id: 'user-2',
+            })).rejects.toThrow('DB down');
+        });
+
+        test('finishGame propage l\'erreur', async () => {
+            mockPrisma.game.update.mockRejectedValue(new Error('DB down'));
+
+            await expect(HistoryService.finishGame('game-1', {
+                winnerId: null,
+                player1Score: 0,
+                player2Score: 0,
+                reason: 'noTokens',
+            })).rejects.toThrow('DB down');
+        });
+
+        test('saveTurns propage l\'erreur', async () => {
+            mockPrisma.game.update.mockRejectedValue(new Error('DB down'));
+
+            await expect(HistoryService.saveTurns('game-1', [{ turn: 1 }])).rejects.toThrow('DB down');
+        });
+
+        test('getGamesByUserId retourne un tableau vide en cas d\'erreur', async () => {
+            mockPrisma.game.findMany.mockRejectedValue(new Error('DB down'));
+
+            const games = await HistoryService.getGamesByUserId('user-1');
+            expect(games).toHaveLength(0);
+        });
     });
 });

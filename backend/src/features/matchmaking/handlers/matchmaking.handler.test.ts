@@ -14,50 +14,49 @@ afterEach(() => {
 // ================================================================
 
 describe('Matchmaking - createGame', () => {
-    test('crée une partie et l\'ajoute au tableau games', () => {
+    test('crée une partie et l\'ajoute au tableau games', async () => {
         const p1 = createMockSocket('p1');
         const p2 = createMockSocket('p2');
         const games: Game[] = [];
 
-        createGame(p1, p2, games);
+        await createGame(p1, p2, games);
         expect(games.length).toBe(1);
         expect(games[0].player1Socket.id).toBe('p1');
         expect(games[0].player2Socket.id).toBe('p2');
     });
 
-    test('émet game.start aux deux joueurs', () => {
+    test('émet game.start aux deux joueurs', async () => {
         const p1 = createMockSocket('p1');
         const p2 = createMockSocket('p2');
         const games: Game[] = [];
 
-        createGame(p1, p2, games);
+        await createGame(p1, p2, games);
         expect(p1.countEmitted('game.start')).toBe(1);
         expect(p2.countEmitted('game.start')).toBe(1);
     });
 
-    test('émet les view-states initiaux (timer, deck, grid, scores)', (done) => {
+    test('émet les view-states initiaux (timer, deck, grid, scores)', async () => {
         const p1 = createMockSocket('p1');
         const p2 = createMockSocket('p2');
         const games: Game[] = [];
 
-        createGame(p1, p2, games);
+        await createGame(p1, p2, games);
 
-        setTimeout(() => {
-            expect(p1.countEmitted('game.timer')).toBeGreaterThanOrEqual(1);
-            expect(p1.countEmitted('game.deck.view-state')).toBeGreaterThanOrEqual(1);
-            expect(p1.countEmitted('game.grid.view-state')).toBeGreaterThanOrEqual(1);
-            expect(p1.countEmitted('game.score')).toBeGreaterThanOrEqual(1);
-            clearInterval(games[0]?.gameInterval);
-            done();
-        }, 300);
+        await new Promise(resolve => setTimeout(resolve, 300));
+
+        expect(p1.countEmitted('game.timer')).toBeGreaterThanOrEqual(1);
+        expect(p1.countEmitted('game.deck.view-state')).toBeGreaterThanOrEqual(1);
+        expect(p1.countEmitted('game.grid.view-state')).toBeGreaterThanOrEqual(1);
+        expect(p1.countEmitted('game.score')).toBeGreaterThanOrEqual(1);
+        clearInterval(games[0]?.gameInterval);
     });
 
-    test('nettoie l\'interval quand player1 se déconnecte', () => {
+    test('nettoie l\'interval quand player1 se déconnecte', async () => {
         const p1 = createMockSocket('p1');
         const p2 = createMockSocket('p2');
         const games: Game[] = [];
 
-        createGame(p1, p2, games);
+        await createGame(p1, p2, games);
         const interval = games[0].gameInterval;
 
         p1.triggerEvent('disconnect');
@@ -72,29 +71,29 @@ describe('Matchmaking - createGame', () => {
 // ================================================================
 
 describe('Matchmaking - createGameVsBot', () => {
-    test('crée une partie avec un bot comme player2', () => {
+    test('crée une partie avec un bot comme player2', async () => {
         const p1 = createMockSocket('p1');
         const games: Game[] = [];
 
-        createGameVsBot(p1, games);
+        await createGameVsBot(p1, games);
         expect(games.length).toBe(1);
         expect(games[0].player1Socket.id).toBe('p1');
         expect(games[0].player2Socket.id).toContain('bot-');
     });
 
-    test('émet game.start au joueur', () => {
+    test('émet game.start au joueur', async () => {
         const p1 = createMockSocket('p1');
         const games: Game[] = [];
 
-        createGameVsBot(p1, games);
+        await createGameVsBot(p1, games);
         expect(p1.countEmitted('game.start')).toBe(1);
     });
 
-    test('supprime la partie quand le joueur se déconnecte', () => {
+    test('supprime la partie quand le joueur se déconnecte', async () => {
         const p1 = createMockSocket('p1');
         const games: Game[] = [];
 
-        createGameVsBot(p1, games);
+        await createGameVsBot(p1, games);
         expect(games.length).toBe(1);
 
         p1.triggerEvent('disconnect');
@@ -115,13 +114,14 @@ describe('Matchmaking - newPlayerInQueue', () => {
         expect((p1 as unknown as ReturnType<typeof createMockSocket>).countEmitted('queue.added')).toBe(1);
     });
 
-    test('crée une partie quand deux joueurs sont dans la queue', () => {
+    test('crée une partie quand deux joueurs sont dans la queue', async () => {
         const p1 = createMockSocket('p1') as unknown as import('socket.io').Socket;
         const p2 = createMockSocket('p2') as unknown as import('socket.io').Socket;
         const games: Game[] = [];
 
         newPlayerInQueue(p1, games);
         newPlayerInQueue(p2, games);
+        await new Promise(resolve => setTimeout(resolve, 10));
 
         expect(games.length).toBe(1);
         expect((p1 as unknown as ReturnType<typeof createMockSocket>).countEmitted('game.start')).toBe(1);
@@ -134,13 +134,13 @@ describe('Matchmaking - newPlayerInQueue', () => {
 // ================================================================
 
 describe('Matchmaking - Isolation des parties', () => {
-    test('queue.join nettoie l\'ancienne partie du joueur avant d\'en rejoindre une nouvelle', () => {
+    test('queue.join nettoie l\'ancienne partie du joueur avant d\'en rejoindre une nouvelle', async () => {
         const p1 = createMockSocket('p1') as unknown as import('socket.io').Socket;
         const p2 = createMockSocket('p2') as unknown as import('socket.io').Socket;
         const games: Game[] = [];
 
         // Créer une première partie
-        createGame(p1, p2, games);
+        await createGame(p1, p2, games);
         expect(games.length).toBe(1);
         const oldGameId = games[0].idGame;
 
@@ -151,31 +151,32 @@ describe('Matchmaking - Isolation des parties', () => {
         expect(games.find(g => g.idGame === oldGameId)).toBeUndefined();
     });
 
-    test('game.vsbot nettoie l\'ancienne partie du joueur', () => {
+    test('game.vsbot nettoie l\'ancienne partie du joueur', async () => {
         const p1 = createMockSocket('p1');
         const games: Game[] = [];
 
         // Créer une première partie VsBot
-        createGameVsBot(p1, games);
+        await createGameVsBot(p1, games);
         expect(games.length).toBe(1);
 
         // Relancer une partie VsBot → l'ancienne doit être nettoyée
-        createGameVsBot(p1, games);
+        await createGameVsBot(p1, games);
         expect(games.length).toBe(1); // Une seule partie, pas deux
     });
 
-    test('un joueur ne peut pas avoir deux parties simultanées', () => {
+    test('un joueur ne peut pas avoir deux parties simultanées', async () => {
         const p1 = createMockSocket('p1');
         const p2 = createMockSocket('p2');
         const p3 = createMockSocket('p3');
         const games: Game[] = [];
 
-        createGame(p1, p2, games);
+        await createGame(p1, p2, games);
         expect(games.length).toBe(1);
 
         // p1 rejoint la queue pour une nouvelle partie avec p3
         newPlayerInQueue(p1 as unknown as import('socket.io').Socket, games);
         newPlayerInQueue(p3 as unknown as import('socket.io').Socket, games);
+        await new Promise(resolve => setTimeout(resolve, 10));
 
         // L'ancienne partie (p1 vs p2) doit avoir été nettoyée
         // et une nouvelle partie (p1 vs p3) créée
