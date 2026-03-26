@@ -1,0 +1,74 @@
+// Prisma Schema — Yam Master
+
+generator client {
+  provider = "prisma-client"
+  output   = "../src/generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+// ================================================================
+// USER — Authentification et profil joueur
+// ================================================================
+
+model User {
+  id        String   @id @default(uuid())
+  username  String   @unique
+  password  String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // Relations
+  gamesAsPlayer1 Game[] @relation("player1")
+  gamesAsPlayer2 Game[] @relation("player2")
+  gamesWon       Game[] @relation("winner")
+
+  @@map("users")
+}
+
+// ================================================================
+// GAME — Historique des parties jouées
+// ================================================================
+
+model Game {
+  id        String   @id @default(uuid())
+  mode      GameMode
+  status    GameStatus @default(IN_PROGRESS)
+  createdAt DateTime   @default(now())
+  endedAt   DateTime?
+
+  // Joueurs
+  player1Id String
+  player1   User   @relation("player1", fields: [player1Id], references: [id])
+
+  player2Id String?
+  player2   User?  @relation("player2", fields: [player2Id], references: [id])
+
+  // Résultat
+  winnerId     String?
+  winner       User?   @relation("winner", fields: [winnerId], references: [id])
+  player1Score Int     @default(0)
+  player2Score Int     @default(0)
+  reason       String?
+
+  // Données de replay (JSON des tours)
+  turns Json?
+
+  @@map("games")
+}
+
+// ================================================================
+// ENUMS
+// ================================================================
+
+enum GameMode {
+  ONLINE
+  VS_BOT
+}
+
+enum GameStatus {
+  IN_PROGRESS
+  FINISHED
+}

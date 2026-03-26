@@ -14,6 +14,20 @@ const Button = ({ title, onPress, disabled, testID, ...props }) =>
         React.createElement('Text', {}, title)
     );
 
+const TextInput = ({ value, onChangeText, placeholder, style, testID, ...props }) =>
+    React.createElement('input', {
+        value,
+        onChange: (e) => onChangeText && onChangeText(e.target.value),
+        placeholder,
+        style,
+        testID,
+        ...props,
+    });
+
+const LogBox = {
+    ignoreAllLogs: () => {},
+};
+
 const StyleSheet = {
     create: (styles) => styles,
 };
@@ -26,8 +40,10 @@ const Platform = {
 module.exports = {
     View,
     Text,
+    TextInput,
     TouchableOpacity,
     Button,
     StyleSheet,
     Platform,
+    LogBox,
 };
