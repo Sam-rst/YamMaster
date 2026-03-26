@@ -11,10 +11,11 @@ module.exports = {
     moduleNameMapper: {
         '^react-native$': '<rootDir>/src/__mocks__/react-native.mock.js',
         '^@/(.*)$': '<rootDir>/src/$1',
+        '^@shared/(.*)$': '<rootDir>/../shared/$1',
     },
     collectCoverageFrom: [
-        'src/features/**/*.js',
-        'src/shared/**/*.js',
-        '!**/*.test.js',
+        'src/features/**/*.{js,ts,tsx}',
+        'src/shared/**/*.{js,ts,tsx}',
+        '!**/*.test.{js,ts,tsx}',
     ],
 };

@@ -5,7 +5,9 @@ module.exports = {
             root: ['./src'],
             alias: {
                 '@': './src',
+                '@shared': '../shared',
             },
+            extensions: ['.ts', '.tsx', '.js', '.jsx'],
         }],
     ],
 };

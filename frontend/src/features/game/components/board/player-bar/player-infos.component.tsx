@@ -1,0 +1,23 @@
+import React from "react";
+import { StyleSheet, Text, View } from "react-native";
+
+const PlayerInfos: React.FC = () => {
+  return (
+    <View style={styles.playerInfosContainer}>
+      <Text>Player Infos</Text>
+    </View>
+  );
+};
+
+const styles = StyleSheet.create({
+  playerInfosContainer: {
+    flex: 7,
+    justifyContent: 'center',
+    alignItems: 'center',
+    borderRightWidth: 1,
+    borderColor: 'black',
+    backgroundColor: "lightgrey"
+  },
+});
+
+export default PlayerInfos;

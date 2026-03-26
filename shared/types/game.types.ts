@@ -1,4 +1,6 @@
-// backend/src/shared/types.ts — Types partagés du protocole WebSocket et du moteur de jeu
+// shared/types/game.types.ts
+// Types métier du jeu — source de vérité partagée entre backend et frontend
+// NOTE: Ces types doivent rester synchronisés avec backend/src/shared/types.ts
 
 export type PlayerKey = 'player:1' | 'player:2';
 
@@ -45,20 +47,6 @@ export interface GameState {
     grid: Grid;
     choices: Choices;
     deck: Deck;
-}
-
-export interface SocketLike {
-    id: string;
-    emit: (event: string, ...args: unknown[]) => void;
-    on: (event: string, listener: (...args: unknown[]) => void) => void;
-}
-
-export interface Game {
-    idGame: string;
-    gameState: GameState;
-    player1Socket: SocketLike;
-    player2Socket: SocketLike;
-    gameInterval?: ReturnType<typeof setInterval>;
 }
 
 export interface VictoryResult {
