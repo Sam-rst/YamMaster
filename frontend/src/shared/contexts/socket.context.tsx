@@ -1,27 +1,52 @@
-// app/contexts/socket.context.tsx
+// frontend/src/shared/contexts/socket.context.tsx
 
-import React from "react";
-import io, { Socket } from "socket.io-client";
+import React, { createContext, useEffect, useRef, useState } from 'react';
+import io, { Socket } from 'socket.io-client';
 import { SERVER_URL } from '../services/config';
+import { useAuth } from './auth.context';
 
-console.log('Connecting to server:', SERVER_URL);
+export const SocketContext = createContext<Socket | null>(null);
 
-export const socketEndpoint: string = SERVER_URL;
+export const SocketProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
+    const { user, isAuthenticated } = useAuth();
+    const [socket, setSocket] = useState<Socket | null>(null);
+    const socketRef = useRef<Socket | null>(null);
 
-export const socket: Socket = io(socketEndpoint, {
-  transports: ["websocket"],
-});
+    useEffect(() => {
+        if (!isAuthenticated || !user) {
+            if (socketRef.current) {
+                socketRef.current.disconnect();
+                socketRef.current = null;
+                setSocket(null);
+            }
+            return;
+        }
 
-export let hasConnection: boolean = false;
+        const newSocket = io(SERVER_URL, {
+            transports: ['websocket'],
+            query: { userId: user.id, username: user.username },
+        });
 
-socket.on("connect", () => {
-  console.log("connect:", socket.id);
-  hasConnection = true;
-});
+        newSocket.on('connect', () => {
+            console.log('Socket connecté:', newSocket.id, 'userId:', user.id);
+        });
 
-socket.on("disconnect", () => {
-  hasConnection = false;
-  console.log("disconnected from server");
-});
+        newSocket.on('disconnect', () => {
+            console.log('Socket déconnecté');
+        });
 
-export const SocketContext = React.createContext<Socket | null>(null);
+        socketRef.current = newSocket;
+        setSocket(newSocket);
+
+        return () => {
+            newSocket.disconnect();
+            socketRef.current = null;
+        };
+    }, [isAuthenticated, user]);
+
+    return (
+        <SocketContext.Provider value={socket}>
+            {children}
+        </SocketContext.Provider>
+    );
+};

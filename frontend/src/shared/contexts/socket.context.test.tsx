@@ -1,71 +1,53 @@
+// frontend/src/shared/contexts/socket.context.test.tsx
+// Tests du SocketContext et SocketProvider
+
 import React from 'react';
+import { render } from '@testing-library/react';
+import { SocketContext, SocketProvider } from './socket.context';
+import { AuthContext } from './auth.context';
 
-// Mock socket.io-client avant l'import du module
-const mockSocket = {
-    id: 'test-socket-id',
-    on: jest.fn(),
-    off: jest.fn(),
-    emit: jest.fn(),
-};
+// Mock socket.io-client
+const mockOn = jest.fn();
+const mockDisconnect = jest.fn();
+const mockSocket = { id: 'test-id', on: mockOn, disconnect: mockDisconnect, connected: true };
 
-jest.mock('socket.io-client', () => {
-    return jest.fn(() => mockSocket);
-});
-
-jest.mock('@/shared/services/config', () => ({
-    SERVER_URL: 'http://localhost:3000',
+jest.mock('socket.io-client', () => ({
+    __esModule: true,
+    default: jest.fn(() => mockSocket),
 }));
 
-interface SocketModule {
-    socketEndpoint: string;
-    socket: {
-        id: string;
-        emit: jest.Mock;
-        on: jest.Mock;
-        off: jest.Mock;
-    };
-    SocketContext: React.Context<unknown>;
-    hasConnection: boolean;
-}
+const TestConsumer: React.FC = () => {
+    const socket = React.useContext(SocketContext);
+    return <span data-testid="has-socket">{socket ? 'yes' : 'no'}</span>;
+};
 
-describe('socket.context', () => {
+describe('SocketContext', () => {
 
-    let socketModule: SocketModule;
-
-    beforeEach(() => {
-        jest.clearAllMocks();
-        // Reinitialiser le cache du module pour chaque test
-        jest.resetModules();
-
-        // Re-mock apres resetModules
-        jest.doMock('socket.io-client', () => jest.fn(() => mockSocket));
-        jest.doMock('@/shared/services/config', () => ({
-            SERVER_URL: 'http://localhost:3000',
-        }));
-
-        socketModule = require('./socket.context');
+    test('SocketContext est un React context avec Provider', () => {
+        expect(SocketContext).toBeDefined();
+        expect(SocketContext.Provider).toBeDefined();
     });
 
-    it('socketEndpoint est defini et est une chaine', () => {
-        expect(socketModule.socketEndpoint).toBeDefined();
-        expect(typeof socketModule.socketEndpoint).toBe('string');
+    test('SocketProvider fournit null quand pas authentifié', () => {
+        const { getByTestId } = render(
+            <AuthContext.Provider value={{
+                user: null, isAuthenticated: false, login: jest.fn(), logout: jest.fn(),
+            }}>
+                <SocketProvider><TestConsumer /></SocketProvider>
+            </AuthContext.Provider>
+        );
+        expect(getByTestId('has-socket').textContent).toBe('no');
     });
 
-    it('socket est exporte et possede les methodes emit, on et off', () => {
-        expect(socketModule.socket).toBeDefined();
-        expect(typeof socketModule.socket.emit).toBe('function');
-        expect(typeof socketModule.socket.on).toBe('function');
-        expect(typeof socketModule.socket.off).toBe('function');
-    });
-
-    it('SocketContext est un React context', () => {
-        expect(socketModule.SocketContext).toBeDefined();
-        // Un React context a un Provider et un Consumer
-        expect(socketModule.SocketContext.Provider).toBeDefined();
-        expect(socketModule.SocketContext.Consumer).toBeDefined();
-    });
-
-    it('hasConnection commence a false', () => {
-        expect(socketModule.hasConnection).toBe(false);
+    test('SocketProvider fournit un socket quand authentifié', () => {
+        const { getByTestId } = render(
+            <AuthContext.Provider value={{
+                user: { id: 'u1', username: 'alice', createdAt: '2026-01-01' },
+                isAuthenticated: true, login: jest.fn(), logout: jest.fn(),
+            }}>
+                <SocketProvider><TestConsumer /></SocketProvider>
+            </AuthContext.Provider>
+        );
+        expect(getByTestId('has-socket').textContent).toBe('yes');
     });
 });

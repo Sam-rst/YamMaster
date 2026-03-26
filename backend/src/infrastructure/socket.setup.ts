@@ -97,7 +97,17 @@ const logServerState = (games: Game[], context: string): void => {
 
 export const setupSocketHandlers = (io: Server, games: Game[]): void => {
     io.on('connection', (socket: Socket) => {
-        logger.info('Socket connecté', { socketId: socket.id });
+        const userId = socket.handshake.query.userId as string | undefined;
+        const username = socket.handshake.query.username as string | undefined;
+
+        // Stocker le userId dans le socket pour l'utiliser dans les handlers
+        (socket as unknown as Record<string, unknown>).userId = userId;
+
+        logger.info('Socket connecté', {
+            socketId: socket.id,
+            player: username,
+            action: userId ? `userId: ${userId}` : 'invité',
+        });
         logServerState(games, 'après connexion');
 
         socket.on('queue.join', () => {

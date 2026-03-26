@@ -49,12 +49,14 @@ export interface GameState {
 
 export interface SocketLike {
     id: string;
+    userId?: string;
     emit: (event: string, ...args: unknown[]) => void;
     on: (event: string, listener: (...args: unknown[]) => void) => void;
 }
 
 export interface Game {
     idGame: string;
+    dbGameId?: string;
     gameState: GameState;
     player1Socket: SocketLike;
     player2Socket: SocketLike;

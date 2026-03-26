@@ -1,8 +1,9 @@
 // backend/src/features/game/handlers/game.handler.ts
 
 import GameService from '../services/game.service';
-import { Game, PlayerKey } from '../../../shared/types';
+import { Game, PlayerKey, VictoryResult } from '../../../shared/types';
 import { logger } from '../../../shared/logger';
+import HistoryService from '../../history/services/history.service';
 
 const EMIT_DELAY_MS = 200;
 const TIMER_INTERVAL_MS = 1000;
@@ -219,10 +220,33 @@ export const handleGridSelected = (
 // GAME LIFECYCLE
 // ================================================================
 
+const saveGameResult = (game: Game, victory: VictoryResult): void => {
+    if (!game.dbGameId) return;
+
+    const winnerId = victory.winner === 'player:1'
+        ? game.player1Socket.userId
+        : victory.winner === 'player:2'
+            ? game.player2Socket.userId
+            : null;
+
+    HistoryService.finishGame(game.dbGameId, {
+        winnerId: winnerId || null,
+        player1Score: victory.player1Score,
+        player2Score: victory.player2Score,
+        reason: victory.reason,
+    }).catch((error: Error) => {
+        logger.error('Échec sauvegarde résultat en BDD (non bloquant)', {
+            gameId: game.idGame,
+            error,
+        });
+    });
+};
+
 const endGame = (game: Game, games: Game[], victory: unknown): true => {
     clearInterval(game.gameInterval);
     emitToBothPlayers(game, 'game.end', () => victory);
     removeGameFromList(game, games);
+    saveGameResult(game, victory as VictoryResult);
 
     logger.info('Partie terminée', { gameId: game.idGame });
     return true;
