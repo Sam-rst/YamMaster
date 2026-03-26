@@ -17,6 +17,10 @@ interface AuthResult {
 
 const AUTH_API_URL = `${SERVER_URL}/api/auth`;
 
+interface CheckUsernameResult {
+    exists: boolean;
+}
+
 const AuthService = {
     login: async (username: string, password: string): Promise<AuthResult> => {
         try {
@@ -30,6 +34,16 @@ const AuthService = {
             return data;
         } catch {
             return { success: false, error: 'Erreur réseau — vérifiez votre connexion' };
+        }
+    },
+
+    checkUsername: async (username: string): Promise<CheckUsernameResult> => {
+        try {
+            const response = await fetch(`${AUTH_API_URL}/check/${encodeURIComponent(username)}`);
+            const data = await response.json();
+            return data;
+        } catch {
+            return { exists: false };
         }
     },
 };

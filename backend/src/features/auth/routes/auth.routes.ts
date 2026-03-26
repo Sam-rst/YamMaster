@@ -39,3 +39,15 @@ authRouter.post('/login', async (req: Request, res: Response): Promise<void> => 
         res.status(HTTP_SERVER_ERROR).json({ success: false, error: 'Erreur serveur' });
     }
 });
+
+authRouter.get('/check/:username', async (req: Request, res: Response): Promise<void> => {
+    const { username } = req.params;
+
+    try {
+        const result = await AuthService.checkUsername(username);
+        res.status(HTTP_OK).json(result);
+    } catch (error) {
+        logger.error('Erreur sur GET /auth/check/:username', { error: error as Error });
+        res.status(HTTP_SERVER_ERROR).json({ exists: false });
+    }
+});

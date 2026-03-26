@@ -99,6 +99,17 @@ const AuthService = {
         }
     },
 
+    checkUsername: async (username: string): Promise<{ exists: boolean }> => {
+        try {
+            const prisma = getPrismaClient();
+            const user = await prisma.user.findUnique({ where: { username } });
+            return { exists: user !== null };
+        } catch (error) {
+            logger.error('Erreur lors de la vérification du username', { error: error as Error });
+            return { exists: false };
+        }
+    },
+
     sanitizeUser: (user: UserWithPassword): SanitizedUser => {
         return { id: user.id, username: user.username, createdAt: user.createdAt };
     },

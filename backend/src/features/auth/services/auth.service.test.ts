@@ -96,6 +96,26 @@ describe('AuthService', () => {
     });
 
     // ================================================================
+    // CHECK USERNAME
+    // ================================================================
+
+    describe('checkUsername', () => {
+        test('retourne exists: true si l\'utilisateur existe', async () => {
+            mockPrisma.user.findUnique.mockResolvedValue({ id: 'user-1', username: 'alice' });
+
+            const result = await AuthService.checkUsername('alice');
+            expect(result.exists).toBe(true);
+        });
+
+        test('retourne exists: false si l\'utilisateur n\'existe pas', async () => {
+            mockPrisma.user.findUnique.mockResolvedValue(null);
+
+            const result = await AuthService.checkUsername('newplayer');
+            expect(result.exists).toBe(false);
+        });
+    });
+
+    // ================================================================
     // GET USER BY ID
     // ================================================================
 
