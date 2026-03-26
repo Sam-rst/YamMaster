@@ -10,12 +10,14 @@ import { socket, SocketContext } from '@/shared/contexts/socket.context';
 import { AuthProvider } from '@/shared/contexts/auth.context';
 import OnlineGameScreen from '@/features/game/screens/online-game.screen';
 import VsBotGameScreen from '@/features/game/screens/vs-bot-game.screen';
+import HistoryScreen from '@/features/history/screens/history.screen';
 
 type RootStackParamList = {
   AuthScreen: undefined;
   HomeScreen: undefined;
   OnlineGameScreen: undefined;
   VsBotGameScreen: undefined;
+  HistoryScreen: undefined;
 };
 
 const Stack = createStackNavigator<RootStackParamList>();
@@ -31,6 +33,7 @@ const App: React.FC = () => {
             <Stack.Screen name="HomeScreen" component={HomeScreen} />
             <Stack.Screen name="OnlineGameScreen" component={OnlineGameScreen} />
             <Stack.Screen name="VsBotGameScreen" component={VsBotGameScreen} />
+            <Stack.Screen name="HistoryScreen" component={HistoryScreen} />
           </Stack.Navigator>
         </NavigationContainer>
       </SocketContext.Provider>

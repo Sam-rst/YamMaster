@@ -24,6 +24,9 @@ const TextInput = ({ value, onChangeText, placeholder, style, testID, ...props }
         ...props,
     });
 
+const ScrollView = ({ children, contentContainerStyle, style, testID, ...props }) =>
+    React.createElement('div', { style: contentContainerStyle || style, testID, ...props }, children);
+
 const LogBox = {
     ignoreAllLogs: () => {},
 };
@@ -43,6 +46,7 @@ module.exports = {
     TextInput,
     TouchableOpacity,
     Button,
+    ScrollView,
     StyleSheet,
     Platform,
     LogBox,
