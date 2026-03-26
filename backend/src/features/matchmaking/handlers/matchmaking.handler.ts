@@ -74,32 +74,33 @@ const removeGameOnDisconnect = (game: Game, games: Game[]): void => {
     logger.info('Partie supprimée suite à déconnexion', { gameId: game.idGame });
 };
 
-const saveGameToDatabase = (game: Game, mode: 'ONLINE' | 'VS_BOT'): void => {
+const saveGameToDatabase = async (game: Game, mode: 'ONLINE' | 'VS_BOT'): Promise<void> => {
     const player1Id = game.player1Socket.userId;
     const player2Id = game.player2Socket.userId;
 
     if (!player1Id) return;
 
-    HistoryService.createGame({
-        mode,
-        player1Id,
-        player2Id,
-    }).then((dbGame) => {
+    try {
+        const dbGame = await HistoryService.createGame({
+            mode,
+            player1Id,
+            player2Id,
+        });
         game.dbGameId = dbGame.id;
         logger.info('Partie sauvegardée en BDD', { gameId: game.idGame, action: dbGame.id });
-    }).catch((error: Error) => {
-        logger.error('Échec sauvegarde BDD (non bloquant)', { gameId: game.idGame, error });
-    });
+    } catch (error) {
+        logger.error('Échec sauvegarde BDD (non bloquant)', { gameId: game.idGame, error: error as Error });
+    }
 };
 
-export const createGame = (player1Socket: SocketLike, player2Socket: SocketLike, games: Game[]): void => {
+export const createGame = async (player1Socket: SocketLike, player2Socket: SocketLike, games: Game[]): Promise<void> => {
     try {
         const newGame = initializeGame(player1Socket, player2Socket);
         games.push(newGame);
 
+        await saveGameToDatabase(newGame, 'ONLINE');
         broadcastInitialState(newGame);
         startGameTimer(newGame, games);
-        saveGameToDatabase(newGame, 'ONLINE');
 
         player1Socket.on('disconnect', () => { clearInterval(newGame.gameInterval); });
         player2Socket.on('disconnect', () => { clearInterval(newGame.gameInterval); });
@@ -113,7 +114,7 @@ export const createGame = (player1Socket: SocketLike, player2Socket: SocketLike,
     }
 };
 
-export const createGameVsBot = (playerSocket: SocketLike, games: Game[]): void => {
+export const createGameVsBot = async (playerSocket: SocketLike, games: Game[]): Promise<void> => {
     try {
         cleanupPlayerFromExistingGames(playerSocket.id, games);
         removeFromQueueBySocketId(playerSocket.id);
@@ -122,10 +123,10 @@ export const createGameVsBot = (playerSocket: SocketLike, games: Game[]): void =
         const newGame = initializeGame(playerSocket, botSocket);
         games.push(newGame);
 
+        await saveGameToDatabase(newGame, 'VS_BOT');
         setupBotListeners(botSocket, newGame, games);
         broadcastInitialState(newGame);
         startGameTimer(newGame, games);
-        saveGameToDatabase(newGame, 'VS_BOT');
 
         playerSocket.on('disconnect', () => removeGameOnDisconnect(newGame, games));
 

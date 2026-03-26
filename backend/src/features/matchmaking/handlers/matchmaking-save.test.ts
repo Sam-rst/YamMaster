@@ -62,6 +62,37 @@ describe('Matchmaking - Sauvegarde BDD', () => {
         );
     });
 
+    test('dbGameId est assigné à la partie après la sauvegarde', async () => {
+        mockCreateGame.mockResolvedValue({ id: 'db-game-42' });
+
+        const p1 = createMockSocket('p1');
+        const p2 = createMockSocket('p2');
+        (p1 as unknown as Record<string, unknown>).userId = 'user-1';
+        (p2 as unknown as Record<string, unknown>).userId = 'user-2';
+
+        const games: Game[] = [];
+        await createGame(p1, p2, games);
+
+        // Attendre que la promesse soit résolue
+        await new Promise(resolve => setTimeout(resolve, 10));
+
+        expect(games[0].dbGameId).toBe('db-game-42');
+    });
+
+    test('dbGameId est assigné pour une partie VsBot', async () => {
+        mockCreateGame.mockResolvedValue({ id: 'db-game-43' });
+
+        const p1 = createMockSocket('p1');
+        (p1 as unknown as Record<string, unknown>).userId = 'user-1';
+
+        const games: Game[] = [];
+        await createGameVsBot(p1, games);
+
+        await new Promise(resolve => setTimeout(resolve, 10));
+
+        expect(games[0].dbGameId).toBe('db-game-43');
+    });
+
     test('ne crash pas si HistoryService.createGame échoue', async () => {
         mockCreateGame.mockRejectedValue(new Error('DB error'));
 

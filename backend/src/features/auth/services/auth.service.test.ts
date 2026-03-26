@@ -95,6 +95,34 @@ describe('AuthService', () => {
         });
     });
 
+    describe('loginOrRegister — erreur BDD', () => {
+        test('retourne une erreur serveur si la BDD échoue', async () => {
+            mockPrisma.user.findUnique.mockRejectedValue(new Error('DB down'));
+
+            const result = await AuthService.loginOrRegister('alice', 'secret');
+            expect(result.success).toBe(false);
+            expect(result.error).toContain('serveur');
+        });
+    });
+
+    describe('getUserById — erreur BDD', () => {
+        test('retourne null si la BDD échoue', async () => {
+            mockPrisma.user.findUnique.mockRejectedValue(new Error('DB down'));
+
+            const user = await AuthService.getUserById('user-1');
+            expect(user).toBeNull();
+        });
+    });
+
+    describe('checkUsername — erreur BDD', () => {
+        test('retourne exists: false si la BDD échoue', async () => {
+            mockPrisma.user.findUnique.mockRejectedValue(new Error('DB down'));
+
+            const result = await AuthService.checkUsername('alice');
+            expect(result.exists).toBe(false);
+        });
+    });
+
     // ================================================================
     // CHECK USERNAME
     // ================================================================
