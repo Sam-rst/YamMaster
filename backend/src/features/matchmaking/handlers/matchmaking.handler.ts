@@ -13,6 +13,7 @@ import {
     startGameTimer,
 } from '../../game/handlers/game.handler';
 import { createBotSocket, setupBotListeners } from '../../bot/handlers/bot.handler';
+import HistoryService from '../../history/services/history.service';
 
 const MINIMUM_PLAYERS_FOR_MATCH = 2;
 const queue: Socket[] = [];
@@ -73,6 +74,24 @@ const removeGameOnDisconnect = (game: Game, games: Game[]): void => {
     logger.info('Partie supprimée suite à déconnexion', { gameId: game.idGame });
 };
 
+const saveGameToDatabase = (game: Game, mode: 'ONLINE' | 'VS_BOT'): void => {
+    const player1Id = game.player1Socket.userId;
+    const player2Id = game.player2Socket.userId;
+
+    if (!player1Id) return;
+
+    HistoryService.createGame({
+        mode,
+        player1Id,
+        player2Id,
+    }).then((dbGame) => {
+        game.dbGameId = dbGame.id;
+        logger.info('Partie sauvegardée en BDD', { gameId: game.idGame, action: dbGame.id });
+    }).catch((error: Error) => {
+        logger.error('Échec sauvegarde BDD (non bloquant)', { gameId: game.idGame, error });
+    });
+};
+
 export const createGame = (player1Socket: SocketLike, player2Socket: SocketLike, games: Game[]): void => {
     try {
         const newGame = initializeGame(player1Socket, player2Socket);
@@ -80,6 +99,7 @@ export const createGame = (player1Socket: SocketLike, player2Socket: SocketLike,
 
         broadcastInitialState(newGame);
         startGameTimer(newGame, games);
+        saveGameToDatabase(newGame, 'ONLINE');
 
         player1Socket.on('disconnect', () => { clearInterval(newGame.gameInterval); });
         player2Socket.on('disconnect', () => { clearInterval(newGame.gameInterval); });
@@ -105,6 +125,7 @@ export const createGameVsBot = (playerSocket: SocketLike, games: Game[]): void =
         setupBotListeners(botSocket, newGame, games);
         broadcastInitialState(newGame);
         startGameTimer(newGame, games);
+        saveGameToDatabase(newGame, 'VS_BOT');
 
         playerSocket.on('disconnect', () => removeGameOnDisconnect(newGame, games));
 

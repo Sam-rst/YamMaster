@@ -6,7 +6,7 @@ import { NavigationContainer } from '@react-navigation/native';
 import { createStackNavigator } from '@react-navigation/stack';
 import HomeScreen from '@/features/home/screens/home.screen';
 import AuthScreen from '@/features/auth/screens/auth.screen';
-import { socket, SocketContext } from '@/shared/contexts/socket.context';
+import { SocketProvider } from '@/shared/contexts/socket.context';
 import { AuthProvider } from '@/shared/contexts/auth.context';
 import OnlineGameScreen from '@/features/game/screens/online-game.screen';
 import VsBotGameScreen from '@/features/game/screens/vs-bot-game.screen';
@@ -26,7 +26,7 @@ LogBox.ignoreAllLogs(true);
 const App: React.FC = () => {
   return (
     <AuthProvider>
-      <SocketContext.Provider value={socket}>
+      <SocketProvider>
         <NavigationContainer>
           <Stack.Navigator initialRouteName="AuthScreen">
             <Stack.Screen name="AuthScreen" component={AuthScreen} options={{ headerShown: false }} />
@@ -36,7 +36,7 @@ const App: React.FC = () => {
             <Stack.Screen name="HistoryScreen" component={HistoryScreen} />
           </Stack.Navigator>
         </NavigationContainer>
-      </SocketContext.Provider>
+      </SocketProvider>
     </AuthProvider>
   );
 };
