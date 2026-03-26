@@ -25,6 +25,12 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ navigation }) => {
           onPress={() => navigation.navigate('VsBotGameScreen')}
         />
       </View>
+      <View>
+        <Button
+          title="Historique"
+          onPress={() => navigation.navigate('HistoryScreen')}
+        />
+      </View>
     </View>
   );
 };
