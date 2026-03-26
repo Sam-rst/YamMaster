@@ -933,3 +933,121 @@ describe('GameService.grid.yamPredator', () => {
         expect(result[0][0].owner).toBeNull();
     });
 });
+
+// =============================================================
+// VIEW STATES — Flags de contrôle pour le frontend
+// =============================================================
+
+describe('GameService.send.forPlayer', () => {
+    const createTestGameState = () => {
+        const game = GameService.init.gameState();
+        return game.gameState;
+    };
+
+    describe('deckViewState', () => {
+        it('envoie canRoll=true quand rollsCounter <= rollsMaximum', () => {
+            const gs = createTestGameState();
+            gs.deck.rollsCounter = 1;
+            gs.deck.rollsMaximum = 3;
+            gs.currentTurn = 'player:1';
+
+            const view = GameService.send.forPlayer.deckViewState('player:1', gs);
+            expect(view.canRoll).toBe(true);
+        });
+
+        it('envoie canRoll=false quand rollsCounter > rollsMaximum', () => {
+            const gs = createTestGameState();
+            gs.deck.rollsCounter = 4;
+            gs.deck.rollsMaximum = 3;
+            gs.currentTurn = 'player:1';
+
+            const view = GameService.send.forPlayer.deckViewState('player:1', gs);
+            expect(view.canRoll).toBe(false);
+        });
+
+        it('envoie canRoll=false quand ce n\'est pas le tour du joueur', () => {
+            const gs = createTestGameState();
+            gs.deck.rollsCounter = 1;
+            gs.currentTurn = 'player:2';
+
+            const view = GameService.send.forPlayer.deckViewState('player:1', gs);
+            expect(view.canRoll).toBe(false);
+        });
+
+        it('envoie canLockDice=true quand c\'est le tour du joueur et le roll button est affiché', () => {
+            const gs = createTestGameState();
+            gs.deck.rollsCounter = 2;
+            gs.deck.rollsMaximum = 3;
+            gs.currentTurn = 'player:1';
+
+            const view = GameService.send.forPlayer.deckViewState('player:1', gs);
+            expect(view.canLockDice).toBe(true);
+        });
+
+        it('envoie canLockDice=false quand ce n\'est pas le tour du joueur', () => {
+            const gs = createTestGameState();
+            gs.currentTurn = 'player:2';
+
+            const view = GameService.send.forPlayer.deckViewState('player:1', gs);
+            expect(view.canLockDice).toBe(false);
+        });
+    });
+
+    describe('choicesViewState', () => {
+        it('envoie canDefi=true quand c\'est le tour du joueur, rollsCounter >= 2 et isDefi=false', () => {
+            const gs = createTestGameState();
+            gs.currentTurn = 'player:1';
+            gs.deck.rollsCounter = 2;
+            gs.choices.isDefi = false;
+
+            const view = GameService.send.forPlayer.choicesViewState('player:1', gs);
+            expect(view.canDefi).toBe(true);
+        });
+
+        it('envoie canDefi=false quand rollsCounter < 2', () => {
+            const gs = createTestGameState();
+            gs.currentTurn = 'player:1';
+            gs.deck.rollsCounter = 1;
+
+            const view = GameService.send.forPlayer.choicesViewState('player:1', gs);
+            expect(view.canDefi).toBe(false);
+        });
+
+        it('envoie canDefi=false quand isDefi est déjà true', () => {
+            const gs = createTestGameState();
+            gs.currentTurn = 'player:1';
+            gs.deck.rollsCounter = 2;
+            gs.choices.isDefi = true;
+
+            const view = GameService.send.forPlayer.choicesViewState('player:1', gs);
+            expect(view.canDefi).toBe(false);
+        });
+
+        it('envoie canDefi=false quand ce n\'est pas le tour du joueur', () => {
+            const gs = createTestGameState();
+            gs.currentTurn = 'player:2';
+            gs.deck.rollsCounter = 2;
+
+            const view = GameService.send.forPlayer.choicesViewState('player:1', gs);
+            expect(view.canDefi).toBe(false);
+        });
+
+        it('envoie canYamPredator=true quand c\'est le tour du joueur et un yam est disponible', () => {
+            const gs = createTestGameState();
+            gs.currentTurn = 'player:1';
+            gs.choices.availableChoices = [{ id: 'yam', value: 'Yam' }];
+
+            const view = GameService.send.forPlayer.choicesViewState('player:1', gs);
+            expect(view.canYamPredator).toBe(true);
+        });
+
+        it('envoie canYamPredator=false quand pas de yam disponible', () => {
+            const gs = createTestGameState();
+            gs.currentTurn = 'player:1';
+            gs.choices.availableChoices = [{ id: 'brelan1', value: 'Brelan 1' }];
+
+            const view = GameService.send.forPlayer.choicesViewState('player:1', gs);
+            expect(view.canYamPredator).toBe(false);
+        });
+    });
+});
