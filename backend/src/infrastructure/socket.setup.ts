@@ -6,7 +6,7 @@ import { Server, Socket } from 'socket.io';
 import GameService from '../features/game/services/game.service';
 import { Game, PlayerKey } from '../shared/types';
 import { logger } from '../shared/logger';
-import { newPlayerInQueue, createGameVsBot } from '../features/matchmaking/handlers/matchmaking.handler';
+import { newPlayerInQueue, createGameVsBot, removeFromQueueBySocketId } from '../features/matchmaking/handlers/matchmaking.handler';
 import {
     handleDiceRoll,
     handleDiceLock,
@@ -42,7 +42,14 @@ const findGameAndValidateTurn = (games: Game[], socketId: string, action: string
     if (!game) return null;
 
     if (!isCurrentPlayerTurn(game, socketId)) {
-        logger.warn('Action rejetée : pas le tour du joueur', { socketId, action });
+        const playerKey = getPlayerKeyFromSocket(game, socketId);
+        logger.warn('Action rejetée : pas le tour du joueur', {
+            socketId,
+            action,
+            gameId: game.idGame,
+            player: playerKey ?? undefined,
+            currentTurn: game.gameState.currentTurn,
+        });
         return null;
     }
 
@@ -71,19 +78,28 @@ const safeHandler = (action: string, socketId: string, handler: () => void): voi
     }
 };
 
+const logServerState = (games: Game[], context: string): void => {
+    logger.info(`[État serveur] ${context}`, {
+        action: `parties: ${games.length}, IDs: [${games.map(g => g.idGame).join(', ')}]`,
+    });
+};
+
 export const setupSocketHandlers = (io: Server, games: Game[]): void => {
     io.on('connection', (socket: Socket) => {
         logger.info('Socket connecté', { socketId: socket.id });
+        logServerState(games, 'après connexion');
 
         socket.on('queue.join', () => {
             safeHandler('queue.join', socket.id, () => {
                 newPlayerInQueue(socket, games);
+                logServerState(games, 'après queue.join');
             });
         });
 
         socket.on('game.vsbot', () => {
             safeHandler('game.vsbot', socket.id, () => {
                 createGameVsBot(socket, games);
+                logServerState(games, 'après game.vsbot');
             });
         });
 
@@ -146,7 +162,9 @@ export const setupSocketHandlers = (io: Server, games: Game[]): void => {
         }
 
         socket.on('disconnect', (reason: string) => {
+            removeFromQueueBySocketId(socket.id);
             logger.info('Socket déconnecté', { socketId: socket.id, action: reason });
+            logServerState(games, 'après déconnexion');
         });
     });
 };

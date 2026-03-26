@@ -20,6 +20,33 @@ const queue: Socket[] = [];
 /** Reset la queue (utilisé dans les tests) */
 export const resetQueue = (): void => { queue.length = 0; };
 
+/**
+ * Nettoie un joueur de toute partie existante et de la queue.
+ * Appelé AVANT de rejoindre une nouvelle partie pour éviter la désynchronisation.
+ */
+const cleanupPlayerFromExistingGames = (socketId: string, games: Game[]): void => {
+    for (let i = games.length - 1; i >= 0; i--) {
+        const game = games[i];
+        const isInGame = game.player1Socket.id === socketId || game.player2Socket.id === socketId;
+        if (!isInGame) continue;
+
+        clearInterval(game.gameInterval);
+        games.splice(i, 1);
+        logger.warn('Ancienne partie nettoyée avant nouvelle action', {
+            gameId: game.idGame,
+            socketId,
+        });
+    }
+};
+
+export const removeFromQueueBySocketId = (socketId: string): void => {
+    const index = queue.findIndex(s => s.id === socketId);
+    if (index !== -1) {
+        queue.splice(index, 1);
+        logger.info('Joueur retiré de la queue', { socketId });
+    }
+};
+
 const initializeGame = (player1Socket: SocketLike, player2Socket: SocketLike): Game => {
     const newGame = GameService.init.gameState() as unknown as Game;
     newGame.idGame = uniqid();
@@ -68,6 +95,9 @@ export const createGame = (player1Socket: SocketLike, player2Socket: SocketLike,
 
 export const createGameVsBot = (playerSocket: SocketLike, games: Game[]): void => {
     try {
+        cleanupPlayerFromExistingGames(playerSocket.id, games);
+        removeFromQueueBySocketId(playerSocket.id);
+
         const botSocket = createBotSocket();
         const newGame = initializeGame(playerSocket, botSocket);
         games.push(newGame);
@@ -88,6 +118,8 @@ export const createGameVsBot = (playerSocket: SocketLike, games: Game[]): void =
 };
 
 export const newPlayerInQueue = (socket: Socket, games: Game[]): void => {
+    cleanupPlayerFromExistingGames(socket.id, games);
+    removeFromQueueBySocketId(socket.id);
     queue.push(socket);
 
     if (queue.length >= MINIMUM_PLAYERS_FOR_MATCH) {
