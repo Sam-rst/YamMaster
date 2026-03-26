@@ -30,6 +30,8 @@ describe('PlayerDeck', () => {
         displayRollButton: true,
         rollsCounter: 1,
         rollsMaximum: 3,
+        canRoll: true,
+        canLockDice: true,
         dices: [
             { id: 1, value: '3', locked: false },
             { id: 2, value: '5', locked: true },

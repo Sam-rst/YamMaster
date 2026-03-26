@@ -135,25 +135,33 @@ const GameService = {
             },
 
             deckViewState: (playerKey: PlayerKey, gameState: GameState) => {
+                const isMyTurn = gameState.currentTurn === playerKey;
+                const hasRollsLeft = gameState.deck.rollsCounter <= gameState.deck.rollsMaximum;
+
                 return {
-                    displayPlayerDeck: gameState.currentTurn === playerKey,
-                    displayOpponentDeck: gameState.currentTurn !== playerKey,
-                    displayRollButton: gameState.deck.rollsCounter <= gameState.deck.rollsMaximum,
+                    displayPlayerDeck: isMyTurn,
+                    displayOpponentDeck: !isMyTurn,
+                    displayRollButton: hasRollsLeft,
                     rollsCounter: gameState.deck.rollsCounter,
                     rollsMaximum: gameState.deck.rollsMaximum,
-                    dices: gameState.deck.dices
+                    dices: gameState.deck.dices,
+                    canRoll: isMyTurn && hasRollsLeft,
+                    canLockDice: isMyTurn && hasRollsLeft,
                 };
             },
 
             choicesViewState: (playerKey: PlayerKey, gameState: GameState) => {
+                const isMyTurn = playerKey === gameState.currentTurn;
+                const hasYam = gameState.choices.availableChoices.some(c => c.id === 'yam');
+
                 return {
                     displayChoices: true,
-                    canMakeChoice: playerKey === gameState.currentTurn,
+                    canMakeChoice: isMyTurn,
                     idSelectedChoice: gameState.choices.idSelectedChoice,
                     availableChoices: gameState.choices.availableChoices,
                     isDefi: gameState.choices.isDefi,
-                    rollsCounter: gameState.deck.rollsCounter,
-                    hasYam: gameState.choices.availableChoices.some(c => c.id === 'yam'),
+                    canDefi: isMyTurn && gameState.deck.rollsCounter >= 2 && !gameState.choices.isDefi,
+                    canYamPredator: isMyTurn && hasYam,
                 };
             },
 

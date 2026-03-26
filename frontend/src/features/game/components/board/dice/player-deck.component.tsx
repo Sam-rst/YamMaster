@@ -1,4 +1,5 @@
 // app/components/board/decks/player-deck.component.tsx
+// Zéro logique métier — affiche les dés et émet les actions
 
 import React, { useState, useContext, useEffect } from "react";
 import { View, TouchableOpacity, Text, StyleSheet } from "react-native";
@@ -13,6 +14,8 @@ interface DeckViewStateData {
   rollsCounter: number;
   rollsMaximum: number;
   dices: DiceType[];
+  canRoll: boolean;
+  canLockDice: boolean;
 }
 
 const PlayerDeck: React.FC = () => {
@@ -23,15 +26,19 @@ const PlayerDeck: React.FC = () => {
   const [displayRollButton, setDisplayRollButton] = useState<boolean>(false);
   const [rollsCounter, setRollsCounter] = useState<number>(0);
   const [rollsMaximum, setRollsMaximum] = useState<number>(3);
+  const [canRoll, setCanRoll] = useState<boolean>(false);
+  const [canLockDice, setCanLockDice] = useState<boolean>(false);
 
   useEffect(() => {
     const onDeckViewState = (data: DeckViewStateData): void => {
-      setDisplayPlayerDeck(data['displayPlayerDeck']);
-      if (data['displayPlayerDeck']) {
-        setDisplayRollButton(data['displayRollButton']);
-        setRollsCounter(data['rollsCounter']);
-        setRollsMaximum(data['rollsMaximum']);
-        setDices(data['dices']);
+      setDisplayPlayerDeck(data.displayPlayerDeck);
+      if (data.displayPlayerDeck) {
+        setDisplayRollButton(data.displayRollButton);
+        setRollsCounter(data.rollsCounter);
+        setRollsMaximum(data.rollsMaximum);
+        setDices(data.dices);
+        setCanRoll(data.canRoll);
+        setCanLockDice(data.canLockDice);
       }
     };
     socket.on("game.deck.view-state", onDeckViewState);
@@ -39,35 +46,27 @@ const PlayerDeck: React.FC = () => {
   }, []);
 
   const toggleDiceLock = (index: number): void => {
-    const newDices = [...dices];
-    if (newDices[index].value !== '' && displayRollButton) {
-      socket.emit("game.dices.lock", newDices[index].id);
+    if (canLockDice) {
+      socket.emit("game.dices.lock", dices[index].id);
     }
   };
 
   const rollDices = (): void => {
-    if (rollsCounter <= rollsMaximum) {
+    if (canRoll) {
       socket.emit("game.dices.roll");
     }
   };
 
   return (
-
     <View style={styles.deckPlayerContainer}>
-
       {displayPlayerDeck && (
-
         <>
           {displayRollButton && (
-
-            <>
-              <View style={styles.rollInfoContainer}>
-                <Text style={styles.rollInfoText}>
-                  Lancer {rollsCounter} / {rollsMaximum}
-                </Text>
-              </View>
-            </>
-
+            <View style={styles.rollInfoContainer}>
+              <Text style={styles.rollInfoText}>
+                Lancer {rollsCounter} / {rollsMaximum}
+              </Text>
+            </View>
           )}
 
           <View style={styles.diceContainer}>
@@ -83,55 +82,37 @@ const PlayerDeck: React.FC = () => {
           </View>
 
           {displayRollButton && (
-
-            <>
-              <TouchableOpacity style={styles.rollButton} onPress={rollDices}>
-                <Text style={styles.rollButtonText}>Roll</Text>
-              </TouchableOpacity>
-            </>
-
+            <TouchableOpacity
+              style={[styles.rollButton, !canRoll && styles.rollButtonDisabled]}
+              onPress={rollDices}
+              disabled={!canRoll}
+            >
+              <Text style={styles.rollButtonText}>Roll</Text>
+            </TouchableOpacity>
           )}
         </>
       )}
-
     </View>
   );
 };
 
 const styles = StyleSheet.create({
   deckPlayerContainer: {
-    flex: 1,
-    justifyContent: "center",
-    alignItems: "center",
-    borderBottomWidth: 1,
-    borderColor: "black"
+    flex: 1, justifyContent: "center", alignItems: "center",
+    borderBottomWidth: 1, borderColor: "black"
   },
-  rollInfoContainer: {
-    marginBottom: 10,
-  },
-  rollInfoText: {
-    fontSize: 14,
-    fontStyle: "italic",
-  },
+  rollInfoContainer: { marginBottom: 10 },
+  rollInfoText: { fontSize: 14, fontStyle: "italic" },
   diceContainer: {
-    flexDirection: "row",
-    width: "70%",
-    justifyContent: "space-between",
-    marginBottom: 10,
+    flexDirection: "row", width: "70%",
+    justifyContent: "space-between", marginBottom: 10,
   },
   rollButton: {
-    width: "30%",
-    backgroundColor: "black",
-    paddingVertical: 10,
-    borderRadius: 5,
-    justifyContent: "center",
-    alignItems: "center",
+    width: "30%", backgroundColor: "black", paddingVertical: 10,
+    borderRadius: 5, justifyContent: "center", alignItems: "center",
   },
-  rollButtonText: {
-    fontSize: 18,
-    color: "white",
-    fontWeight: "bold",
-  },
+  rollButtonDisabled: { opacity: 0.5 },
+  rollButtonText: { fontSize: 18, color: "white", fontWeight: "bold" },
 });
 
 export default PlayerDeck;

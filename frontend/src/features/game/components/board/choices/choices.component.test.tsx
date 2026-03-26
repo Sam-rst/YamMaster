@@ -30,8 +30,8 @@ describe('Choices', () => {
                     { id: 'full', value: 'Full' },
                 ],
                 isDefi: false,
-                rollsCounter: 1,
-                hasYam: false,
+                canDefi: false,
+                canYamPredator: false,
             });
         });
 
@@ -53,8 +53,8 @@ describe('Choices', () => {
                 idSelectedChoice: null,
                 availableChoices: [{ id: 'full', value: 'Full' }],
                 isDefi: false,
-                rollsCounter: 2,
-                hasYam: false,
+                canDefi: true,
+                canYamPredator: false,
             });
         });
 
@@ -76,8 +76,8 @@ describe('Choices', () => {
                 idSelectedChoice: null,
                 availableChoices: [{ id: 'full', value: 'Full' }],
                 isDefi: false,
-                rollsCounter: 1,
-                hasYam: false,
+                canDefi: false,
+                canYamPredator: false,
             });
         });
 
@@ -99,8 +99,8 @@ describe('Choices', () => {
                 idSelectedChoice: null,
                 availableChoices: [],
                 isDefi: false,
-                rollsCounter: 2,
-                hasYam: false,
+                canDefi: true,
+                canYamPredator: false,
             });
         });
 
@@ -121,8 +121,8 @@ describe('Choices', () => {
                 idSelectedChoice: null,
                 availableChoices: [],
                 isDefi: false,
-                rollsCounter: 1,
-                hasYam: false,
+                canDefi: false,
+                canYamPredator: false,
             });
         });
 
@@ -143,8 +143,8 @@ describe('Choices', () => {
                 idSelectedChoice: null,
                 availableChoices: [],
                 isDefi: false,
-                rollsCounter: 2,
-                hasYam: false,
+                canDefi: true,
+                canYamPredator: false,
             });
         });
 
@@ -166,8 +166,8 @@ describe('Choices', () => {
                 idSelectedChoice: null,
                 availableChoices: [{ id: 'defi', value: 'Défi' }],
                 isDefi: true,
-                rollsCounter: 2,
-                hasYam: false,
+                canDefi: false,
+                canYamPredator: false,
             });
         });
 
@@ -190,8 +190,8 @@ describe('Choices', () => {
                 idSelectedChoice: null,
                 availableChoices: [{ id: 'yam', value: 'Yam' }],
                 isDefi: false,
-                rollsCounter: 3,
-                hasYam: true,
+                canDefi: true,
+                canYamPredator: true,
             });
         });
 
@@ -212,8 +212,8 @@ describe('Choices', () => {
                 idSelectedChoice: null,
                 availableChoices: [{ id: 'yam', value: 'Yam' }],
                 isDefi: false,
-                rollsCounter: 3,
-                hasYam: true,
+                canDefi: true,
+                canYamPredator: true,
             });
         });
 
