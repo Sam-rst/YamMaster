@@ -10,17 +10,6 @@ import HomeScreen from '@/features/home/screens/home.screen';
 import OnlineGameController from '@/features/game/controllers/online-game.controller';
 import VsBotGameController from '@/features/game/controllers/vs-bot-game.controller';
 
-// Mock expo dependencies
-jest.mock('expo-linear-gradient', () => ({
-    LinearGradient: ({ children, ...props }: React.PropsWithChildren<Record<string, unknown>>) =>
-        <div data-testid="linear-gradient" {...props}>{children}</div>,
-}));
-
-jest.mock('@expo/vector-icons', () => ({
-    Feather: ({ name, ...props }: { name: string } & Record<string, unknown>) =>
-        <span data-testid={`icon-${name}`} {...props} />,
-}));
-
 // Mock les composants Board lourds
 jest.mock('@/features/game/components/board/grid/grid.component', () => {
     const React = require('react');

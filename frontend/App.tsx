@@ -52,8 +52,8 @@ const App: React.FC = () => {
           <Stack.Navigator initialRouteName="AuthScreen">
             <Stack.Screen name="AuthScreen" component={AuthScreen} options={{ headerShown: false }} />
             <Stack.Screen name="HomeScreen" component={HomeScreen} options={{ headerShown: false }} />
-            <Stack.Screen name="OnlineGameScreen" component={OnlineGameScreen} />
-            <Stack.Screen name="VsBotGameScreen" component={VsBotGameScreen} />
+            <Stack.Screen name="OnlineGameScreen" component={OnlineGameScreen} options={{ headerShown: false }} />
+            <Stack.Screen name="VsBotGameScreen" component={VsBotGameScreen} options={{ headerShown: false }} />
             <Stack.Screen name="HistoryScreen" component={HistoryScreen} />
             <Stack.Screen name="ReplayScreen" component={ReplayScreen} />
           </Stack.Navigator>

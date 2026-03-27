@@ -1,12 +1,16 @@
-// app/controllers/vs-bot-game.controller.tsx
+// frontend/src/features/game/controllers/vs-bot-game.controller.tsx
 
-import React, { useEffect, useState, useContext } from "react";
-import { Button, StyleSheet, Text, View } from "react-native";
+import React, { useEffect, useState, useContext } from 'react';
+import { StyleSheet, Text, View, TouchableOpacity, Platform, ActivityIndicator } from 'react-native';
 import { SocketContext } from '@/shared/contexts/socket.context';
-import Board from "../components/board/board.component";
-import type { Socket } from "socket.io-client";
-import type { VictoryResult } from "@shared/types/game.types";
-import type { GameStartPayload } from "@shared/types/socket-events.types";
+import Board from '../components/board/board.component';
+import { colors } from '@/shared/theme/colors';
+import type { Socket } from 'socket.io-client';
+import type { VictoryResult } from '@shared/types/game.types';
+import type { GameStartPayload } from '@shared/types/socket-events.types';
+
+const fontDisplay = Platform.select({ web: '"Outfit", sans-serif', default: 'Outfit' });
+const fontSans = Platform.select({ web: '"Inter", sans-serif', default: 'Inter' });
 
 interface VsBotGameControllerProps {
     navigation?: {
@@ -15,7 +19,6 @@ interface VsBotGameControllerProps {
 }
 
 const VsBotGameController: React.FC<VsBotGameControllerProps> = ({ navigation }) => {
-
     const socket = useContext(SocketContext) as Socket;
 
     const [inGame, setInGame] = useState<boolean>(false);
@@ -23,7 +26,7 @@ const VsBotGameController: React.FC<VsBotGameControllerProps> = ({ navigation })
 
     useEffect(() => {
         console.log('[emit][game.vsbot]:', socket.id);
-        socket.emit("game.vsbot");
+        socket.emit('game.vsbot');
 
         const onGameStart = (data: GameStartPayload): void => {
             setInGame(data['inGame']);
@@ -43,47 +46,56 @@ const VsBotGameController: React.FC<VsBotGameControllerProps> = ({ navigation })
         };
     }, []);
 
+    if (inGame) {
+        return <Board />;
+    }
+
     return (
         <View style={styles.container}>
-            {!inGame && !gameResult && (
-                <Text style={styles.paragraph}>
-                    Lancement de la partie contre le bot...
-                </Text>
-            )}
-
-            {inGame && (
-                <Board />
+            {!gameResult && (
+                <View style={styles.waitingContainer}>
+                    <ActivityIndicator size="large" color={colors.primary} />
+                    <Text style={styles.waitingText}>Lancement de la partie contre le bot...</Text>
+                </View>
             )}
 
             {gameResult && (
-                <View style={styles.endScreen}>
+                <View style={styles.endContainer}>
                     <Text style={styles.endTitle}>Fin de la partie</Text>
                     {gameResult.winner ? (
-                        <Text style={styles.endText}>
+                        <Text style={styles.endResult}>
                             Vainqueur : {gameResult.winner === 'player:1' ? 'Vous' : 'Bot'}
                         </Text>
                     ) : (
-                        <Text style={styles.endText}>Égalité !</Text>
+                        <Text style={styles.endResult}>Égalité !</Text>
                     )}
-                    <Text style={styles.endText}>
-                        Votre score : {gameResult.player1Score} — Bot : {gameResult.player2Score}
-                    </Text>
-                    <Text style={styles.endText}>
-                        Raison : {gameResult.reason === 'alignment5' ? 'Alignement de 5 pions' : 'Plus de pions disponibles'}
-                    </Text>
+                    <View style={styles.scoreCard}>
+                        <Text style={styles.scoreText}>
+                            Votre score : {gameResult.player1Score} — Bot : {gameResult.player2Score}
+                        </Text>
+                        <Text style={styles.reasonText}>
+                            {gameResult.reason === 'alignment5' ? 'Alignement de 5 pions' : 'Plus de pions disponibles'}
+                        </Text>
+                    </View>
                     <View style={styles.endButtons}>
-                        <Button
-                            title="Retour au menu"
-                            onPress={() => navigation && navigation.navigate('HomeScreen')}
-                        />
-                        <Button
-                            title="Rejouer"
+                        <TouchableOpacity
+                            style={styles.primaryButton}
+                            onPress={() => navigation?.navigate('HomeScreen')}
+                            activeOpacity={0.85}
+                        >
+                            <Text style={styles.primaryButtonText}>Retour au menu</Text>
+                        </TouchableOpacity>
+                        <TouchableOpacity
+                            style={styles.secondaryButton}
                             onPress={() => {
                                 setGameResult(null);
                                 setInGame(false);
-                                socket.emit("game.vsbot");
+                                socket.emit('game.vsbot');
                             }}
-                        />
+                            activeOpacity={0.7}
+                        >
+                            <Text style={styles.secondaryButtonText}>Rejouer</Text>
+                        </TouchableOpacity>
                     </View>
                 </View>
             )}
@@ -96,33 +108,89 @@ export default VsBotGameController;
 const styles = StyleSheet.create({
     container: {
         flex: 1,
-        backgroundColor: "#fff",
-        alignItems: "center",
-        justifyContent: "center",
+        backgroundColor: colors.background,
+        alignItems: 'center',
+        justifyContent: 'center',
         width: '100%',
         height: '100%',
     },
-    paragraph: {
-        fontSize: 16,
-    },
-    endScreen: {
-        flex: 1,
-        justifyContent: 'center',
+    waitingContainer: {
         alignItems: 'center',
-        padding: 20,
+        gap: 16,
+    },
+    waitingText: {
+        fontFamily: fontSans,
+        fontSize: 14,
+        color: colors.textSecondary,
+    },
+    endContainer: {
+        alignItems: 'center',
+        padding: 24,
+        gap: 16,
     },
     endTitle: {
-        fontSize: 24,
-        fontWeight: 'bold',
-        marginBottom: 20,
+        fontFamily: fontDisplay,
+        fontSize: 28,
+        fontWeight: '900',
+        color: colors.textPrimary,
     },
-    endText: {
-        fontSize: 16,
-        marginBottom: 10,
+    endResult: {
+        fontFamily: fontDisplay,
+        fontSize: 18,
+        fontWeight: '700',
+        color: colors.primary,
+    },
+    scoreCard: {
+        backgroundColor: colors.glass,
+        borderWidth: 1,
+        borderColor: colors.border,
+        borderRadius: 16,
+        padding: 16,
+        alignItems: 'center',
+        gap: 8,
+    },
+    scoreText: {
+        fontFamily: fontSans,
+        fontSize: 14,
+        fontWeight: '700',
+        color: colors.textPrimary,
+    },
+    reasonText: {
+        fontFamily: fontSans,
+        fontSize: 12,
+        color: colors.textSecondary,
     },
     endButtons: {
-        marginTop: 20,
-        flexDirection: 'row',
         gap: 10,
+        width: '100%',
+        maxWidth: 300,
+    },
+    primaryButton: {
+        backgroundColor: colors.primary,
+        paddingVertical: 14,
+        borderRadius: 12,
+        alignItems: 'center',
+    },
+    primaryButtonText: {
+        fontFamily: fontDisplay,
+        fontSize: 14,
+        fontWeight: '700',
+        color: colors.white,
+        textTransform: 'uppercase',
+        letterSpacing: 2,
+    },
+    secondaryButton: {
+        backgroundColor: 'rgba(255,255,255,0.05)',
+        paddingVertical: 14,
+        borderRadius: 12,
+        alignItems: 'center',
+    },
+    secondaryButtonText: {
+        fontFamily: fontSans,
+        fontSize: 12,
+        fontWeight: '700',
+        color: colors.textSecondary,
+        textTransform: 'uppercase',
+        letterSpacing: 2,
     },
 });

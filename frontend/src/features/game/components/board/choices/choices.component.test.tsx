@@ -104,7 +104,7 @@ describe('Choices', () => {
             });
         });
 
-        expect(getByText('Défi !')).toBeTruthy();
+        expect(getByText('Défi Royal')).toBeTruthy();
     });
 
     it('n\'affiche pas le bouton Défi avant le 1er lancer', () => {
@@ -126,7 +126,7 @@ describe('Choices', () => {
             });
         });
 
-        expect(queryByText('Défi !')).toBeNull();
+        expect(queryByText('Défi Royal')).toBeNull();
     });
 
     it('émet game.defi au clic sur le bouton Défi', () => {
@@ -148,7 +148,7 @@ describe('Choices', () => {
             });
         });
 
-        fireEvent.click(getByText('Défi !'));
+        fireEvent.click(getByText('Défi Royal'));
         expect(mockSocket.emit).toHaveBeenCalledWith('game.defi');
     });
 
@@ -172,7 +172,7 @@ describe('Choices', () => {
         });
 
         expect(getByText('Défi actif')).toBeTruthy();
-        expect(queryByText('Défi !')).toBeNull(); // Le bouton disparait
+        expect(queryByText('Défi Royal')).toBeNull(); // Le bouton disparait
     });
 
     // --- Yam Predator ---

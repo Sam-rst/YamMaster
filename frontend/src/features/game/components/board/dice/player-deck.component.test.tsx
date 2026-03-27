@@ -52,8 +52,9 @@ describe('PlayerDeck', () => {
             mockSocket.__simulateEvent('game.deck.view-state', mockDeckData);
         });
 
-        expect(getByText('Lancer 1 / 3')).toBeTruthy();
-        expect(getByText('Roll')).toBeTruthy();
+        expect(getByText('Lancer')).toBeTruthy();
+        expect(getByText('1/3')).toBeTruthy();
+        expect(getByText('Lancer les dés')).toBeTruthy();
     });
 
     it('émet game.dices.roll au clic sur Roll', () => {
@@ -67,7 +68,7 @@ describe('PlayerDeck', () => {
             mockSocket.__simulateEvent('game.deck.view-state', mockDeckData);
         });
 
-        fireEvent.click(getByText('Roll'));
+        fireEvent.click(getByText('Lancer les dés'));
         expect(mockSocket.emit).toHaveBeenCalledWith('game.dices.roll');
     });
 
@@ -100,7 +101,7 @@ describe('PlayerDeck', () => {
             });
         });
 
-        expect(queryByText('Roll')).toBeNull();
+        expect(queryByText('Lancer les dés')).toBeNull();
     });
 
     it('cache le bouton Roll si displayRollButton est false', () => {
@@ -117,6 +118,6 @@ describe('PlayerDeck', () => {
             });
         });
 
-        expect(queryByText('Roll')).toBeNull();
+        expect(queryByText('Lancer les dés')).toBeNull();
     });
 });

@@ -19,7 +19,7 @@ describe('OpponentTimer', () => {
                 <OpponentTimer />
             </SocketContext.Provider>
         );
-        expect(getByText('Timer: 0')).toBeTruthy();
+        expect(getByText('0s')).toBeTruthy();
     });
 
     it('met à jour le timer après réception de game.timer', () => {
@@ -33,6 +33,6 @@ describe('OpponentTimer', () => {
             mockSocket.__simulateEvent('game.timer', { playerTimer: 0, opponentTimer: 18 });
         });
 
-        expect(getByText('Timer: 18')).toBeTruthy();
+        expect(getByText('18s')).toBeTruthy();
     });
 });

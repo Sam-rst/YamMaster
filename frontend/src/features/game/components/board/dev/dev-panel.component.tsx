@@ -87,7 +87,7 @@ const DevPanel: React.FC = () => {
 const styles = StyleSheet.create({
     toggleButton: {
         position: 'absolute',
-        top: 5,
+        top: 50,
         right: 5,
         backgroundColor: '#333',
         paddingHorizontal: 8,
@@ -102,7 +102,7 @@ const styles = StyleSheet.create({
     },
     panel: {
         position: 'absolute',
-        top: 0,
+        top: 50,
         right: 0,
         backgroundColor: 'rgba(0,0,0,0.9)',
         padding: 10,

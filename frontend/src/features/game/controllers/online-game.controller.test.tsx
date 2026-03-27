@@ -138,7 +138,7 @@ describe('OnlineGameController', () => {
         expect(getByText('Retour au menu')).toBeTruthy();
     });
 
-    it('le bouton "Return to home" navigue vers HomeScreen en état waiting', () => {
+    it('le bouton "Retour au menu" navigue vers HomeScreen en état waiting', () => {
         const navigation = { navigate: jest.fn() };
         const { getByText } = render(
             <SocketContext.Provider value={mockSocket}>
@@ -146,11 +146,11 @@ describe('OnlineGameController', () => {
             </SocketContext.Provider>
         );
 
-        fireEvent.click(getByText('Return to home'));
+        fireEvent.click(getByText('Retour au menu'));
         expect(navigation.navigate).toHaveBeenCalledWith('HomeScreen');
     });
 
-    it('le bouton "Return to home" navigue vers HomeScreen en file d\'attente', () => {
+    it('le bouton "Retour au menu" navigue vers HomeScreen en file d\'attente', () => {
         const navigation = { navigate: jest.fn() };
         const { getByText } = render(
             <SocketContext.Provider value={mockSocket}>
@@ -162,7 +162,7 @@ describe('OnlineGameController', () => {
             mockSocket.__simulateEvent('queue.added', { inQueue: true, inGame: false });
         });
 
-        fireEvent.click(getByText('Return to home'));
+        fireEvent.click(getByText('Retour au menu'));
         expect(navigation.navigate).toHaveBeenCalledWith('HomeScreen');
     });
 

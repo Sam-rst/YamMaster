@@ -1,89 +1,130 @@
-// app/components/board/board.component.tsx
+// frontend/src/features/game/components/board/board.component.tsx
 
-import React from "react";
-import { View, StyleSheet } from 'react-native';
-import PlayerTimer from "./player-bar/player-timer.component";
-import OpponentTimer from "./player-bar/opponent-timer.component";
-import OpponentDeck from "./dice/opponent-deck.component";
-import PlayerDeck from "./dice/player-deck.component";
-import Choices from "./choices/choices.component";
-import Grid from "./grid/grid.component";
-import OpponentScore from "./player-bar/opponent-score.component";
-import PlayerScore from "./player-bar/player-score.component";
-import PlayerInfos from "./player-bar/player-infos.component";
-import OpponentInfos from "./player-bar/opponent-infos.component";
-import PlayerTokens from "./player-bar/player-tokens.component";
-import OpponentTokens from "./player-bar/opponent-tokens.component";
-import DevPanel from "./dev/dev-panel.component";
-import { DEV_MODE } from "@/shared/services/config";
+import React from 'react';
+import { View, ScrollView, StyleSheet } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
+import PlayerTimer from './player-bar/player-timer.component';
+import OpponentTimer from './player-bar/opponent-timer.component';
+import OpponentDeck from './dice/opponent-deck.component';
+import PlayerDeck from './dice/player-deck.component';
+import Choices from './choices/choices.component';
+import Grid from './grid/grid.component';
+import OpponentScore from './player-bar/opponent-score.component';
+import PlayerScore from './player-bar/player-score.component';
+import PlayerInfos from './player-bar/player-infos.component';
+import OpponentInfos from './player-bar/opponent-infos.component';
+import PlayerTokens from './player-bar/player-tokens.component';
+import OpponentTokens from './player-bar/opponent-tokens.component';
+import DevPanel from './dev/dev-panel.component';
+import { DEV_MODE } from '@/shared/services/config';
+import { colors } from '@/shared/theme/colors';
 
 interface BoardProps {
-  _gameViewState?: Record<string, unknown>;
+    _gameViewState?: Record<string, unknown>;
 }
 
 const Board: React.FC<BoardProps> = ({ _gameViewState }) => {
-  return (
-    <View style={styles.container}>
-      {DEV_MODE && <DevPanel />}
-      <View style={[styles.row, { height: '8%' }]}>
-        <OpponentInfos />
-        <View style={styles.opponentStatsContainer}>
-          <OpponentTimer />
-          <OpponentScore />
-          <OpponentTokens />
-        </View>
-      </View>
-      <View style={[styles.row, { height: '22%' }]}>
-        <OpponentDeck />
-      </View>
-      <View style={[styles.row, { height: '40%' }]}>
-        <Grid />
-        <Choices />
-      </View>
-      <View style={[styles.row, { height: '22%' }]}>
-        <PlayerDeck />
-      </View>
-      <View style={[styles.row, { height: '8%' }]}>
-        <PlayerInfos />
-        <View style={styles.playerStatsContainer}>
-          <PlayerTimer />
-          <PlayerScore />
-          <PlayerTokens />
-        </View>
-      </View>
-    </View>
-  );
+    return (
+        <SafeAreaView style={styles.container}>
+            {DEV_MODE && <DevPanel />}
+
+            <View style={styles.opponentHeader}>
+                <View style={styles.opponentBarRow}>
+                    <OpponentInfos />
+                    <View style={styles.opponentStats}>
+                        <View style={styles.scoreTokenGroup}>
+                            <OpponentScore />
+                            <OpponentTokens />
+                        </View>
+                        <OpponentTimer />
+                    </View>
+                </View>
+                <OpponentDeck />
+            </View>
+
+            <ScrollView
+                style={styles.mainScroll}
+                contentContainerStyle={styles.mainContent}
+                showsVerticalScrollIndicator={false}
+            >
+                <Grid />
+                <Choices />
+            </ScrollView>
+
+            <View style={styles.playerFooter}>
+                <PlayerDeck />
+                <View style={styles.playerBarRow}>
+                    <PlayerInfos />
+                    <View style={styles.playerStats}>
+                        <View style={styles.scoreTokenGroup}>
+                            <PlayerScore />
+                            <PlayerTokens />
+                        </View>
+                        <PlayerTimer />
+                    </View>
+                </View>
+            </View>
+        </SafeAreaView>
+    );
 };
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    flexDirection: 'column',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    width: '100%',
-    height: '100%',
-  },
-  row: {
-    flexDirection: 'row',
-    width: '100%',
-    borderBottomWidth: 1,
-    borderColor: 'black',
-  },
-  opponentStatsContainer: {
-    flex: 3,
-    flexDirection: 'row',
-    justifyContent: 'space-around',
-    alignItems: 'center',
-    backgroundColor: "lightgrey"
-  },
-  playerStatsContainer: {
-    flex: 3,
-    flexDirection: 'row',
-    justifyContent: 'space-around',
-    alignItems: 'center',
-    backgroundColor: "lightgrey"
-  },
+    container: {
+        flex: 1,
+        flexDirection: 'column',
+        backgroundColor: colors.background,
+    },
+
+    opponentHeader: {
+        paddingHorizontal: 16,
+        paddingTop: 8,
+        paddingBottom: 4,
+    },
+    opponentBarRow: {
+        flexDirection: 'row',
+        justifyContent: 'space-between',
+        alignItems: 'center',
+        marginBottom: 8,
+    },
+    opponentStats: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        gap: 12,
+    },
+
+    mainScroll: {
+        flex: 1,
+    },
+    mainContent: {
+        paddingHorizontal: 12,
+        paddingVertical: 8,
+        gap: 12,
+    },
+
+    playerFooter: {
+        backgroundColor: colors.glass,
+        borderTopWidth: 1,
+        borderTopColor: 'rgba(255,255,255,0.1)',
+        borderTopLeftRadius: 28,
+        borderTopRightRadius: 28,
+        paddingBottom: 16,
+    },
+    playerBarRow: {
+        flexDirection: 'row',
+        justifyContent: 'space-between',
+        alignItems: 'center',
+        paddingHorizontal: 20,
+        paddingTop: 8,
+    },
+    playerStats: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        gap: 12,
+    },
+    scoreTokenGroup: {
+        alignItems: 'flex-end',
+        gap: 2,
+    },
 });
 
 export default Board;

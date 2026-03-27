@@ -19,7 +19,7 @@ describe('OpponentScore', () => {
                 <OpponentScore />
             </SocketContext.Provider>
         );
-        expect(getByText('Score: 0')).toBeTruthy();
+        expect(getByText('Score')).toBeTruthy();
     });
 
     it('met à jour le score après game.score', () => {
@@ -38,6 +38,6 @@ describe('OpponentScore', () => {
             });
         });
 
-        expect(getByText('Score: 4')).toBeTruthy();
+        expect(getByText('4')).toBeTruthy();
     });
 });

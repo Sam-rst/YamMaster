@@ -27,6 +27,9 @@ const TextInput = ({ value, onChangeText, placeholder, style, testID, ...props }
 const ScrollView = ({ children, contentContainerStyle, style, testID, ...props }) =>
     React.createElement('div', { style: contentContainerStyle || style, testID, ...props }, children);
 
+const ActivityIndicator = ({ size, color, style, testID, ...props }) =>
+    React.createElement('View', { testID: testID || 'activity-indicator', style, ...props });
+
 const LogBox = {
     ignoreAllLogs: () => {},
 };
@@ -47,6 +50,7 @@ module.exports = {
     TouchableOpacity,
     Button,
     ScrollView,
+    ActivityIndicator,
     StyleSheet,
     Platform,
     LogBox,
