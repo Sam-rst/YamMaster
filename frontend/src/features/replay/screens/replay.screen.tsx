@@ -2,7 +2,9 @@
 // Zéro logique métier — affiche les tours envoyés par le backend
 
 import React, { useEffect, useState } from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, ScrollView } from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity, ScrollView, ActivityIndicator, Platform } from 'react-native';
+import { Feather } from '@expo/vector-icons';
+import { colors } from '@/shared/theme/colors';
 import ReplayService, { GameWithTurns, TurnAction } from '../services/replay.service';
 
 interface NavigationProp {
@@ -14,6 +16,9 @@ interface Props {
     route: { params: { gameId: string } };
 }
 
+const fontDisplay = Platform.select({ web: '"Outfit", sans-serif', default: 'Outfit' });
+const fontSans = Platform.select({ web: '"Inter", sans-serif', default: 'Inter' });
+
 const ACTION_LABELS: Record<string, string> = {
     roll: 'Lancer de dés',
     lock: 'Verrouillage dé',
@@ -22,6 +27,26 @@ const ACTION_LABELS: Record<string, string> = {
     defi: 'Défi activé',
     predator: 'Yam Predator',
     snapshot: 'État du jeu',
+};
+
+const ACTION_ICONS: Record<string, keyof typeof Feather.glyphMap> = {
+    roll: 'rotate-cw',
+    lock: 'lock',
+    choice: 'check-square',
+    grid: 'grid',
+    defi: 'shield',
+    predator: 'zap',
+    snapshot: 'camera',
+};
+
+const ACTION_COLORS: Record<string, string> = {
+    roll: colors.blue,
+    lock: colors.gold,
+    choice: colors.success,
+    grid: colors.primary,
+    defi: colors.gold,
+    predator: colors.primary,
+    snapshot: 'rgba(255,255,255,0.4)',
 };
 
 const ReplayScreen: React.FC<Props> = ({ navigation, route }) => {
@@ -42,18 +67,23 @@ const ReplayScreen: React.FC<Props> = ({ navigation, route }) => {
 
     if (loading) {
         return (
-            <View style={styles.container}>
-                <Text>Chargement...</Text>
+            <View style={styles.loadingContainer}>
+                <ActivityIndicator size="large" color={colors.primary} />
             </View>
         );
     }
 
     if (!game || !game.turns) {
         return (
-            <View style={styles.container}>
+            <View style={styles.errorContainer}>
+                <Feather name="alert-circle" size={40} color="rgba(255,255,255,0.2)" />
                 <Text style={styles.errorText}>Partie introuvable ou pas de données de replay</Text>
-                <TouchableOpacity style={styles.button} onPress={() => navigation.navigate('HistoryScreen')}>
-                    <Text style={styles.buttonText}>Retour à l'historique</Text>
+                <TouchableOpacity
+                    style={styles.backButtonLarge}
+                    onPress={() => navigation.navigate('HistoryScreen')}
+                    activeOpacity={0.7}
+                >
+                    <Text style={styles.backButtonLargeText}>Retour à l&apos;historique</Text>
                 </TouchableOpacity>
             </View>
         );
@@ -78,103 +108,307 @@ const ReplayScreen: React.FC<Props> = ({ navigation, route }) => {
         if (currentStep > 0) setCurrentStep(currentStep - 1);
     };
 
+    const actionType = currentTurn?.type || 'snapshot';
+    const actionColor = ACTION_COLORS[actionType] || 'rgba(255,255,255,0.4)';
+    const actionIcon = ACTION_ICONS[actionType] || 'info';
+
     return (
-        <ScrollView contentContainerStyle={styles.container}>
-            <Text style={styles.title}>Replay</Text>
+        <ScrollView style={styles.scrollView} contentContainerStyle={styles.scrollContent}>
+            <View style={styles.header}>
+                <TouchableOpacity
+                    style={styles.backButton}
+                    onPress={() => navigation.navigate('HistoryScreen')}
+                    activeOpacity={0.7}
+                >
+                    <Feather name="chevron-left" size={24} color={colors.primary} />
+                </TouchableOpacity>
+                <Text style={styles.headerTitle}>Replay</Text>
+            </View>
 
-            <Text style={styles.stepCounter}>{currentStep} / {totalSteps}</Text>
-
-            {currentTurn && (
-                <View style={styles.actionCard}>
-                    <Text style={styles.actionPlayer}>
-                        {getPlayerName(currentTurn.playerNumber)}
-                    </Text>
-                    <Text style={styles.actionType}>
-                        {ACTION_LABELS[currentTurn.type] || currentTurn.type}
-                    </Text>
-                    <Text style={styles.actionData}>
-                        {JSON.stringify(currentTurn.data, null, 2)}
-                    </Text>
+            <View style={styles.stepSection}>
+                <Text style={styles.stepLabel}>Tour</Text>
+                <View style={styles.stepCounterRow}>
+                    <Text style={styles.stepCurrent}>{currentStep}</Text>
+                    <Text style={styles.stepSeparator}>/</Text>
+                    <Text style={styles.stepTotal}>{totalSteps}</Text>
                 </View>
-            )}
-
-            {!currentTurn && (
-                <View style={styles.actionCard}>
-                    <Text style={styles.actionType}>Début de la partie</Text>
+                <View style={styles.progressBar}>
+                    <View style={[
+                        styles.progressFill,
+                        { width: totalSteps > 0 ? `${(currentStep / totalSteps) * 100}%` : '0%' },
+                    ]} />
                 </View>
-            )}
+            </View>
+
+            <View style={styles.actionCard}>
+                <View style={[styles.actionIconBox, { backgroundColor: `${actionColor}15` }]}>
+                    <Feather name={actionIcon} size={22} color={actionColor} />
+                </View>
+
+                <View style={styles.actionContent}>
+                    {currentTurn ? (
+                        <>
+                            <Text style={[styles.actionPlayerName, { color: actionColor }]}>
+                                {getPlayerName(currentTurn.playerNumber)}
+                            </Text>
+                            <Text style={styles.actionTypeText}>
+                                {ACTION_LABELS[currentTurn.type] || currentTurn.type}
+                            </Text>
+                            <View style={styles.actionDataBox}>
+                                <Text style={styles.actionData}>
+                                    {JSON.stringify(currentTurn.data, null, 2)}
+                                </Text>
+                            </View>
+                        </>
+                    ) : (
+                        <>
+                            <Text style={styles.actionTypeText}>Début de la partie</Text>
+                            <Text style={styles.actionSubtext}>
+                                Utilisez les contrôles pour naviguer tour par tour
+                            </Text>
+                        </>
+                    )}
+                </View>
+            </View>
 
             <View style={styles.controls}>
                 <TouchableOpacity
                     style={[styles.controlButton, currentStep === 0 && styles.controlDisabled]}
                     onPress={goPrev}
                     disabled={currentStep === 0}
+                    activeOpacity={0.7}
                 >
-                    <Text style={styles.controlText}>Précédent</Text>
+                    <Feather name="skip-back" size={18} color={currentStep === 0 ? 'rgba(255,255,255,0.2)' : colors.textPrimary} />
+                    <Text style={[styles.controlText, currentStep === 0 && styles.controlTextDisabled]}>
+                        Précédent
+                    </Text>
                 </TouchableOpacity>
 
                 <TouchableOpacity
-                    style={[styles.controlButton, currentStep === totalSteps && styles.controlDisabled]}
+                    style={[styles.controlButton, styles.controlButtonPrimary, currentStep === totalSteps && styles.controlDisabled]}
                     onPress={goNext}
                     disabled={currentStep === totalSteps}
+                    activeOpacity={0.7}
                 >
-                    <Text style={styles.controlText}>Suivant</Text>
+                    <Text style={[styles.controlText, styles.controlTextPrimary, currentStep === totalSteps && styles.controlTextDisabled]}>
+                        Suivant
+                    </Text>
+                    <Feather name="skip-forward" size={18} color={currentStep === totalSteps ? 'rgba(255,255,255,0.2)' : colors.white} />
                 </TouchableOpacity>
             </View>
-
-            <TouchableOpacity style={styles.button} onPress={() => navigation.navigate('HistoryScreen')}>
-                <Text style={styles.buttonText}>Retour à l'historique</Text>
-            </TouchableOpacity>
         </ScrollView>
     );
 };
 
 const styles = StyleSheet.create({
-    container: {
-        flexGrow: 1, alignItems: 'center', padding: 20, backgroundColor: '#fff',
+    scrollView: {
+        flex: 1,
+        backgroundColor: colors.background,
     },
-    title: {
-        fontSize: 24, fontWeight: 'bold', marginBottom: 10,
+    scrollContent: {
+        padding: 24,
+        paddingTop: 48,
     },
-    stepCounter: {
-        fontSize: 16, color: '#666', marginBottom: 20,
+    loadingContainer: {
+        flex: 1,
+        justifyContent: 'center',
+        alignItems: 'center',
+        backgroundColor: colors.background,
     },
-    actionCard: {
-        width: '100%', maxWidth: 400, backgroundColor: '#f9f9f9',
-        borderRadius: 8, padding: 16, marginBottom: 20,
-        borderWidth: 1, borderColor: '#eee',
-    },
-    actionPlayer: {
-        fontSize: 14, fontWeight: 'bold', color: '#007AFF', marginBottom: 4,
-    },
-    actionType: {
-        fontSize: 18, fontWeight: 'bold', marginBottom: 8,
-    },
-    actionData: {
-        fontSize: 12, color: '#666', fontFamily: 'monospace',
-    },
-    controls: {
-        flexDirection: 'row', gap: 12, marginBottom: 20,
-    },
-    controlButton: {
-        backgroundColor: '#007AFF', paddingVertical: 12, paddingHorizontal: 24,
-        borderRadius: 8,
-    },
-    controlDisabled: {
-        backgroundColor: '#ccc',
-    },
-    controlText: {
-        color: '#fff', fontSize: 16, fontWeight: 'bold',
+    errorContainer: {
+        flex: 1,
+        justifyContent: 'center',
+        alignItems: 'center',
+        backgroundColor: colors.background,
+        padding: 24,
+        gap: 16,
     },
     errorText: {
-        fontSize: 16, color: '#999', marginBottom: 20,
+        fontFamily: fontSans,
+        fontSize: 14,
+        color: 'rgba(255,255,255,0.3)',
+        textAlign: 'center',
     },
-    button: {
-        paddingVertical: 12, paddingHorizontal: 24,
-        backgroundColor: '#007AFF', borderRadius: 8,
+    backButtonLarge: {
+        backgroundColor: colors.primary,
+        paddingVertical: 12,
+        paddingHorizontal: 24,
+        borderRadius: 12,
     },
-    buttonText: {
-        color: '#fff', fontSize: 16,
+    backButtonLargeText: {
+        fontFamily: fontDisplay,
+        fontSize: 14,
+        fontWeight: '700',
+        color: colors.white,
+        textTransform: 'uppercase',
+        letterSpacing: 2,
+    },
+
+    header: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        gap: 12,
+        marginBottom: 28,
+    },
+    backButton: {
+        width: 40,
+        height: 40,
+        borderRadius: 20,
+        backgroundColor: colors.glass,
+        borderWidth: 1,
+        borderColor: colors.border,
+        justifyContent: 'center',
+        alignItems: 'center',
+    },
+    headerTitle: {
+        fontFamily: fontDisplay,
+        fontSize: 24,
+        fontWeight: '700',
+        fontStyle: 'italic',
+        color: colors.textPrimary,
+        textTransform: 'uppercase',
+        letterSpacing: -0.5,
+    },
+
+    stepSection: {
+        alignItems: 'center',
+        marginBottom: 24,
+        gap: 8,
+    },
+    stepLabel: {
+        fontFamily: fontSans,
+        fontSize: 10,
+        fontWeight: '900',
+        color: colors.textSecondary,
+        textTransform: 'uppercase',
+        letterSpacing: 4,
+    },
+    stepCounterRow: {
+        flexDirection: 'row',
+        alignItems: 'baseline',
+        gap: 4,
+    },
+    stepCurrent: {
+        fontFamily: fontDisplay,
+        fontSize: 42,
+        fontWeight: '900',
+        color: colors.primary,
+    },
+    stepSeparator: {
+        fontFamily: fontDisplay,
+        fontSize: 24,
+        fontWeight: '700',
+        color: 'rgba(255,255,255,0.2)',
+    },
+    stepTotal: {
+        fontFamily: fontDisplay,
+        fontSize: 24,
+        fontWeight: '700',
+        color: 'rgba(255,255,255,0.3)',
+    },
+    progressBar: {
+        width: '100%',
+        maxWidth: 200,
+        height: 4,
+        backgroundColor: 'rgba(255,255,255,0.05)',
+        borderRadius: 2,
+        overflow: 'hidden',
+    },
+    progressFill: {
+        height: '100%',
+        backgroundColor: colors.primary,
+        borderRadius: 2,
+    },
+
+    actionCard: {
+        flexDirection: 'row',
+        gap: 14,
+        backgroundColor: colors.glass,
+        borderWidth: 1,
+        borderColor: colors.border,
+        borderRadius: 16,
+        padding: 16,
+        marginBottom: 24,
+    },
+    actionIconBox: {
+        width: 48,
+        height: 48,
+        borderRadius: 12,
+        justifyContent: 'center',
+        alignItems: 'center',
+        alignSelf: 'flex-start',
+    },
+    actionContent: {
+        flex: 1,
+        gap: 4,
+    },
+    actionPlayerName: {
+        fontFamily: fontDisplay,
+        fontSize: 12,
+        fontWeight: '700',
+        textTransform: 'uppercase',
+        letterSpacing: 2,
+    },
+    actionTypeText: {
+        fontFamily: fontDisplay,
+        fontSize: 18,
+        fontWeight: '700',
+        color: colors.textPrimary,
+    },
+    actionSubtext: {
+        fontFamily: fontSans,
+        fontSize: 12,
+        color: colors.textSecondary,
+        marginTop: 4,
+    },
+    actionDataBox: {
+        backgroundColor: 'rgba(0,0,0,0.2)',
+        borderRadius: 8,
+        padding: 10,
+        marginTop: 8,
+    },
+    actionData: {
+        fontFamily: Platform.select({ web: 'monospace', default: 'monospace' }),
+        fontSize: 10,
+        color: 'rgba(255,255,255,0.4)',
+    },
+
+    controls: {
+        flexDirection: 'row',
+        gap: 12,
+    },
+    controlButton: {
+        flex: 1,
+        flexDirection: 'row',
+        justifyContent: 'center',
+        alignItems: 'center',
+        gap: 8,
+        backgroundColor: colors.glass,
+        borderWidth: 1,
+        borderColor: colors.border,
+        paddingVertical: 14,
+        borderRadius: 12,
+    },
+    controlButtonPrimary: {
+        backgroundColor: colors.primary,
+        borderColor: colors.primary,
+    },
+    controlDisabled: {
+        opacity: 0.4,
+    },
+    controlText: {
+        fontFamily: fontDisplay,
+        fontSize: 14,
+        fontWeight: '700',
+        color: colors.textPrimary,
+        textTransform: 'uppercase',
+        letterSpacing: 1,
+    },
+    controlTextPrimary: {
+        color: colors.white,
+    },
+    controlTextDisabled: {
+        color: 'rgba(255,255,255,0.2)',
     },
 });
 
