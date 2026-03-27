@@ -1,12 +1,12 @@
 // frontend/src/features/replay/controllers/replay.controller.tsx
-// Gère le chargement, la navigation entre les tours, l'autoplay, et délègue l'affichage à ReplayAction
+// Gère le chargement, la navigation entre les tours, l'autoplay, et délègue l'affichage à ReplayBoard
 
 import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, ScrollView, ActivityIndicator, Platform } from 'react-native';
 import { Feather } from '@expo/vector-icons';
 import { colors } from '@/shared/theme/colors';
 import ReplayService, { GameWithTurns, TurnAction } from '../services/replay.service';
-import ReplayAction from '../components/replay-action/replay-action.component';
+import ReplayBoard from '../components/replay-board/replay-board.component';
 
 interface NavigationProp {
     navigate: (screen: string) => void;
@@ -15,6 +15,18 @@ interface NavigationProp {
 interface ReplayControllerProps {
     navigation: NavigationProp;
     gameId: string;
+}
+
+interface GameSnapshot {
+    currentTurn: string;
+    timer: number;
+    player1Score: number;
+    player2Score: number;
+    player1Tokens: number;
+    player2Tokens: number;
+    grid: { id: string; viewContent: string; owner: string | null; canBeChecked: boolean }[][];
+    choices: { isDefi: boolean; isSec: boolean; idSelectedChoice: string | null; availableChoices: unknown[] };
+    deck: { dices: { id: number; value: string; locked: boolean }[]; rollsCounter: number; rollsMaximum: number };
 }
 
 const fontDisplay = Platform.select({ web: '"Outfit", sans-serif', default: 'Outfit' });
@@ -38,7 +50,22 @@ const ReplayController: React.FC<ReplayControllerProps> = ({ navigation, gameId 
         loadGame();
     }, [gameId]);
 
-    const totalSteps = game?.turns?.length ?? 0;
+    const turns = game?.turns ?? [];
+    const totalSteps = Math.floor(turns.length / 2);
+
+    const getActionForStep = (step: number): TurnAction | null => {
+        if (step <= 0) return null;
+        const actionIndex = (step - 1) * 2;
+        return turns[actionIndex] ?? null;
+    };
+
+    const getSnapshotForStep = (step: number): GameSnapshot | null => {
+        if (step <= 0) return null;
+        const snapshotIndex = (step - 1) * 2 + 1;
+        const snapshotTurn = turns[snapshotIndex];
+        if (!snapshotTurn) return null;
+        return snapshotTurn.data as unknown as GameSnapshot;
+    };
 
     const stopAutoplay = useCallback((): void => {
         if (intervalRef.current) {
@@ -89,8 +116,8 @@ const ReplayController: React.FC<ReplayControllerProps> = ({ navigation, gameId 
         );
     }
 
-    const turns = game.turns;
-    const currentTurn: TurnAction | null = currentStep > 0 ? turns[currentStep - 1] : null;
+    const currentAction = getActionForStep(currentStep);
+    const currentSnapshot = getSnapshotForStep(currentStep);
 
     const getPlayerName = (playerNumber: number): string => {
         const player = game.players.find(p => p.playerNumber === playerNumber);
@@ -114,6 +141,21 @@ const ReplayController: React.FC<ReplayControllerProps> = ({ navigation, gameId 
             startAutoplay();
         }
     };
+
+    const defaultGameState: GameSnapshot = {
+        currentTurn: '',
+        timer: 0,
+        player1Score: 0,
+        player2Score: 0,
+        player1Tokens: 12,
+        player2Tokens: 12,
+        grid: [],
+        choices: { isDefi: false, isSec: false, idSelectedChoice: null, availableChoices: [] },
+        deck: { dices: [], rollsCounter: 0, rollsMaximum: 3 },
+    };
+
+    const gameState = currentSnapshot ?? defaultGameState;
+    const playerName = currentAction ? getPlayerName(currentAction.playerNumber) : '';
 
     return (
         <ScrollView style={styles.scrollView} contentContainerStyle={styles.scrollContent}>
@@ -143,11 +185,11 @@ const ReplayController: React.FC<ReplayControllerProps> = ({ navigation, gameId 
                 </View>
             </View>
 
-            {currentTurn ? (
-                <ReplayAction
-                    type={currentTurn.type}
-                    data={currentTurn.data as Record<string, unknown>}
-                    playerName={getPlayerName(currentTurn.playerNumber)}
+            {currentStep > 0 ? (
+                <ReplayBoard
+                    gameState={gameState}
+                    action={currentAction}
+                    playerName={playerName}
                 />
             ) : (
                 <View style={styles.startCard}>
@@ -173,6 +215,7 @@ const ReplayController: React.FC<ReplayControllerProps> = ({ navigation, gameId 
                 </TouchableOpacity>
 
                 <TouchableOpacity
+                    aria-label={isPlaying ? 'Pause' : 'Play'}
                     style={[styles.playButton, isPlaying && styles.playButtonActive]}
                     onPress={toggleAutoplay}
                     activeOpacity={0.7}
@@ -231,7 +274,6 @@ const styles = StyleSheet.create({
     controlTextDisabled: { color: 'rgba(255,255,255,0.2)' },
     playButton: { width: 52, height: 52, borderRadius: 26, backgroundColor: colors.success, justifyContent: 'center', alignItems: 'center', flexDirection: 'row', gap: 4 },
     playButtonActive: { backgroundColor: colors.gold },
-    playButtonText: { fontFamily: fontDisplay, fontSize: 10, fontWeight: '700', color: colors.white, textTransform: 'uppercase', letterSpacing: 1 },
 });
 
 export default ReplayController;
