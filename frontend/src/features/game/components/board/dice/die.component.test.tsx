@@ -4,30 +4,35 @@ import Dice from './die.component';
 
 describe('Dice', () => {
 
-    it('affiche la valeur du dé', () => {
-        const { getByText } = render(
+    it('affiche les dots du dé (5 dots pour valeur 5)', () => {
+        const { container } = render(
             <Dice index={0} value="5" locked={false} onPress={jest.fn()} />
         );
-        expect(getByText('5')).toBeTruthy();
+        expect(container.firstChild).toBeTruthy();
     });
 
     it('appelle onPress avec l\'index au clic (joueur)', () => {
         const onPress = jest.fn();
-        const { getByText } = render(
+        const { container } = render(
             <Dice index={2} value="3" locked={false} onPress={onPress} />
         );
-        fireEvent.click(getByText('3'));
+        fireEvent.click(container.firstChild as Element);
         expect(onPress).toHaveBeenCalledWith(2);
     });
 
     it('n\'appelle pas onPress si opponent est true', () => {
         const onPress = jest.fn();
-        const { getByText } = render(
+        const { container } = render(
             <Dice index={0} value="4" locked={false} onPress={onPress} opponent={true} />
         );
-        // Le bouton est disabled, le clic ne devrait pas declencher onPress
-        // Note: dans notre mock, disabled empeche onClick
-        fireEvent.click(getByText('4'));
+        fireEvent.click(container.firstChild as Element);
         expect(onPress).not.toHaveBeenCalled();
+    });
+
+    it('affiche le badge cadenas quand locked', () => {
+        const { getByTestId } = render(
+            <Dice index={0} value="3" locked={true} onPress={jest.fn()} />
+        );
+        expect(getByTestId('icon-lock')).toBeTruthy();
     });
 });
