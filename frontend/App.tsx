@@ -1,9 +1,11 @@
 // ./App.tsx
 
 import React from 'react';
-import { LogBox } from 'react-native';
+import { LogBox, ActivityIndicator, View } from 'react-native';
 import { NavigationContainer } from '@react-navigation/native';
 import { createStackNavigator } from '@react-navigation/stack';
+import { useFonts, Inter_400Regular, Inter_600SemiBold, Inter_700Bold } from '@expo-google-fonts/inter';
+import { Outfit_700Bold, Outfit_900Black } from '@expo-google-fonts/outfit';
 import HomeScreen from '@/features/home/screens/home.screen';
 import AuthScreen from '@/features/auth/screens/auth.screen';
 import { SocketProvider } from '@/shared/contexts/socket.context';
@@ -12,6 +14,7 @@ import OnlineGameScreen from '@/features/game/screens/online-game.screen';
 import VsBotGameScreen from '@/features/game/screens/vs-bot-game.screen';
 import HistoryScreen from '@/features/history/screens/history.screen';
 import ReplayScreen from '@/features/replay/screens/replay.screen';
+import { colors } from '@/shared/theme/colors';
 
 type RootStackParamList = {
   AuthScreen: undefined;
@@ -26,6 +29,22 @@ const Stack = createStackNavigator<RootStackParamList>();
 LogBox.ignoreAllLogs(true);
 
 const App: React.FC = () => {
+  const [fontsLoaded] = useFonts({
+    Inter: Inter_400Regular,
+    Inter_600SemiBold,
+    Inter_700Bold,
+    Outfit_700Bold,
+    Outfit: Outfit_900Black,
+  });
+
+  if (!fontsLoaded) {
+    return (
+      <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center', backgroundColor: colors.background }}>
+        <ActivityIndicator size="large" color={colors.primary} />
+      </View>
+    );
+  }
+
   return (
     <AuthProvider>
       <SocketProvider>

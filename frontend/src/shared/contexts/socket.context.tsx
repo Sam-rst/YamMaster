@@ -24,7 +24,10 @@ export const SocketProvider: React.FC<{ children: React.ReactNode }> = ({ childr
 
         const newSocket = io(SERVER_URL, {
             transports: ['websocket'],
-            query: { userId: user.id, username: user.username },
+            query: {
+                ...(user.id ? { userId: user.id } : {}),
+                username: user.username,
+            },
         });
 
         newSocket.on('connect', () => {

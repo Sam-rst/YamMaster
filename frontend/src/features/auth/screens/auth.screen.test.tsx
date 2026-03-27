@@ -6,6 +6,18 @@ import { render, fireEvent, act, waitFor } from '@testing-library/react';
 import AuthScreen from './auth.screen';
 import { AuthProvider } from '@/shared/contexts/auth.context';
 
+// Mock expo-linear-gradient
+jest.mock('expo-linear-gradient', () => ({
+    LinearGradient: ({ children, ...props }: React.PropsWithChildren<Record<string, unknown>>) =>
+        <div data-testid="linear-gradient" {...props}>{children}</div>,
+}));
+
+// Mock @expo/vector-icons
+jest.mock('@expo/vector-icons', () => ({
+    Feather: ({ name, ...props }: { name: string } & Record<string, unknown>) =>
+        <span data-testid={`icon-${name}`} {...props} />,
+}));
+
 // Mock AuthService
 const mockLogin = jest.fn();
 const mockCheckUsername = jest.fn();
@@ -44,7 +56,7 @@ describe('AuthScreen — Smart Login', () => {
         const { getByText, getByPlaceholderText } = renderAuthScreen();
 
         expect(getByText('Yam Master')).toBeTruthy();
-        expect(getByPlaceholderText(/nom d'utilisateur/i)).toBeTruthy();
+        expect(getByPlaceholderText('votre_pseudo')).toBeTruthy();
     });
 
     test('affiche le bouton de connexion après vérification du username', async () => {
@@ -52,14 +64,14 @@ describe('AuthScreen — Smart Login', () => {
         const { getByPlaceholderText, getByText } = renderAuthScreen();
 
         await act(async () => {
-            fireEvent.change(getByPlaceholderText(/nom d'utilisateur/i), { target: { value: 'alice' } });
+            fireEvent.change(getByPlaceholderText('votre_pseudo'), { target: { value: 'alice' } });
         });
         await act(async () => {
             jest.advanceTimersByTime(600);
         });
 
         await waitFor(() => {
-            expect(getByText(/connecter|Créer mon compte/i)).toBeTruthy();
+            expect(getByText(/connecter/i)).toBeTruthy();
         });
     });
 
@@ -69,10 +81,9 @@ describe('AuthScreen — Smart Login', () => {
         const { getByPlaceholderText } = renderAuthScreen();
 
         await act(async () => {
-            fireEvent.change(getByPlaceholderText(/nom d'utilisateur/i), { target: { value: 'alice' } });
+            fireEvent.change(getByPlaceholderText('votre_pseudo'), { target: { value: 'alice' } });
         });
 
-        // Avancer le debounce
         await act(async () => {
             jest.advanceTimersByTime(600);
         });
@@ -86,7 +97,7 @@ describe('AuthScreen — Smart Login', () => {
         const { getByPlaceholderText, getByText } = renderAuthScreen();
 
         await act(async () => {
-            fireEvent.change(getByPlaceholderText(/nom d'utilisateur/i), { target: { value: 'alice' } });
+            fireEvent.change(getByPlaceholderText('votre_pseudo'), { target: { value: 'alice' } });
         });
 
         await act(async () => {
@@ -104,7 +115,7 @@ describe('AuthScreen — Smart Login', () => {
         const { getByPlaceholderText, getByText } = renderAuthScreen();
 
         await act(async () => {
-            fireEvent.change(getByPlaceholderText(/nom d'utilisateur/i), { target: { value: 'newplayer' } });
+            fireEvent.change(getByPlaceholderText('votre_pseudo'), { target: { value: 'newplayer' } });
         });
 
         await act(async () => {
@@ -122,7 +133,7 @@ describe('AuthScreen — Smart Login', () => {
         const { getByPlaceholderText, getByText } = renderAuthScreen();
 
         await act(async () => {
-            fireEvent.change(getByPlaceholderText(/nom d'utilisateur/i), { target: { value: 'newplayer' } });
+            fireEvent.change(getByPlaceholderText('votre_pseudo'), { target: { value: 'newplayer' } });
         });
 
         await act(async () => {
@@ -144,19 +155,17 @@ describe('AuthScreen — Smart Login', () => {
 
         const { getByPlaceholderText, getByText } = renderAuthScreen();
 
-        // Étape 1 : saisir le username et attendre le check
         await act(async () => {
-            fireEvent.change(getByPlaceholderText(/nom d'utilisateur/i), { target: { value: 'alice' } });
+            fireEvent.change(getByPlaceholderText('votre_pseudo'), { target: { value: 'alice' } });
         });
         await act(async () => { jest.advanceTimersByTime(600); });
 
-        // Étape 2 : saisir le password et soumettre
         await waitFor(() => {
-            fireEvent.change(getByPlaceholderText(/mot de passe/i), { target: { value: 'secret' } });
+            fireEvent.change(getByPlaceholderText('••••••••'), { target: { value: 'secret' } });
         });
 
         await act(async () => {
-            fireEvent.click(getByText(/connecter|Créer mon compte/i));
+            fireEvent.click(getByText(/connecter/i));
         });
 
         expect(mockLogin).toHaveBeenCalledWith('alice', 'secret');
@@ -173,16 +182,16 @@ describe('AuthScreen — Smart Login', () => {
         const { getByPlaceholderText, getByText } = renderAuthScreen();
 
         await act(async () => {
-            fireEvent.change(getByPlaceholderText(/nom d'utilisateur/i), { target: { value: 'alice' } });
+            fireEvent.change(getByPlaceholderText('votre_pseudo'), { target: { value: 'alice' } });
         });
         await act(async () => { jest.advanceTimersByTime(600); });
 
         await waitFor(() => {
-            fireEvent.change(getByPlaceholderText(/mot de passe/i), { target: { value: 'secret' } });
+            fireEvent.change(getByPlaceholderText('••••••••'), { target: { value: 'secret' } });
         });
 
         await act(async () => {
-            fireEvent.click(getByText(/connecter|Créer mon compte/i));
+            fireEvent.click(getByText(/connecter/i));
         });
 
         await waitFor(() => {
@@ -207,20 +216,36 @@ describe('AuthScreen — Smart Login', () => {
         const { getByPlaceholderText, getByText } = renderAuthScreen();
 
         await act(async () => {
-            fireEvent.change(getByPlaceholderText(/nom d'utilisateur/i), { target: { value: 'alice' } });
+            fireEvent.change(getByPlaceholderText('votre_pseudo'), { target: { value: 'alice' } });
         });
         await act(async () => { jest.advanceTimersByTime(600); });
 
         await waitFor(() => {
-            fireEvent.change(getByPlaceholderText(/mot de passe/i), { target: { value: 'wrong' } });
+            fireEvent.change(getByPlaceholderText('••••••••'), { target: { value: 'wrong' } });
         });
 
         await act(async () => {
-            fireEvent.click(getByText(/connecter|Créer mon compte/i));
+            fireEvent.click(getByText(/connecter/i));
         });
 
         await waitFor(() => {
             expect(getByText(/Mot de passe incorrect/)).toBeTruthy();
         });
+    });
+
+    test('affiche le bouton Jouer en invité', () => {
+        const { getByText } = renderAuthScreen();
+
+        expect(getByText(/Jouer en invité/i)).toBeTruthy();
+    });
+
+    test('le mode invité navigue directement vers HomeScreen', async () => {
+        const { getByText } = renderAuthScreen();
+
+        await act(async () => {
+            fireEvent.click(getByText(/Jouer en invité/i));
+        });
+
+        expect(mockNavigate).toHaveBeenCalledWith('HomeScreen');
     });
 });
