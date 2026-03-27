@@ -142,7 +142,7 @@ describe('HistoryScreen', () => {
 
         await waitFor(() => {
             expect(getByText('Vs Bot')).toBeTruthy();
-            expect(getByText('vs Bot')).toBeTruthy();
+            expect(getByText('Bot')).toBeTruthy();
         });
     });
 });

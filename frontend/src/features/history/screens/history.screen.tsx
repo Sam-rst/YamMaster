@@ -1,8 +1,10 @@
 // frontend/src/features/history/screens/history.screen.tsx
 
 import React, { useEffect, useState } from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, ScrollView } from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity, ScrollView, ActivityIndicator, Platform } from 'react-native';
+import { Feather } from '@expo/vector-icons';
 import { useAuth } from '@/shared/contexts/auth.context';
+import { colors } from '@/shared/theme/colors';
 import HistoryService, { GameSummary } from '../services/history.service';
 
 interface NavigationProp {
@@ -13,6 +15,9 @@ interface Props {
     navigation: NavigationProp;
 }
 
+const fontDisplay = Platform.select({ web: '"Outfit", sans-serif', default: 'Outfit' });
+const fontSans = Platform.select({ web: '"Inter", sans-serif', default: 'Inter' });
+
 const RESULT_LABELS: Record<string, string> = {
     WIN: 'Victoire',
     LOSE: 'Défaite',
@@ -21,10 +26,17 @@ const RESULT_LABELS: Record<string, string> = {
 };
 
 const RESULT_COLORS: Record<string, string> = {
-    WIN: '#4CAF50',
-    LOSE: '#F44336',
-    DRAW: '#FF9800',
-    PENDING: '#999',
+    WIN: colors.success,
+    LOSE: colors.primary,
+    DRAW: colors.gold,
+    PENDING: 'rgba(255,255,255,0.4)',
+};
+
+const RESULT_ICONS: Record<string, keyof typeof Feather.glyphMap> = {
+    WIN: 'award',
+    LOSE: 'x-circle',
+    DRAW: 'minus-circle',
+    PENDING: 'clock',
 };
 
 const MODE_LABELS: Record<string, string> = {
@@ -51,155 +63,255 @@ const HistoryScreen: React.FC<Props> = ({ navigation }) => {
 
     const formatDate = (dateStr: string): string => {
         const date = new Date(dateStr);
-        return date.toLocaleDateString('fr-FR', {
-            day: '2-digit',
-            month: '2-digit',
-            year: 'numeric',
-            hour: '2-digit',
-            minute: '2-digit',
-        });
+        const now = new Date();
+        const diffDays = Math.floor((now.getTime() - date.getTime()) / (1000 * 60 * 60 * 24));
+
+        if (diffDays === 0) return "Aujourd'hui";
+        if (diffDays === 1) return 'Hier';
+        return date.toLocaleDateString('fr-FR', { day: 'numeric', month: 'short' });
     };
 
     if (loading) {
         return (
-            <View style={styles.container}>
-                <Text>Chargement...</Text>
+            <View style={styles.loadingContainer}>
+                <ActivityIndicator size="large" color={colors.primary} />
             </View>
         );
     }
 
     return (
-        <ScrollView contentContainerStyle={styles.container}>
-            <Text style={styles.title}>Historique</Text>
+        <ScrollView style={styles.scrollView} contentContainerStyle={styles.scrollContent}>
+            <View style={styles.header}>
+                <TouchableOpacity
+                    style={styles.backButton}
+                    onPress={() => navigation.navigate('HomeScreen')}
+                    activeOpacity={0.7}
+                >
+                    <Feather name="chevron-left" size={24} color={colors.primary} />
+                </TouchableOpacity>
+                <Text style={styles.headerTitle}>Historique</Text>
+            </View>
+
+            <View style={styles.sectionIntro}>
+                <Text style={styles.sectionLabel}>Vos Exploits</Text>
+                <Text style={styles.sectionTitle}>
+                    Dernières <Text style={styles.sectionTitleAccent}>Parties</Text>
+                </Text>
+            </View>
 
             {games.length === 0 && (
-                <Text style={styles.emptyText}>Aucune partie jouée pour le moment</Text>
+                <View style={styles.emptyContainer}>
+                    <Feather name="inbox" size={40} color="rgba(255,255,255,0.2)" />
+                    <Text style={styles.emptyText}>Aucune partie jouée pour le moment</Text>
+                </View>
             )}
 
-            {games.map((game) => (
-                <View key={game.id} style={styles.card}>
-                    <View style={styles.cardHeader}>
-                        <Text style={styles.mode}>
-                            {MODE_LABELS[game.mode] || game.mode}
-                        </Text>
-                        <Text style={styles.date}>{formatDate(game.createdAt)}</Text>
-                    </View>
+            <View style={styles.gamesList}>
+                {games.map((game) => {
+                    const resultColor = RESULT_COLORS[game.myResult] || 'rgba(255,255,255,0.4)';
+                    const resultIcon = RESULT_ICONS[game.myResult] || 'clock';
 
-                    <View style={styles.cardBody}>
-                        <Text style={styles.opponent}>vs {game.opponentName}</Text>
-                        <Text style={styles.score}>{game.scoreDisplay}</Text>
-                    </View>
-
-                    <View style={styles.cardFooter}>
-                        <Text style={[styles.result, { color: RESULT_COLORS[game.myResult] || '#999' }]}>
-                            {RESULT_LABELS[game.myResult] || game.myResult}
-                        </Text>
+                    return (
                         <TouchableOpacity
-                            style={styles.replayButton}
+                            key={game.id}
+                            style={styles.gameCard}
                             onPress={() => navigation.navigate('ReplayScreen', { gameId: game.id })}
+                            activeOpacity={0.85}
                         >
-                            <Text style={styles.replayButtonText}>Replay</Text>
-                        </TouchableOpacity>
-                    </View>
-                </View>
-            ))}
+                            <View style={[styles.iconBox, { backgroundColor: `${resultColor}15` }]}>
+                                <Feather name={resultIcon} size={22} color={resultColor} />
+                            </View>
 
-            <TouchableOpacity
-                style={styles.backButton}
-                onPress={() => navigation.navigate('HomeScreen')}
-            >
-                <Text style={styles.backButtonText}>Retour au menu</Text>
-            </TouchableOpacity>
+                            <View style={styles.cardContent}>
+                                <View style={styles.cardTopRow}>
+                                    <Text style={styles.opponentName}>{game.opponentName}</Text>
+                                    <View style={styles.dateRow}>
+                                        <Feather name="calendar" size={10} color="rgba(255,255,255,0.2)" />
+                                        <Text style={styles.dateText}>{formatDate(game.createdAt)}</Text>
+                                    </View>
+                                </View>
+
+                                <View style={styles.cardBottomRow}>
+                                    <View style={styles.resultRow}>
+                                        <Text style={[styles.resultBadge, { color: resultColor, borderColor: `${resultColor}50` }]}>
+                                            {RESULT_LABELS[game.myResult] || game.myResult}
+                                        </Text>
+                                        <Text style={styles.scoreText}>{game.scoreDisplay}</Text>
+                                    </View>
+
+                                    <Text style={styles.modeText}>
+                                        {MODE_LABELS[game.mode] || game.mode}
+                                    </Text>
+                                </View>
+                            </View>
+                        </TouchableOpacity>
+                    );
+                })}
+            </View>
         </ScrollView>
     );
 };
 
 const styles = StyleSheet.create({
-    container: {
-        flexGrow: 1,
+    scrollView: {
+        flex: 1,
+        backgroundColor: colors.background,
+    },
+    scrollContent: {
+        padding: 24,
+        paddingTop: 48,
+    },
+    loadingContainer: {
+        flex: 1,
+        justifyContent: 'center',
         alignItems: 'center',
-        padding: 20,
-        backgroundColor: '#fff',
+        backgroundColor: colors.background,
     },
-    title: {
-        fontSize: 24,
-        fontWeight: 'bold',
-        marginBottom: 20,
-    },
-    emptyText: {
-        fontSize: 16,
-        color: '#999',
-        marginTop: 40,
-    },
-    card: {
-        width: '100%',
-        maxWidth: 400,
-        backgroundColor: '#f9f9f9',
-        borderRadius: 8,
-        padding: 16,
-        marginBottom: 12,
-        borderWidth: 1,
-        borderColor: '#eee',
-    },
-    cardHeader: {
+
+    header: {
         flexDirection: 'row',
-        justifyContent: 'space-between',
-        marginBottom: 8,
-    },
-    mode: {
-        fontSize: 12,
-        color: '#666',
-        textTransform: 'uppercase',
-    },
-    date: {
-        fontSize: 12,
-        color: '#999',
-    },
-    cardBody: {
-        flexDirection: 'row',
-        justifyContent: 'space-between',
         alignItems: 'center',
-        marginBottom: 8,
-    },
-    opponent: {
-        fontSize: 16,
-        fontWeight: '500',
-    },
-    score: {
-        fontSize: 18,
-        fontWeight: 'bold',
-    },
-    cardFooter: {
-        flexDirection: 'row',
-        justifyContent: 'space-between',
-        alignItems: 'center',
-    },
-    result: {
-        fontSize: 14,
-        fontWeight: 'bold',
-        textTransform: 'uppercase',
-    },
-    replayButton: {
-        backgroundColor: '#007AFF',
-        paddingVertical: 6,
-        paddingHorizontal: 12,
-        borderRadius: 4,
-    },
-    replayButtonText: {
-        color: '#fff',
-        fontSize: 12,
-        fontWeight: 'bold',
+        gap: 12,
+        marginBottom: 28,
     },
     backButton: {
-        marginTop: 20,
-        paddingVertical: 12,
-        paddingHorizontal: 24,
-        backgroundColor: '#007AFF',
-        borderRadius: 8,
+        width: 40,
+        height: 40,
+        borderRadius: 20,
+        backgroundColor: colors.glass,
+        borderWidth: 1,
+        borderColor: colors.border,
+        justifyContent: 'center',
+        alignItems: 'center',
     },
-    backButtonText: {
-        color: '#fff',
+    headerTitle: {
+        fontFamily: fontDisplay,
+        fontSize: 24,
+        fontWeight: '700',
+        fontStyle: 'italic',
+        color: colors.textPrimary,
+        textTransform: 'uppercase',
+        letterSpacing: -0.5,
+    },
+
+    sectionIntro: {
+        marginBottom: 24,
+        gap: 4,
+    },
+    sectionLabel: {
+        fontFamily: fontSans,
+        fontSize: 10,
+        fontWeight: '900',
+        color: colors.primary,
+        textTransform: 'uppercase',
+        letterSpacing: 4,
+    },
+    sectionTitle: {
+        fontFamily: fontDisplay,
+        fontSize: 32,
+        fontWeight: '700',
+        color: colors.textPrimary,
+    },
+    sectionTitleAccent: {
+        color: colors.primary,
+    },
+
+    emptyContainer: {
+        alignItems: 'center',
+        paddingVertical: 60,
+        gap: 12,
+    },
+    emptyText: {
+        fontFamily: fontSans,
+        fontSize: 14,
+        color: 'rgba(255,255,255,0.3)',
+    },
+
+    gamesList: {
+        gap: 12,
+    },
+    gameCard: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        gap: 14,
+        backgroundColor: colors.glass,
+        borderWidth: 1,
+        borderColor: colors.border,
+        borderRadius: 16,
+        padding: 16,
+    },
+    iconBox: {
+        width: 48,
+        height: 48,
+        borderRadius: 12,
+        justifyContent: 'center',
+        alignItems: 'center',
+    },
+    cardContent: {
+        flex: 1,
+        gap: 6,
+    },
+    cardTopRow: {
+        flexDirection: 'row',
+        justifyContent: 'space-between',
+        alignItems: 'center',
+    },
+    opponentName: {
+        fontFamily: fontDisplay,
         fontSize: 16,
+        fontWeight: '700',
+        color: colors.textPrimary,
+        textTransform: 'uppercase',
+        letterSpacing: -0.3,
+    },
+    dateRow: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        gap: 4,
+    },
+    dateText: {
+        fontFamily: fontSans,
+        fontSize: 10,
+        fontWeight: '700',
+        color: 'rgba(255,255,255,0.2)',
+        textTransform: 'uppercase',
+        letterSpacing: 2,
+    },
+    cardBottomRow: {
+        flexDirection: 'row',
+        justifyContent: 'space-between',
+        alignItems: 'center',
+    },
+    resultRow: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        gap: 8,
+    },
+    resultBadge: {
+        fontFamily: fontSans,
+        fontSize: 10,
+        fontWeight: '900',
+        textTransform: 'uppercase',
+        letterSpacing: 2,
+        borderWidth: 1,
+        borderRadius: 12,
+        paddingHorizontal: 8,
+        paddingVertical: 2,
+    },
+    scoreText: {
+        fontFamily: fontDisplay,
+        fontSize: 14,
+        fontWeight: '900',
+        fontStyle: 'italic',
+        color: 'rgba(255,255,255,0.6)',
+    },
+    modeText: {
+        fontFamily: fontSans,
+        fontSize: 10,
+        fontWeight: '700',
+        color: 'rgba(255,255,255,0.3)',
+        textTransform: 'uppercase',
+        letterSpacing: 1,
     },
 });
 

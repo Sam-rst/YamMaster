@@ -14,6 +14,17 @@ jest.mock('expo-linear-gradient', () => {
     };
 });
 
+// Mock global react-native-safe-area-context
+jest.mock('react-native-safe-area-context', () => {
+    const mockReact = require('react');
+    return {
+        SafeAreaView: ({ children, ...props }) =>
+            mockReact.createElement('div', { 'data-testid': 'safe-area-view', ...props }, children),
+        SafeAreaProvider: ({ children }) => children,
+        useSafeAreaInsets: () => ({ top: 0, bottom: 0, left: 0, right: 0 }),
+    };
+});
+
 // Mock global @expo/vector-icons
 jest.mock('@expo/vector-icons', () => {
     const mockReact = require('react');

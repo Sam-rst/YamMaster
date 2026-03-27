@@ -54,8 +54,8 @@ const App: React.FC = () => {
             <Stack.Screen name="HomeScreen" component={HomeScreen} options={{ headerShown: false }} />
             <Stack.Screen name="OnlineGameScreen" component={OnlineGameScreen} options={{ headerShown: false }} />
             <Stack.Screen name="VsBotGameScreen" component={VsBotGameScreen} options={{ headerShown: false }} />
-            <Stack.Screen name="HistoryScreen" component={HistoryScreen} />
-            <Stack.Screen name="ReplayScreen" component={ReplayScreen} />
+            <Stack.Screen name="HistoryScreen" component={HistoryScreen} options={{ headerShown: false }} />
+            <Stack.Screen name="ReplayScreen" component={ReplayScreen} options={{ headerShown: false }} />
           </Stack.Navigator>
         </NavigationContainer>
       </SocketProvider>
