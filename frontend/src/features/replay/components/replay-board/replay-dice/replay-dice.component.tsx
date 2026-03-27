@@ -4,7 +4,7 @@ import React from 'react';
 import { View, Text, StyleSheet } from 'react-native';
 import Dice from '@/features/game/components/board/dice/die.component';
 import { colors } from '@/shared/theme/colors';
-import { fontDisplay, fontSans } from '@/shared/theme/fonts';
+import { fontSans } from '@/shared/theme/fonts';
 
 interface DiceData {
     id: number;
