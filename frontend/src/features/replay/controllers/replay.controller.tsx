@@ -1,7 +1,7 @@
 // frontend/src/features/replay/controllers/replay.controller.tsx
-// Gère le chargement, la navigation entre les tours, et délègue l'affichage à ReplayAction
+// Gère le chargement, la navigation entre les tours, l'autoplay, et délègue l'affichage à ReplayAction
 
-import React, { useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, ScrollView, ActivityIndicator, Platform } from 'react-native';
 import { Feather } from '@expo/vector-icons';
 import { colors } from '@/shared/theme/colors';
@@ -20,10 +20,14 @@ interface ReplayControllerProps {
 const fontDisplay = Platform.select({ web: '"Outfit", sans-serif', default: 'Outfit' });
 const fontSans = Platform.select({ web: '"Inter", sans-serif', default: 'Inter' });
 
+const AUTOPLAY_INTERVAL_MS = 1000;
+
 const ReplayController: React.FC<ReplayControllerProps> = ({ navigation, gameId }) => {
     const [game, setGame] = useState<GameWithTurns | null>(null);
     const [loading, setLoading] = useState(true);
     const [currentStep, setCurrentStep] = useState(0);
+    const [isPlaying, setIsPlaying] = useState(false);
+    const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
     useEffect(() => {
         const loadGame = async (): Promise<void> => {
@@ -34,6 +38,33 @@ const ReplayController: React.FC<ReplayControllerProps> = ({ navigation, gameId 
         loadGame();
     }, [gameId]);
 
+    const totalSteps = game?.turns?.length ?? 0;
+
+    const stopAutoplay = useCallback((): void => {
+        if (intervalRef.current) {
+            clearInterval(intervalRef.current);
+            intervalRef.current = null;
+        }
+        setIsPlaying(false);
+    }, []);
+
+    const startAutoplay = useCallback((): void => {
+        setIsPlaying(true);
+        intervalRef.current = setInterval(() => {
+            setCurrentStep((prev) => {
+                if (prev >= totalSteps) {
+                    stopAutoplay();
+                    return prev;
+                }
+                return prev + 1;
+            });
+        }, AUTOPLAY_INTERVAL_MS);
+    }, [totalSteps, stopAutoplay]);
+
+    useEffect(() => {
+        return () => { stopAutoplay(); };
+    }, [stopAutoplay]);
+
     if (loading) {
         return (
             <View style={styles.loadingContainer}>
@@ -42,7 +73,7 @@ const ReplayController: React.FC<ReplayControllerProps> = ({ navigation, gameId 
         );
     }
 
-    if (!game || !game.turns) {
+    if (!game?.turns) {
         return (
             <View style={styles.errorContainer}>
                 <Feather name="alert-circle" size={40} color="rgba(255,255,255,0.2)" />
@@ -59,7 +90,6 @@ const ReplayController: React.FC<ReplayControllerProps> = ({ navigation, gameId 
     }
 
     const turns = game.turns;
-    const totalSteps = turns.length;
     const currentTurn: TurnAction | null = currentStep > 0 ? turns[currentStep - 1] : null;
 
     const getPlayerName = (playerNumber: number): string => {
@@ -75,6 +105,14 @@ const ReplayController: React.FC<ReplayControllerProps> = ({ navigation, gameId 
 
     const goPrev = (): void => {
         if (currentStep > 0) setCurrentStep(currentStep - 1);
+    };
+
+    const toggleAutoplay = (): void => {
+        if (isPlaying) {
+            stopAutoplay();
+        } else {
+            startAutoplay();
+        }
     };
 
     return (
@@ -125,7 +163,7 @@ const ReplayController: React.FC<ReplayControllerProps> = ({ navigation, gameId 
                 <TouchableOpacity
                     style={[styles.controlButton, currentStep === 0 && styles.controlDisabled]}
                     onPress={goPrev}
-                    disabled={currentStep === 0}
+                    disabled={currentStep === 0 || isPlaying}
                     activeOpacity={0.7}
                 >
                     <Feather name="skip-back" size={18} color={currentStep === 0 ? 'rgba(255,255,255,0.2)' : colors.textPrimary} />
@@ -135,9 +173,21 @@ const ReplayController: React.FC<ReplayControllerProps> = ({ navigation, gameId 
                 </TouchableOpacity>
 
                 <TouchableOpacity
+                    style={[styles.playButton, isPlaying && styles.playButtonActive]}
+                    onPress={toggleAutoplay}
+                    activeOpacity={0.7}
+                >
+                    <Feather
+                        name={isPlaying ? 'pause' : 'play'}
+                        size={20}
+                        color={colors.white}
+                    />
+                </TouchableOpacity>
+
+                <TouchableOpacity
                     style={[styles.controlButton, styles.controlButtonPrimary, currentStep === totalSteps && styles.controlDisabled]}
                     onPress={goNext}
-                    disabled={currentStep === totalSteps}
+                    disabled={currentStep === totalSteps || isPlaying}
                     activeOpacity={0.7}
                 >
                     <Text style={[styles.controlText, styles.controlTextPrimary, currentStep === totalSteps && styles.controlTextDisabled]}>
@@ -172,13 +222,16 @@ const styles = StyleSheet.create({
     startCard: { backgroundColor: colors.glass, borderWidth: 1, borderColor: colors.border, borderRadius: 16, padding: 24, alignItems: 'center', gap: 8, marginBottom: 24 },
     startText: { fontFamily: fontDisplay, fontSize: 18, fontWeight: '700', color: colors.textPrimary },
     startSubtext: { fontFamily: fontSans, fontSize: 12, color: colors.textSecondary },
-    controls: { flexDirection: 'row', gap: 12, marginTop: 24 },
-    controlButton: { flex: 1, flexDirection: 'row', justifyContent: 'center', alignItems: 'center', gap: 8, backgroundColor: colors.glass, borderWidth: 1, borderColor: colors.border, paddingVertical: 14, borderRadius: 12 },
+    controls: { flexDirection: 'row', gap: 8, marginTop: 24 },
+    controlButton: { flex: 1, flexDirection: 'row', justifyContent: 'center', alignItems: 'center', gap: 6, backgroundColor: colors.glass, borderWidth: 1, borderColor: colors.border, paddingVertical: 14, borderRadius: 12 },
     controlButtonPrimary: { backgroundColor: colors.primary, borderColor: colors.primary },
     controlDisabled: { opacity: 0.4 },
-    controlText: { fontFamily: fontDisplay, fontSize: 14, fontWeight: '700', color: colors.textPrimary, textTransform: 'uppercase', letterSpacing: 1 },
+    controlText: { fontFamily: fontDisplay, fontSize: 12, fontWeight: '700', color: colors.textPrimary, textTransform: 'uppercase', letterSpacing: 1 },
     controlTextPrimary: { color: colors.white },
     controlTextDisabled: { color: 'rgba(255,255,255,0.2)' },
+    playButton: { width: 52, height: 52, borderRadius: 26, backgroundColor: colors.success, justifyContent: 'center', alignItems: 'center', flexDirection: 'row', gap: 4 },
+    playButtonActive: { backgroundColor: colors.gold },
+    playButtonText: { fontFamily: fontDisplay, fontSize: 10, fontWeight: '700', color: colors.white, textTransform: 'uppercase', letterSpacing: 1 },
 });
 
 export default ReplayController;

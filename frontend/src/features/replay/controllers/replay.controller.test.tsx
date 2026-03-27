@@ -76,6 +76,137 @@ describe('ReplayController', () => {
         expect(queryByText(/\{.*dices.*\}/)).toBeFalsy();
     });
 
+    // ================================================================
+    // AUTOPLAY
+    // ================================================================
+
+    test('affiche un bouton Play', async () => {
+        mockGetGameWithTurns.mockResolvedValue(mockGameData);
+        const { getByText } = render(
+            <ReplayController navigation={navigation} gameId="game-1" />
+        );
+        await waitFor(() => {
+            expect(getByText('Play')).toBeTruthy();
+        });
+    });
+
+    test('le bouton Play devient Pause au clic', async () => {
+        jest.useFakeTimers();
+        mockGetGameWithTurns.mockResolvedValue(mockGameData);
+        const { getByText } = render(
+            <ReplayController navigation={navigation} gameId="game-1" />
+        );
+
+        await waitFor(() => {
+            expect(getByText('Play')).toBeTruthy();
+        });
+
+        act(() => {
+            fireEvent.click(getByText('Play'));
+        });
+
+        expect(getByText(/pause/i)).toBeTruthy();
+        jest.useRealTimers();
+    });
+
+    test('la lecture automatique avance les steps toutes les 500ms', async () => {
+        jest.useFakeTimers();
+        mockGetGameWithTurns.mockResolvedValue(mockGameData);
+        const { getByText } = render(
+            <ReplayController navigation={navigation} gameId="game-1" />
+        );
+
+        await waitFor(() => {
+            expect(getByText('Play')).toBeTruthy();
+        });
+
+        // Lancer la lecture auto
+        act(() => {
+            fireEvent.click(getByText('Play'));
+        });
+
+        // Après 500ms → step 1
+        act(() => {
+            jest.advanceTimersByTime(500);
+        });
+        expect(getByText('1')).toBeTruthy();
+
+        // Après 1000ms → step 2
+        act(() => {
+            jest.advanceTimersByTime(500);
+        });
+        expect(getByText('2')).toBeTruthy();
+
+        jest.useRealTimers();
+    });
+
+    test('la lecture automatique s\'arrête à la fin', async () => {
+        jest.useFakeTimers();
+        mockGetGameWithTurns.mockResolvedValue(mockGameData);
+        const { getByText, container } = render(
+            <ReplayController navigation={navigation} gameId="game-1" />
+        );
+
+        await waitFor(() => {
+            expect(getByText('Play')).toBeTruthy();
+        });
+
+        act(() => {
+            fireEvent.click(getByText('Play'));
+        });
+
+        // 3 turns × 500ms = 1500ms pour finir
+        act(() => {
+            jest.advanceTimersByTime(2000);
+        });
+
+        // Doit être revenu à Play (plus en Pause)
+        expect(getByText('Play')).toBeTruthy();
+        // Step current et total sont tous les deux "3"
+        const threes = container.querySelectorAll('*');
+        const textContents = Array.from(threes).map(el => el.textContent);
+        expect(textContents.includes('3')).toBe(true);
+
+        jest.useRealTimers();
+    });
+
+    test('le bouton Pause arrête la lecture', async () => {
+        jest.useFakeTimers();
+        mockGetGameWithTurns.mockResolvedValue(mockGameData);
+        const { getByText } = render(
+            <ReplayController navigation={navigation} gameId="game-1" />
+        );
+
+        await waitFor(() => {
+            expect(getByText('Play')).toBeTruthy();
+        });
+
+        // Lancer
+        act(() => {
+            fireEvent.click(getByText('Play'));
+        });
+
+        // Avancer 1 step
+        act(() => {
+            jest.advanceTimersByTime(500);
+        });
+        expect(getByText('1')).toBeTruthy();
+
+        // Pause
+        act(() => {
+            fireEvent.click(getByText(/pause/i));
+        });
+
+        // Avancer encore — ne doit PAS bouger
+        act(() => {
+            jest.advanceTimersByTime(1000);
+        });
+        expect(getByText('1')).toBeTruthy();
+        expect(getByText('Play')).toBeTruthy();
+
+        jest.useRealTimers();
+    });
+
     test('affiche une erreur si la partie est introuvable', async () => {
         mockGetGameWithTurns.mockResolvedValue(null);
         const { getByText } = render(
