@@ -4,10 +4,22 @@
 import React from 'react';
 import { render, fireEvent, act } from '@testing-library/react';
 import { SocketContext } from '@/shared/contexts/socket.context';
+import { AuthProvider } from '@/shared/contexts/auth.context';
 import { createMockSocket } from '@/__mocks__/socket.mock';
 import HomeScreen from '@/features/home/screens/home.screen';
 import OnlineGameController from '@/features/game/controllers/online-game.controller';
 import VsBotGameController from '@/features/game/controllers/vs-bot-game.controller';
+
+// Mock expo dependencies
+jest.mock('expo-linear-gradient', () => ({
+    LinearGradient: ({ children, ...props }: React.PropsWithChildren<Record<string, unknown>>) =>
+        <div data-testid="linear-gradient" {...props}>{children}</div>,
+}));
+
+jest.mock('@expo/vector-icons', () => ({
+    Feather: ({ name, ...props }: { name: string } & Record<string, unknown>) =>
+        <span data-testid={`icon-${name}`} {...props} />,
+}));
 
 // Mock les composants Board lourds
 jest.mock('@/features/game/components/board/grid/grid.component', () => {
@@ -53,9 +65,11 @@ const MiniApp: React.FC = () => {
 const renderApp = () => {
     const mockSocket = createMockSocket();
     const result = render(
-        <SocketContext.Provider value={mockSocket}>
-            <MiniApp />
-        </SocketContext.Provider>
+        <AuthProvider>
+            <SocketContext.Provider value={mockSocket}>
+                <MiniApp />
+            </SocketContext.Provider>
+        </AuthProvider>
     );
     return { ...result, mockSocket };
 };
@@ -64,14 +78,14 @@ describe('E2E — App Navigation', () => {
 
     it('affiche le menu principal au démarrage', () => {
         const { getByText } = renderApp();
-        expect(getByText(/Jouer en ligne/)).toBeTruthy();
+        expect(getByText(/Partie en ligne/)).toBeTruthy();
     });
 
     it('navigue vers la partie en ligne et émet queue.join', () => {
         const { getByText, mockSocket } = renderApp();
 
         act(() => {
-            fireEvent.click(getByText(/Jouer en ligne/));
+            fireEvent.click(getByText(/Partie en ligne/));
         });
 
         expect(mockSocket.emit).toHaveBeenCalledWith('queue.join');
@@ -82,7 +96,7 @@ describe('E2E — App Navigation', () => {
         const { getByText, mockSocket } = renderApp();
 
         act(() => {
-            fireEvent.click(getByText(/Jouer contre le bot/));
+            fireEvent.click(getByText(/Vs Bot/));
         });
 
         expect(mockSocket.emit).toHaveBeenCalledWith('game.vsbot');
@@ -94,7 +108,7 @@ describe('E2E — App Navigation', () => {
 
         // 1. Menu → Partie en ligne
         act(() => {
-            fireEvent.click(getByText(/Jouer en ligne/));
+            fireEvent.click(getByText(/Partie en ligne/));
         });
 
         // 2. Game start
@@ -119,7 +133,7 @@ describe('E2E — App Navigation', () => {
         act(() => {
             fireEvent.click(getByText('Retour au menu'));
         });
-        expect(getByText(/Jouer en ligne/)).toBeTruthy();
+        expect(getByText(/Partie en ligne/)).toBeTruthy();
     });
 
     it('flow E2E : menu → VsBot → fin → retour menu', () => {
@@ -127,7 +141,7 @@ describe('E2E — App Navigation', () => {
 
         // 1. Menu → VsBot
         act(() => {
-            fireEvent.click(getByText(/Jouer contre le bot/));
+            fireEvent.click(getByText(/Vs Bot/));
         });
 
         // 2. Game start
@@ -152,6 +166,6 @@ describe('E2E — App Navigation', () => {
         act(() => {
             fireEvent.click(getByText('Retour au menu'));
         });
-        expect(getByText(/Jouer en ligne/)).toBeTruthy();
+        expect(getByText(/Partie en ligne/)).toBeTruthy();
     });
 });
