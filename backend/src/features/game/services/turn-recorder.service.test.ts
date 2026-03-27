@@ -100,6 +100,25 @@ describe('TurnRecorderService', () => {
         });
     });
 
+    describe('alternance action/snapshot', () => {
+        test('enregistre un snapshot après une action (alternance action/snapshot)', () => {
+            const recorder = TurnRecorderService.createRecorder();
+
+            recorder.recordAction({ type: 'roll', playerNumber: 1, data: { dices: [], rollNumber: 1 } });
+            recorder.recordGameState({ currentTurn: 'player:1', grid: [], player1Score: 0, player2Score: 0, player1Tokens: 12, player2Tokens: 12 });
+
+            recorder.recordAction({ type: 'lock', playerNumber: 1, data: { diceId: 1, locked: true } });
+            recorder.recordGameState({ currentTurn: 'player:1', grid: [], player1Score: 0, player2Score: 0, player1Tokens: 12, player2Tokens: 12 });
+
+            const turns = recorder.getTurns();
+            expect(turns).toHaveLength(4);
+            expect(turns[0].type).toBe('roll');
+            expect(turns[1].type).toBe('snapshot');
+            expect(turns[2].type).toBe('lock');
+            expect(turns[3].type).toBe('snapshot');
+        });
+    });
+
     describe('toJSON', () => {
         test('retourne les tours sérialisables pour la BDD', () => {
             const recorder = TurnRecorderService.createRecorder();
