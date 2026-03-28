@@ -7,6 +7,7 @@ import { Feather } from '@expo/vector-icons';
 import { colors } from '@/shared/theme/colors';
 import ReplayService, { GameWithTurns, TurnAction } from '../services/replay.service';
 import ReplayBoard from '../components/replay-board/replay-board.component';
+import ReplayActionInfo from '../components/replay-board/replay-action-info/replay-action-info.component';
 
 interface NavigationProp {
     navigate: (screen: string) => void;
@@ -51,16 +52,20 @@ const ReplayController: React.FC<ReplayControllerProps> = ({ navigation, gameId 
     }, [gameId]);
 
     const turns = game?.turns ?? [];
-    const totalSteps = Math.floor(turns.length / 2);
+    const hasSnapshots = turns.some(t => t.type === 'snapshot');
+    const totalSteps = hasSnapshots ? Math.floor(turns.length / 2) : turns.length;
 
     const getActionForStep = (step: number): TurnAction | null => {
         if (step <= 0) return null;
-        const actionIndex = (step - 1) * 2;
-        return turns[actionIndex] ?? null;
+        if (hasSnapshots) {
+            const actionIndex = (step - 1) * 2;
+            return turns[actionIndex] ?? null;
+        }
+        return turns[step - 1] ?? null;
     };
 
     const getSnapshotForStep = (step: number): GameSnapshot | null => {
-        if (step <= 0) return null;
+        if (step <= 0 || !hasSnapshots) return null;
         const snapshotIndex = (step - 1) * 2 + 1;
         const snapshotTurn = turns[snapshotIndex];
         if (!snapshotTurn) return null;
@@ -185,9 +190,14 @@ const ReplayController: React.FC<ReplayControllerProps> = ({ navigation, gameId 
                 </View>
             </View>
 
-            {currentStep > 0 ? (
+            {currentStep > 0 && currentSnapshot ? (
                 <ReplayBoard
                     gameState={gameState}
+                    action={currentAction}
+                    playerName={playerName}
+                />
+            ) : currentStep > 0 && !hasSnapshots ? (
+                <ReplayActionInfo
                     action={currentAction}
                     playerName={playerName}
                 />
