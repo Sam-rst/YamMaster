@@ -203,7 +203,7 @@ describe('AuthScreen — Smart Login', () => {
             jest.advanceTimersByTime(2000);
         });
 
-        expect(mockNavigate).toHaveBeenCalledWith('HomeScreen');
+        expect(mockNavigate).toHaveBeenCalledWith('MainTabs');
     });
 
     test('affiche une erreur pour un mauvais mot de passe', async () => {
@@ -239,13 +239,13 @@ describe('AuthScreen — Smart Login', () => {
         expect(getByText(/Jouer en invité/i)).toBeTruthy();
     });
 
-    test('le mode invité navigue directement vers HomeScreen', async () => {
+    test('le mode invité navigue directement vers MainTabs', async () => {
         const { getByText } = renderAuthScreen();
 
         await act(async () => {
             fireEvent.click(getByText(/Jouer en invité/i));
         });
 
-        expect(mockNavigate).toHaveBeenCalledWith('HomeScreen');
+        expect(mockNavigate).toHaveBeenCalledWith('MainTabs');
     });
 });

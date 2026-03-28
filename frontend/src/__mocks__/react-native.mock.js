@@ -30,6 +30,11 @@ const ScrollView = ({ children, contentContainerStyle, style, testID, ...props }
 const ActivityIndicator = ({ size, color, style, testID, ...props }) =>
     React.createElement('View', { testID: testID || 'activity-indicator', style, ...props });
 
+function Modal({ children, visible, ...props }) {
+    if (!visible) return null;
+    return React.createElement('div', { 'data-testid': 'modal', ...props }, children);
+}
+
 const LogBox = {
     ignoreAllLogs: () => {},
 };
@@ -51,6 +56,7 @@ module.exports = {
     Button,
     ScrollView,
     ActivityIndicator,
+    Modal,
     StyleSheet,
     Platform,
     LogBox,

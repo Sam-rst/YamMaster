@@ -75,7 +75,7 @@ const AuthScreen: React.FC<Props> = ({ navigation }) => {
             setAuthUser(result.user);
 
             setTimeout(() => {
-                navigation.navigate('HomeScreen');
+                navigation.navigate('MainTabs');
             }, REDIRECT_DELAY_MS);
         } else {
             setError(result.error || 'Erreur inconnue');
@@ -84,7 +84,7 @@ const AuthScreen: React.FC<Props> = ({ navigation }) => {
 
     const handleGuestLogin = (): void => {
         setAuthUser({ id: '', username: 'Invité', createdAt: new Date().toISOString() });
-        navigation.navigate('HomeScreen');
+        navigation.navigate('MainTabs');
     };
 
     const isFormValid = username.trim().length >= 2 && password.length >= 1;
