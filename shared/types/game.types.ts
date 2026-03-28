@@ -54,6 +54,9 @@ export interface VictoryResult {
     reason: 'alignment5' | 'noTokens';
     player1Score: number;
     player2Score: number;
+    isWinner?: boolean;
+    isDraw?: boolean;
+    opponentName?: string;
 }
 
 export interface Scores {

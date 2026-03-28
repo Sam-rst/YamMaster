@@ -62,8 +62,7 @@ describe('Intégration — Online Game (controller + board)', () => {
             player1Score: 5,
             player2Score: 2,
         }));
-        expect(getByText('Fin de la partie')).toBeTruthy();
-        expect(getByText(/player:1/)).toBeTruthy();
+        expect(getByText(/Victoire/i)).toBeTruthy();
         expect(getByText(/Alignement de 5 pions/)).toBeTruthy();
     });
 
@@ -87,7 +86,7 @@ describe('Intégration — Online Game (controller + board)', () => {
         // Cycle 1
         act(() => simulateGameStart(mockSocket));
         act(() => simulateGameEnd(mockSocket));
-        expect(getByText('Fin de la partie')).toBeTruthy();
+        expect(getByText(/Victoire|Défaite|Égalité/i)).toBeTruthy();
 
         // Rejouer
         const { fireEvent: fe } = require('@testing-library/react');
@@ -114,7 +113,7 @@ describe('Intégration — Online Game (controller + board)', () => {
 
         act(() => {
             const { fireEvent: fe } = require('@testing-library/react');
-            fe.click(getByText('Retour au menu'));
+            fe.click(getByText('Menu Principal'));
         });
 
         expect(mockNavigate).toHaveBeenCalledWith('HomeScreen');

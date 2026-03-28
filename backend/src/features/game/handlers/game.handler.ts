@@ -288,9 +288,21 @@ const saveGameResult = (game: Game, victory: VictoryResult): void => {
 
 const endGame = (game: Game, games: Game[], victory: unknown): true => {
     clearInterval(game.gameInterval);
-    emitToBothPlayers(game, 'game.end', () => victory);
+    const v = victory as VictoryResult;
+    const p1Socket = game.player1Socket as unknown as Record<string, unknown>;
+    const p2Socket = game.player2Socket as unknown as Record<string, unknown>;
+    const p1Name = (p1Socket.handshake as Record<string, Record<string, string>>)?.query?.username || 'Joueur 1';
+    const p2Id = String(game.player2Socket.id || '');
+    const p2Name = p2Id.startsWith('bot-') ? 'Bot' : ((p2Socket.handshake as Record<string, Record<string, string>>)?.query?.username || 'Joueur 2');
+
+    emitToBothPlayers(game, 'game.end', (player) => ({
+        ...v,
+        isWinner: v.winner === player,
+        isDraw: !v.winner,
+        opponentName: player === 'player:1' ? p2Name : p1Name,
+    }));
     removeGameFromList(game, games);
-    saveGameResult(game, victory as VictoryResult);
+    saveGameResult(game, v);
 
     logger.info('Partie terminée', { gameId: game.idGame });
     return true;

@@ -1,9 +1,10 @@
 // frontend/src/features/game/controllers/vs-bot-game.controller.tsx
 
 import React, { useEffect, useState, useContext } from 'react';
-import { StyleSheet, Text, View, TouchableOpacity, Platform, ActivityIndicator } from 'react-native';
+import { StyleSheet, Text, View, Platform, ActivityIndicator } from 'react-native';
 import { SocketContext } from '@/shared/contexts/socket.context';
 import Board from '../components/board/board.component';
+import EndScreen from '../components/board/end-screen/end-screen.component';
 import { colors } from '@/shared/theme/colors';
 import type { Socket } from 'socket.io-client';
 import type { VictoryResult } from '@shared/types/game.types';
@@ -60,44 +61,20 @@ const VsBotGameController: React.FC<VsBotGameControllerProps> = ({ navigation })
             )}
 
             {gameResult && (
-                <View style={styles.endContainer}>
-                    <Text style={styles.endTitle}>Fin de la partie</Text>
-                    {gameResult.winner ? (
-                        <Text style={styles.endResult}>
-                            Vainqueur : {gameResult.winner === 'player:1' ? 'Vous' : 'Bot'}
-                        </Text>
-                    ) : (
-                        <Text style={styles.endResult}>Égalité !</Text>
-                    )}
-                    <View style={styles.scoreCard}>
-                        <Text style={styles.scoreText}>
-                            Votre score : {gameResult.player1Score} — Bot : {gameResult.player2Score}
-                        </Text>
-                        <Text style={styles.reasonText}>
-                            {gameResult.reason === 'alignment5' ? 'Alignement de 5 pions' : 'Plus de pions disponibles'}
-                        </Text>
-                    </View>
-                    <View style={styles.endButtons}>
-                        <TouchableOpacity
-                            style={styles.primaryButton}
-                            onPress={() => navigation?.navigate('HomeScreen')}
-                            activeOpacity={0.85}
-                        >
-                            <Text style={styles.primaryButtonText}>Retour au menu</Text>
-                        </TouchableOpacity>
-                        <TouchableOpacity
-                            style={styles.secondaryButton}
-                            onPress={() => {
-                                setGameResult(null);
-                                setInGame(false);
-                                socket.emit('game.vsbot');
-                            }}
-                            activeOpacity={0.7}
-                        >
-                            <Text style={styles.secondaryButtonText}>Rejouer</Text>
-                        </TouchableOpacity>
-                    </View>
-                </View>
+                <EndScreen
+                    isWin={gameResult.isWinner ?? gameResult.winner === 'player:1'}
+                    isDraw={gameResult.isDraw ?? !gameResult.winner}
+                    playerScore={gameResult.player1Score}
+                    opponentScore={gameResult.player2Score}
+                    reason={gameResult.reason}
+                    opponentName={gameResult.opponentName}
+                    onReplay={() => {
+                        setGameResult(null);
+                        setInGame(false);
+                        socket.emit('game.vsbot');
+                    }}
+                    onHome={() => navigation?.navigate('HomeScreen')}
+                />
             )}
         </View>
     );

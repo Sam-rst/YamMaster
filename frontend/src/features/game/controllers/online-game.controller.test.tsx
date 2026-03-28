@@ -109,8 +109,7 @@ describe('OnlineGameController', () => {
         });
 
         expect(queryByText('MockBoard')).toBeNull();
-        expect(getByText(/Fin de la partie/)).toBeTruthy();
-        expect(getByText(/player:1/)).toBeTruthy();
+        expect(getByText(/Victoire|Défaite|Égalité/i)).toBeTruthy();
     });
 
     it('affiche un bouton retour au menu après game.end', () => {
@@ -135,7 +134,7 @@ describe('OnlineGameController', () => {
             });
         });
 
-        expect(getByText('Retour au menu')).toBeTruthy();
+        expect(getByText('Menu Principal')).toBeTruthy();
     });
 
     it('le bouton "Retour au menu" navigue vers HomeScreen en état waiting', () => {
@@ -212,7 +211,7 @@ describe('OnlineGameController', () => {
             });
         });
 
-        fireEvent.click(getByText('Retour au menu'));
+        fireEvent.click(getByText('Menu Principal'));
         expect(navigation.navigate).toHaveBeenCalledWith('HomeScreen');
     });
 

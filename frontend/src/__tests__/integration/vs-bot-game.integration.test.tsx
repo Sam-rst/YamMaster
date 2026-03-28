@@ -54,8 +54,7 @@ describe('Intégration — VsBot Game (controller + board)', () => {
             player1Score: 7,
             player2Score: 3,
         }));
-        expect(getByText('Fin de la partie')).toBeTruthy();
-        expect(getByText(/Vous/)).toBeTruthy();
+        expect(getByText(/Victoire/i)).toBeTruthy();
 
         // 4. Rejouer
         act(() => {
@@ -89,7 +88,7 @@ describe('Intégration — VsBot Game (controller + board)', () => {
             player2Score: 5,
         }));
 
-        expect(getByText(/Vainqueur : Bot/)).toBeTruthy();
+        expect(getByText(/Défaite/i)).toBeTruthy();
         expect(getByText(/Plus de pions disponibles/)).toBeTruthy();
     });
 
@@ -103,7 +102,7 @@ describe('Intégration — VsBot Game (controller + board)', () => {
         act(() => simulateGameEnd(mockSocket));
 
         act(() => {
-            fireEvent.click(getByText('Retour au menu'));
+            fireEvent.click(getByText('Menu Principal'));
         });
 
         expect(mockNavigate).toHaveBeenCalledWith('HomeScreen');

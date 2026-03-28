@@ -79,8 +79,8 @@ describe('VsBotGameController', () => {
         });
 
         expect(queryByText('MockBoard')).toBeNull();
-        expect(getByText(/Fin de la partie/)).toBeTruthy();
-        expect(getByText('Retour au menu')).toBeTruthy();
+        expect(getByText(/Victoire|Défaite|Égalité/i)).toBeTruthy();
+        expect(getByText('Menu Principal')).toBeTruthy();
         expect(getByText('Rejouer')).toBeTruthy();
     });
 
@@ -141,11 +141,11 @@ describe('VsBotGameController', () => {
             });
         });
 
-        fireEvent.click(getByText('Retour au menu'));
+        fireEvent.click(getByText('Menu Principal'));
         expect(navigation.navigate).toHaveBeenCalledWith('HomeScreen');
     });
 
-    it('game.end avec winner player:2 affiche "Bot"', () => {
+    it('game.end avec winner player:2 affiche "Défaite"', () => {
         const { getByText } = render(
             <SocketContext.Provider value={mockSocket}>
                 <VsBotGameController />
@@ -164,7 +164,7 @@ describe('VsBotGameController', () => {
             });
         });
 
-        expect(getByText(/Vainqueur.*Bot/)).toBeTruthy();
+        expect(getByText(/Défaite/i)).toBeTruthy();
     });
 
     it('game.end sans vainqueur affiche "Égalité !"', () => {

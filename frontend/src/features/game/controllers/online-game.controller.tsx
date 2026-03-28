@@ -4,6 +4,7 @@ import React, { useEffect, useState, useContext } from 'react';
 import { StyleSheet, Text, View, TouchableOpacity, Platform, ActivityIndicator } from 'react-native';
 import { SocketContext } from '@/shared/contexts/socket.context';
 import Board from '../components/board/board.component';
+import EndScreen from '../components/board/end-screen/end-screen.component';
 import { colors } from '@/shared/theme/colors';
 import type { Socket } from 'socket.io-client';
 import type { VictoryResult } from '@shared/types/game.types';
@@ -71,7 +72,8 @@ const OnlineGameController: React.FC<OnlineGameControllerProps> = ({ navigation 
                         onPress={() => navigation?.navigate('HomeScreen')}
                         activeOpacity={0.7}
                     >
-                        <Text style={styles.secondaryButtonText}>Retour au menu</Text>
+                        <Text style={styles.secondaryButtonText}
+                            onPress={() => navigation?.navigate('HomeScreen')}>Retour au menu</Text>
                     </TouchableOpacity>
                 </View>
             )}
@@ -85,51 +87,28 @@ const OnlineGameController: React.FC<OnlineGameControllerProps> = ({ navigation 
                         onPress={() => navigation?.navigate('HomeScreen')}
                         activeOpacity={0.7}
                     >
-                        <Text style={styles.secondaryButtonText}>Retour au menu</Text>
+                        <Text style={styles.secondaryButtonText}
+                            onPress={() => navigation?.navigate('HomeScreen')}>Retour au menu</Text>
                     </TouchableOpacity>
                 </View>
             )}
 
             {gameResult && (
-                <View style={styles.endContainer}>
-                    <Text style={styles.endTitle}>Fin de la partie</Text>
-                    {gameResult.winner ? (
-                        <Text style={styles.endResult}>
-                            Vainqueur : {gameResult.winner}
-                        </Text>
-                    ) : (
-                        <Text style={styles.endResult}>Égalité !</Text>
-                    )}
-                    <View style={styles.scoreCard}>
-                        <Text style={styles.scoreText}>
-                            Score J1 : {gameResult.player1Score} — Score J2 : {gameResult.player2Score}
-                        </Text>
-                        <Text style={styles.reasonText}>
-                            {gameResult.reason === 'alignment5' ? 'Alignement de 5 pions' : 'Plus de pions disponibles'}
-                        </Text>
-                    </View>
-                    <View style={styles.endButtons}>
-                        <TouchableOpacity
-                            style={styles.primaryButton}
-                            onPress={() => navigation?.navigate('HomeScreen')}
-                            activeOpacity={0.85}
-                        >
-                            <Text style={styles.primaryButtonText}>Retour au menu</Text>
-                        </TouchableOpacity>
-                        <TouchableOpacity
-                            style={styles.secondaryButton}
-                            onPress={() => {
-                                setGameResult(null);
-                                socket.emit('queue.join');
-                                setInQueue(false);
-                                setInGame(false);
-                            }}
-                            activeOpacity={0.7}
-                        >
-                            <Text style={styles.secondaryButtonText}>Rejouer</Text>
-                        </TouchableOpacity>
-                    </View>
-                </View>
+                <EndScreen
+                    isWin={gameResult.isWinner ?? gameResult.winner === 'player:1'}
+                    isDraw={gameResult.isDraw ?? !gameResult.winner}
+                    playerScore={gameResult.player1Score}
+                    opponentScore={gameResult.player2Score}
+                    reason={gameResult.reason}
+                    opponentName={gameResult.opponentName}
+                    onReplay={() => {
+                        setGameResult(null);
+                        socket.emit('queue.join');
+                        setInQueue(false);
+                        setInGame(false);
+                    }}
+                    onHome={() => navigation?.navigate('HomeScreen')}
+                />
             )}
         </View>
     );

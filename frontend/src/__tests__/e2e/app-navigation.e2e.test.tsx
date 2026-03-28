@@ -116,11 +116,11 @@ describe('E2E — App Navigation', () => {
                 player2Score: 2,
             });
         });
-        expect(getByText('Fin de la partie')).toBeTruthy();
+        expect(getByText(/Victoire/i)).toBeTruthy();
 
         // 4. Retour au menu
         act(() => {
-            fireEvent.click(getByText('Retour au menu'));
+            fireEvent.click(getByText('Menu Principal'));
         });
         expect(getByText(/Partie en ligne/)).toBeTruthy();
     });
@@ -149,11 +149,11 @@ describe('E2E — App Navigation', () => {
                 player2Score: 5,
             });
         });
-        expect(getByText(/Vainqueur : Bot/)).toBeTruthy();
+        expect(getByText(/Défaite/i)).toBeTruthy();
 
         // 4. Retour au menu
         act(() => {
-            fireEvent.click(getByText('Retour au menu'));
+            fireEvent.click(getByText('Menu Principal'));
         });
         expect(getByText(/Partie en ligne/)).toBeTruthy();
     });
