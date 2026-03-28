@@ -13,6 +13,8 @@ interface ReplayScoresProps {
     player1Tokens: number;
     player2Tokens: number;
     currentTurn: string;
+    player1Name?: string;
+    player2Name?: string;
 }
 
 const ReplayScores: React.FC<ReplayScoresProps> = ({
@@ -21,6 +23,8 @@ const ReplayScores: React.FC<ReplayScoresProps> = ({
     player1Tokens,
     player2Tokens,
     currentTurn,
+    player1Name = 'J1',
+    player2Name = 'J2',
 }) => {
     const isPlayer1Active = currentTurn === 'player:1';
     const isPlayer2Active = currentTurn === 'player:2';
@@ -28,7 +32,7 @@ const ReplayScores: React.FC<ReplayScoresProps> = ({
     return (
         <View style={styles.container}>
             <View style={[styles.playerColumn, isPlayer1Active && styles.activeColumn]}>
-                <Text style={scoreTextStyles.label}>J1</Text>
+                <Text style={scoreTextStyles.label}>{player1Name}</Text>
                 <Text style={[scoreTextStyles.value, isPlayer1Active && styles.activeScore]}>
                     {player1Score}
                 </Text>
@@ -41,7 +45,7 @@ const ReplayScores: React.FC<ReplayScoresProps> = ({
             <Text style={styles.versus}>VS</Text>
 
             <View style={[styles.playerColumn, isPlayer2Active && styles.activeColumn]}>
-                <Text style={scoreTextStyles.label}>J2</Text>
+                <Text style={scoreTextStyles.label}>{player2Name}</Text>
                 <Text style={[scoreTextStyles.value, isPlayer2Active && styles.activeScore]}>
                     {player2Score}
                 </Text>

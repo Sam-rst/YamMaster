@@ -131,6 +131,9 @@ const ReplayController: React.FC<ReplayControllerProps> = ({ navigation, gameId 
         return player.user?.username || `Joueur ${playerNumber}`;
     };
 
+    const player1Name = getPlayerName(1);
+    const player2Name = getPlayerName(2);
+
     const goNext = (): void => {
         if (currentStep < totalSteps) setCurrentStep(currentStep + 1);
     };
@@ -195,6 +198,8 @@ const ReplayController: React.FC<ReplayControllerProps> = ({ navigation, gameId 
                     gameState={gameState}
                     action={currentAction}
                     playerName={playerName}
+                    player1Name={player1Name}
+                    player2Name={player2Name}
                 />
             ) : currentStep > 0 && !hasSnapshots ? (
                 <ReplayActionInfo

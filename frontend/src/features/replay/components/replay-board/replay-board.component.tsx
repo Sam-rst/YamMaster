@@ -54,9 +54,11 @@ interface ReplayBoardProps {
     gameState: GameState;
     action: ReplayAction | null;
     playerName: string;
+    player1Name?: string;
+    player2Name?: string;
 }
 
-const ReplayBoard: React.FC<ReplayBoardProps> = ({ gameState, action, playerName }) => {
+const ReplayBoard: React.FC<ReplayBoardProps> = ({ gameState, action, playerName, player1Name, player2Name }) => {
     return (
         <View style={styles.container}>
             <ReplayActionInfo action={action} playerName={playerName} />
@@ -66,6 +68,8 @@ const ReplayBoard: React.FC<ReplayBoardProps> = ({ gameState, action, playerName
                 player1Tokens={gameState.player1Tokens}
                 player2Tokens={gameState.player2Tokens}
                 currentTurn={gameState.currentTurn}
+                player1Name={player1Name}
+                player2Name={player2Name}
             />
             <ReplayGrid grid={gameState.grid} />
             <ReplayDice
