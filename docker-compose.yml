@@ -1,17 +1,35 @@
 services:
-  backend:
-    build: ./backend
-    ports:
-      - "3000:3000"
+  postgres:
+    image: postgres:16-alpine
     environment:
-      - PORT=3000
-      - DEV_MODE=false
+      POSTGRES_USER: yammaster
+      POSTGRES_PASSWORD: yammaster
+      POSTGRES_DB: yammaster
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
     restart: unless-stopped
 
-  frontend:
-    build: ./frontend
-    ports:
-      - "8080:8080"
-    depends_on:
-      - backend
-    restart: unless-stopped
+  # backend:
+  #   build: ./backend
+  #   ports:
+  #     - "3000:3000"
+  #   environment:
+  #     - PORT=3000
+  #     - DEV_MODE=false
+  #     - DATABASE_URL=postgresql://yammaster:yammaster@postgres:5432/yammaster
+  #   depends_on:
+  #     - postgres
+  #   restart: unless-stopped
+
+  # frontend:
+  #   build: ./frontend
+  #   ports:
+  #     - "8080:8080"
+  #   depends_on:
+  #     - backend
+  #   restart: unless-stopped
+
+volumes:
+  postgres_data:
