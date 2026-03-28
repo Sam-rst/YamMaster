@@ -11,5 +11,7 @@ module.exports = {
         '!src/**/*.test.ts',
         '!src/**/*.d.ts',
         '!src/index.ts',
+        '!src/__tests__/helpers/**',
+        '!src/generated/**',
     ],
 };

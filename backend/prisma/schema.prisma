@@ -1,0 +1,96 @@
+// Prisma Schema — Yam Master
+
+generator client {
+  provider = "prisma-client"
+  output   = "../src/generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+// ================================================================
+// USER — Authentification et profil joueur
+// ================================================================
+
+model User {
+  id        String   @id @default(uuid())
+  username  String   @unique
+  password  String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // Relations
+  gamePlayers GamePlayer[]
+
+  @@map("users")
+}
+
+// ================================================================
+// GAME — Partie jouée
+// ================================================================
+
+model Game {
+  id        String     @id @default(uuid())
+  mode      GameMode
+  status    GameStatus @default(IN_PROGRESS)
+  reason    String?
+  createdAt DateTime   @default(now())
+  endedAt   DateTime?
+
+  // Données de replay (JSON des tours)
+  turns Json?
+
+  // Relations
+  players GamePlayer[]
+
+  @@map("games")
+}
+
+// ================================================================
+// GAME_PLAYER — Participation d'un joueur à une partie (table de jointure)
+// Scalable : supporte 2, 4, N joueurs par partie
+// ================================================================
+
+model GamePlayer {
+  id           String           @id @default(uuid())
+
+  // Relation vers la partie
+  gameId       String
+  game         Game             @relation(fields: [gameId], references: [id], onDelete: Cascade)
+
+  // Relation vers le joueur (null si bot)
+  userId       String?
+  user         User?            @relation(fields: [userId], references: [id], onDelete: SetNull)
+
+  // Position et résultat
+  playerNumber Int              // 1, 2, 3, 4...
+  isBot        Boolean          @default(false)
+  score        Int              @default(0)
+  tokensLeft   Int              @default(12)
+  result       GamePlayerResult @default(PENDING)
+
+  @@unique([gameId, playerNumber])
+  @@map("game_players")
+}
+
+// ================================================================
+// ENUMS
+// ================================================================
+
+enum GameMode {
+  ONLINE
+  VS_BOT
+}
+
+enum GameStatus {
+  IN_PROGRESS
+  FINISHED
+}
+
+enum GamePlayerResult {
+  PENDING
+  WIN
+  LOSE
+  DRAW
+}
