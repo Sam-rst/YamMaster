@@ -1,6 +1,6 @@
 {
-  "name": "socket-io-expo-backend",
-  "version": "1.0.0",
+  "name": "yammaster-backend",
+  "version": "1.2.0",
   "main": "dist/index.js",
   "scripts": {
     "build": "tsc",
