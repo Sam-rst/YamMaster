@@ -1,7 +1,8 @@
 import React, { useState } from 'react';
-import { View, Text, ScrollView, StyleSheet, Platform } from 'react-native';
+import { View, Text, ScrollView, StyleSheet, Platform, TouchableOpacity } from 'react-native';
 import { colors } from '@/shared/theme/colors';
 import RulesSection from '../rules-section/rules-section.component';
+import PonderModal from '../ponder/ponder-modal/ponder-modal.component';
 
 const fontDisplay = Platform.select({ web: '"Outfit", sans-serif', default: 'Outfit' });
 const fontBody = Platform.select({ web: '"Inter", sans-serif', default: 'Inter' });
@@ -125,6 +126,7 @@ const SECTIONS = [
 
 const RulesContent: React.FC = () => {
     const [openSection, setOpenSection] = useState<string | null>(null);
+    const [ponderSceneId, setPonderSceneId] = useState<string | null>(null);
 
     const handleToggle = (sectionId: string): void => {
         setOpenSection((current) => (current === sectionId ? null : sectionId));
@@ -142,19 +144,30 @@ const RulesContent: React.FC = () => {
                 </Text>
             </View>
 
-            <View style={styles.sections}>
-                {SECTIONS.map(({ id, icon, title, Content }) => (
-                    <RulesSection
-                        key={id}
-                        icon={icon}
-                        title={title}
-                        isOpen={openSection === id}
-                        onToggle={() => handleToggle(id)}
-                    >
-                        <Content />
-                    </RulesSection>
-                ))}
-            </View>
+            {ponderSceneId === null && (
+                <View style={styles.sections}>
+                    {SECTIONS.map(({ id, icon, title, Content }) => (
+                        <RulesSection
+                            key={id}
+                            icon={icon}
+                            title={title}
+                            isOpen={openSection === id}
+                            onToggle={() => handleToggle(id)}
+                        >
+                            <Content />
+                            <TouchableOpacity style={styles.ponderButton} onPress={() => setPonderSceneId(id)}>
+                                <Text style={styles.ponderButtonText}>▶ Voir en action</Text>
+                            </TouchableOpacity>
+                        </RulesSection>
+                    ))}
+                </View>
+            )}
+
+            <PonderModal
+                visible={ponderSceneId !== null}
+                onClose={() => setPonderSceneId(null)}
+                sceneId={ponderSceneId ?? 'dice'}
+            />
         </ScrollView>
     );
 };
@@ -248,5 +261,20 @@ const styles = StyleSheet.create({
         color: colors.textSecondary,
         lineHeight: 18,
         fontStyle: 'italic',
+    },
+    ponderButton: {
+        alignSelf: 'center',
+        borderWidth: 1,
+        borderColor: 'rgba(0,210,255,0.3)',
+        borderRadius: 20,
+        paddingHorizontal: 16,
+        paddingVertical: 8,
+        marginTop: 12,
+    },
+    ponderButtonText: {
+        fontFamily: fontBody,
+        fontSize: 12,
+        fontWeight: '700',
+        color: colors.blue,
     },
 });

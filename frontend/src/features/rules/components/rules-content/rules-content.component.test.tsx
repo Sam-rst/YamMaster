@@ -38,4 +38,17 @@ describe('RulesContent', () => {
         expect(queryByText(/jusqu'à 3 lancers/i)).toBeNull();
         expect(getByText(/Brelan/i)).toBeTruthy();
     });
+
+    test('affiche le bouton "Voir en action" dans une section ouverte', () => {
+        const { getByText, getAllByText } = render(<RulesContent />);
+        fireEvent.click(getByText('Les Dés'));
+        expect(getAllByText(/Voir en action/).length).toBeGreaterThanOrEqual(1);
+    });
+
+    test('cliquer "Voir en action" ouvre le PonderModal', () => {
+        const { getByText, getAllByText } = render(<RulesContent />);
+        fireEvent.click(getByText('Les Dés'));
+        fireEvent.click(getAllByText(/Voir en action/)[0]);
+        expect(getByText(/Les Dés/)).toBeTruthy();
+    });
 });
