@@ -1,13 +1,13 @@
 const React = require('react');
 
 const View = ({ children, style, testID, ...props }) =>
-    React.createElement('View', { style, testID, ...props }, children);
+    React.createElement('View', { style, 'data-testid': testID, ...props }, children);
 
 const Text = ({ children, style, testID, ...props }) =>
-    React.createElement('Text', { style, testID, ...props }, children);
+    React.createElement('Text', { style, 'data-testid': testID, ...props }, children);
 
 const TouchableOpacity = ({ children, onPress, disabled, style, testID, ...props }) =>
-    React.createElement('TouchableOpacity', { onClick: disabled ? undefined : onPress, testID, style, ...props }, children);
+    React.createElement('TouchableOpacity', { onClick: disabled ? undefined : onPress, 'data-testid': testID, style, ...props }, children);
 
 const Button = ({ title, onPress, disabled, testID, ...props }) =>
     React.createElement('TouchableOpacity', { onClick: disabled ? undefined : onPress, testID, ...props },
