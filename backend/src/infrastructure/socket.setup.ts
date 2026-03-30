@@ -34,6 +34,7 @@ export const isCurrentPlayerTurn = (game: Game, socketId: string): boolean => {
 
 import { authRouter } from '../features/auth/routes/auth.routes';
 import { historyRouter } from '../features/history/routes/history.routes';
+import { profileRouter } from '../features/profile/routes/profile.routes';
 
 export const createServer = (): { app: ReturnType<typeof express>; server: http.Server; io: Server } => {
     const app = express();
@@ -41,6 +42,7 @@ export const createServer = (): { app: ReturnType<typeof express>; server: http.
     app.use(express.json());
     app.use('/api/auth', authRouter);
     app.use('/api/history', historyRouter);
+    app.use('/api/profile', profileRouter);
 
     const server = http.createServer(app);
     const io = new Server(server, {
