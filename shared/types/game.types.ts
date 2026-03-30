@@ -63,3 +63,5 @@ export interface Scores {
     player1Score: number;
     player2Score: number;
 }
+
+export type BotDifficulty = 'EASY' | 'MEDIUM' | 'HARD';
