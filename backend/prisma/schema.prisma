@@ -69,6 +69,7 @@ model GamePlayer {
   score        Int              @default(0)
   tokensLeft   Int              @default(12)
   result       GamePlayerResult @default(PENDING)
+  difficulty   BotDifficulty?   // null pour les joueurs humains
 
   @@unique([gameId, playerNumber])
   @@map("game_players")
@@ -93,4 +94,10 @@ enum GamePlayerResult {
   WIN
   LOSE
   DRAW
+}
+
+enum BotDifficulty {
+  EASY
+  MEDIUM
+  HARD
 }
