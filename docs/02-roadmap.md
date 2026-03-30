@@ -100,15 +100,17 @@ Priorisation basée sur la grille d'évaluation (14pts obligatoires + 6pts au ch
 ### Réalisé
 - [x] Page Règles du jeu — accordéon avec 6 sections, accessible via tab bar + modal en partie
 - [x] Mode Ponder — animations step-by-step pour chaque section des règles (5 scènes : Dés, Combinaisons, Actions Spéciales, Grille, Scoring) avec autoplay hybride
+- [x] Niveaux de difficulté bot — 3 stratégies (Débutant/Tactique/Maître IA) avec écran de sélection, stockage BDD et scoring intelligent (alignements + blocage)
+- [x] Splash screen Neon Nocturne (mesh gradient, branding)
+- [x] Bottom tab bar extensible (Accueil / Règles)
 - [x] Versioning SemVer (frontend + backend v1.2.0)
 - [x] README professionnel + licence GPL v3
 - [x] CI/CD GitHub Actions par environnement (develop, recette, main)
 
 ### À faire
-- [ ] Mode classé MMR (score Elo, classement des joueurs)
 - [ ] Leaderboard (classement global)
 - [ ] Profil joueur (stats, avatar)
-- [ ] Niveaux de difficulté bot (Facile / Intermédiaire / Pro)
+- [ ] Mode classé MMR (score Elo, classement des joueurs)
 - [ ] Notifications mobiles natives (tour adverse terminé)
 - [ ] Interface Shi/Fu/Mi pour déterminer qui commence
 
@@ -122,7 +124,7 @@ Phase 2    Mode VS Bot             ██████████  FAIT
 Phase 3A   Auth + BDD              ██████████  FAIT
 Phase 3B   UI Neon Nocturne        ██████████  FAIT
 Phase 3C   Replay de parties       ██████████  FAIT
-Phase 4    Bonus créatifs          ██████░░░░  EN COURS
+Phase 4    Bonus créatifs          ████████░░  EN COURS
 ```
 
 Approche **TDD** (Red → Green → Blue) et **gitflow** strict sur toutes les phases.
