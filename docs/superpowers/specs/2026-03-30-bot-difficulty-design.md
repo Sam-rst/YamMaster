@@ -109,7 +109,7 @@ export type BotDifficulty = 'EASY' | 'MEDIUM' | 'HARD';
 
 ## Frontend
 
-### Écran de sélection de difficulté
+### Écran de sélection de difficulté (basé sur la maquette Stitch)
 
 Nouvel écran `BotDifficultyScreen` accessible depuis le Home (remplace la navigation directe vers VsBotGameScreen).
 
@@ -120,22 +120,30 @@ frontend/src/features/game/screens/bot-difficulty.screen.tsx
 frontend/src/features/game/screens/bot-difficulty.screen.test.tsx
 ```
 
-#### Contenu de l'écran
+#### Layout de l'écran (maquette Stitch "VS Bot Difficulty - Néon Style")
 
-- Header avec bouton retour + titre "Vs Bot"
-- 3 cartes de difficulté empilées verticalement :
+1. **Header** : flèche retour (Feather `arrow-left`) + titre "Yam Master"
+2. **Sous-titre** : "Mode Entraînement" centré
+3. **Section** : "Choisir la Difficulté" + description "Affrontez nos maîtres du Yam."
+4. **3 cartes de difficulté** empilées verticalement :
 
-| Carte | Icône | Nom | Description | Couleur |
-|-------|-------|-----|-------------|---------|
-| Facile | `smile` | Bot Débutant | Joue simplement, ne cherche pas les combos fortes ni les alignements | `colors.success` (vert) |
-| Intermédiaire | `target` | Bot Stratège | Priorise les bonnes combinaisons et place ses pions intelligemment | `colors.gold` (doré) |
-| Pro | `zap` | Bot Champion | Stratégie optimale, bloque vos alignements, exploite toutes les mécaniques | `colors.primary` (coral) |
+| Carte | Étoiles | Nom | Sous-titre | Description | Couleur |
+|-------|---------|-----|------------|-------------|---------|
+| Facile | ★ | Débutant | Facile | Idéal pour se chauffer. Le bot fait des erreurs simples. | `colors.success` (vert) |
+| Intermédiaire | ★★ | Tactique | Intermédiaire | Un défi équilibré. Ce bot connaît ses probabilités. | `colors.gold` (doré) |
+| Pro | ★★★ | Maître IA | Pro | Aucun droit à l'erreur. Ce bot joue pour le Grand Yam. | `colors.primary` (coral) |
+
+5. **Section XP multiplicateurs** (Facile 1x, Pro 3x) — **désactivée pour l'instant**, sera implémentée avec le système de monnaie virtuelle. Pas affichée dans cette version.
 
 - Au clic sur une carte → navigation vers VsBotGameScreen avec `{ difficulty }` en param
 
 #### Style Neon Nocturne
 
-Cartes glass avec bordure teintée de la couleur du niveau. Icône Feather dans un cercle coloré (même pattern que les action cards du Home).
+- Fond : `colors.background` avec mesh gradient subtil (même pattern que le splash screen)
+- Cartes : glass card (`colors.glass` + `colors.border`), bordure teintée de la couleur du niveau au hover/actif
+- Étoiles : remplies dans la couleur du niveau
+- Sous-titre du niveau (Facile/Intermédiaire/Pro) en uppercase, letterSpacing
+- Fonts : Outfit (titres, noms de bot), Inter (descriptions)
 
 ### Modification du flow de navigation
 
