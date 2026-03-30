@@ -40,7 +40,7 @@ describe('ProfileService', () => {
     describe('getProfileStats', () => {
 
         test('calcule les stats avec des résultats mixtes', async () => {
-            mockPrisma.user.findUnique.mockResolvedValue({ id: 'user-1', username: 'alice', avatar: '🎲' });
+            mockPrisma.user.findUnique.mockResolvedValue({ id: 'user-1', username: 'alice', avatar: '🎲', createdAt: new Date('2024-03-14') });
             mockPrisma.gamePlayer.findMany.mockResolvedValue(buildPlayers([
                 { result: 'WIN', score: 10, isBot: false, mode: 'ONLINE' },
                 { result: 'WIN', score: 8, isBot: false, mode: 'ONLINE' },
@@ -51,11 +51,11 @@ describe('ProfileService', () => {
             const stats = await ProfileService.getProfileStats('user-1');
 
             expect(stats).not.toBeNull();
-            expect(stats!.totalGames).toBe(4);
-            expect(stats!.wins).toBe(2);
-            expect(stats!.losses).toBe(1);
-            expect(stats!.draws).toBe(1);
-            expect(stats!.winRate).toBeCloseTo(50);
+            expect(stats!.stats.totalGames).toBe(4);
+            expect(stats!.stats.wins).toBe(2);
+            expect(stats!.stats.losses).toBe(1);
+            expect(stats!.stats.draws).toBe(1);
+            expect(stats!.stats.winRate).toBeCloseTo(50);
         });
 
         test('retourne null pour un utilisateur inconnu', async () => {
@@ -67,7 +67,7 @@ describe('ProfileService', () => {
         });
 
         test('attribue le rang Bronze pour 3 victoires', async () => {
-            mockPrisma.user.findUnique.mockResolvedValue({ id: 'user-1', username: 'alice', avatar: '🎲' });
+            mockPrisma.user.findUnique.mockResolvedValue({ id: 'user-1', username: 'alice', avatar: '🎲', createdAt: new Date('2024-03-14') });
             mockPrisma.gamePlayer.findMany.mockResolvedValue(buildPlayers([
                 { result: 'WIN', score: 10, isBot: false },
                 { result: 'WIN', score: 8, isBot: false },
@@ -76,21 +76,21 @@ describe('ProfileService', () => {
 
             const stats = await ProfileService.getProfileStats('user-1');
 
-            expect(stats!.rank).toContain('Bronze');
+            expect(stats!.rank.name).toBe('Bronze');
         });
 
         test('attribue le rang Or pour 20 victoires', async () => {
-            mockPrisma.user.findUnique.mockResolvedValue({ id: 'user-1', username: 'alice', avatar: '🎲' });
+            mockPrisma.user.findUnique.mockResolvedValue({ id: 'user-1', username: 'alice', avatar: '🎲', createdAt: new Date('2024-03-14') });
             const wins = Array.from({ length: 20 }, () => ({ result: 'WIN', score: 10, isBot: false }));
             mockPrisma.gamePlayer.findMany.mockResolvedValue(buildPlayers(wins));
 
             const stats = await ProfileService.getProfileStats('user-1');
 
-            expect(stats!.rank).toContain('Or');
+            expect(stats!.rank.name).toBe('Or');
         });
 
         test('calcule la meilleure série de victoires consécutives', async () => {
-            mockPrisma.user.findUnique.mockResolvedValue({ id: 'user-1', username: 'alice', avatar: '🎲' });
+            mockPrisma.user.findUnique.mockResolvedValue({ id: 'user-1', username: 'alice', avatar: '🎲', createdAt: new Date('2024-03-14') });
             mockPrisma.gamePlayer.findMany.mockResolvedValue(buildPlayers([
                 { result: 'WIN', score: 10, isBot: false },
                 { result: 'WIN', score: 8, isBot: false },
@@ -102,11 +102,11 @@ describe('ProfileService', () => {
 
             const stats = await ProfileService.getProfileStats('user-1');
 
-            expect(stats!.bestWinStreak).toBe(3);
+            expect(stats!.stats.bestWinStreak).toBe(3);
         });
 
         test('calcule la moyenne des scores', async () => {
-            mockPrisma.user.findUnique.mockResolvedValue({ id: 'user-1', username: 'alice', avatar: '🎲' });
+            mockPrisma.user.findUnique.mockResolvedValue({ id: 'user-1', username: 'alice', avatar: '🎲', createdAt: new Date('2024-03-14') });
             mockPrisma.gamePlayer.findMany.mockResolvedValue(buildPlayers([
                 { result: 'WIN', score: 10, isBot: false },
                 { result: 'LOSE', score: 6, isBot: false },
@@ -114,11 +114,11 @@ describe('ProfileService', () => {
 
             const stats = await ProfileService.getProfileStats('user-1');
 
-            expect(stats!.averageScore).toBeCloseTo(8);
+            expect(stats!.stats.averageScore).toBeCloseTo(8);
         });
 
         test('distingue les parties en ligne et vs bot', async () => {
-            mockPrisma.user.findUnique.mockResolvedValue({ id: 'user-1', username: 'alice', avatar: '🎲' });
+            mockPrisma.user.findUnique.mockResolvedValue({ id: 'user-1', username: 'alice', avatar: '🎲', createdAt: new Date('2024-03-14') });
             mockPrisma.gamePlayer.findMany.mockResolvedValue(buildPlayers([
                 { result: 'WIN', score: 10, isBot: false, mode: 'ONLINE' },
                 { result: 'WIN', score: 8, isBot: false, mode: 'ONLINE' },
@@ -127,12 +127,12 @@ describe('ProfileService', () => {
 
             const stats = await ProfileService.getProfileStats('user-1');
 
-            expect(stats!.onlineGames).toBe(2);
-            expect(stats!.botGames).toBe(1);
+            expect(stats!.stats.onlineGames).toBe(2);
+            expect(stats!.stats.botGames).toBe(1);
         });
 
         test('calcule la difficulté bot favorite', async () => {
-            mockPrisma.user.findUnique.mockResolvedValue({ id: 'user-1', username: 'alice', avatar: '🎲' });
+            mockPrisma.user.findUnique.mockResolvedValue({ id: 'user-1', username: 'alice', avatar: '🎲', createdAt: new Date('2024-03-14') });
             mockPrisma.gamePlayer.findMany.mockResolvedValue(buildPlayers([
                 { result: 'WIN', score: 10, isBot: false, mode: 'VS_BOT', difficulty: 'EASY' },
                 { result: 'WIN', score: 8, isBot: false, mode: 'VS_BOT', difficulty: 'HARD' },
@@ -141,20 +141,20 @@ describe('ProfileService', () => {
 
             const stats = await ProfileService.getProfileStats('user-1');
 
-            expect(stats!.favoriteBotDifficulty).toBe('HARD');
+            expect(stats!.stats.favoriteBotDifficulty).toBe('HARD');
         });
 
         test('retourne 0 parties et stats vides pour un joueur sans parties', async () => {
-            mockPrisma.user.findUnique.mockResolvedValue({ id: 'user-1', username: 'alice', avatar: '🎲' });
+            mockPrisma.user.findUnique.mockResolvedValue({ id: 'user-1', username: 'alice', avatar: '🎲', createdAt: new Date('2024-03-14') });
             mockPrisma.gamePlayer.findMany.mockResolvedValue([]);
 
             const stats = await ProfileService.getProfileStats('user-1');
 
-            expect(stats!.totalGames).toBe(0);
-            expect(stats!.wins).toBe(0);
-            expect(stats!.winRate).toBe(0);
-            expect(stats!.averageScore).toBe(0);
-            expect(stats!.bestWinStreak).toBe(0);
+            expect(stats!.stats.totalGames).toBe(0);
+            expect(stats!.stats.wins).toBe(0);
+            expect(stats!.stats.winRate).toBe(0);
+            expect(stats!.stats.averageScore).toBe(0);
+            expect(stats!.stats.bestWinStreak).toBe(0);
         });
     });
 
