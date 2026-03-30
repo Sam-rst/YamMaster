@@ -19,6 +19,7 @@ import BotDifficultyScreen from '@/features/game/screens/bot-difficulty.screen';
 import HistoryScreen from '@/features/history/screens/history.screen';
 import ReplayScreen from '@/features/replay/screens/replay.screen';
 import RulesScreen from '@/features/rules/screens/rules.screen';
+import ProfileScreen from '@/features/profile/screens/profile.screen';
 import { colors } from '@/shared/theme/colors';
 
 type RootStackParamList = {
@@ -87,6 +88,13 @@ const MainTabs: React.FC = () => (
       component={RulesScreen}
       options={{
         tabBarIcon: ({ color, size }) => <Feather name="book-open" size={size} color={color} />,
+      }}
+    />
+    <Tab.Screen
+      name="Profil"
+      component={ProfileScreen}
+      options={{
+        tabBarIcon: ({ color, size }) => <Feather name="user" size={size} color={color} />,
       }}
     />
   </Tab.Navigator>
