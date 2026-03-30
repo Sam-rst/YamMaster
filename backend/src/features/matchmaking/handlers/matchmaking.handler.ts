@@ -13,6 +13,7 @@ import {
     startGameTimer,
 } from '../../game/handlers/game.handler';
 import { createBotSocket, setupBotListeners } from '../../bot/handlers/bot.handler';
+import { BotDifficulty } from '../../bot/services/bot.service';
 import HistoryService from '../../history/services/history.service';
 import TurnRecorderService from '../../game/services/turn-recorder.service';
 
@@ -76,7 +77,7 @@ const removeGameOnDisconnect = (game: Game, games: Game[]): void => {
     logger.info('Partie supprimée suite à déconnexion', { gameId: game.idGame });
 };
 
-const saveGameToDatabase = async (game: Game, mode: 'ONLINE' | 'VS_BOT'): Promise<void> => {
+const saveGameToDatabase = async (game: Game, mode: 'ONLINE' | 'VS_BOT', botDifficulty?: BotDifficulty): Promise<void> => {
     const player1Id = game.player1Socket.userId;
     const player2Id = game.player2Socket.userId;
 
@@ -87,7 +88,7 @@ const saveGameToDatabase = async (game: Game, mode: 'ONLINE' | 'VS_BOT'): Promis
             mode,
             players: [
                 { userId: player1Id, playerNumber: 1, isBot: false },
-                { userId: player2Id || null, playerNumber: 2, isBot: !player2Id },
+                { userId: player2Id || null, playerNumber: 2, isBot: !player2Id, difficulty: botDifficulty ?? null },
             ],
         });
         game.dbGameId = dbGame.id;
@@ -118,7 +119,7 @@ export const createGame = async (player1Socket: SocketLike, player2Socket: Socke
     }
 };
 
-export const createGameVsBot = async (playerSocket: SocketLike, games: Game[]): Promise<void> => {
+export const createGameVsBot = async (playerSocket: SocketLike, games: Game[], difficulty: BotDifficulty = 'MEDIUM'): Promise<void> => {
     try {
         cleanupPlayerFromExistingGames(playerSocket.id, games);
         removeFromQueueBySocketId(playerSocket.id);
@@ -127,8 +128,8 @@ export const createGameVsBot = async (playerSocket: SocketLike, games: Game[]): 
         const newGame = initializeGame(playerSocket, botSocket);
         games.push(newGame);
 
-        await saveGameToDatabase(newGame, 'VS_BOT');
-        setupBotListeners(botSocket, newGame, games);
+        await saveGameToDatabase(newGame, 'VS_BOT', difficulty);
+        setupBotListeners(botSocket, newGame, games, difficulty);
         broadcastInitialState(newGame);
         startGameTimer(newGame, games);
 

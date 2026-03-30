@@ -69,10 +69,10 @@ describe('HomeScreen', () => {
         expect(mockNavigation.navigate).toHaveBeenCalledWith('OnlineGameScreen');
     });
 
-    it('navigue vers VsBotGameScreen au clic sur "Vs Bot"', () => {
+    it('navigue vers BotDifficultyScreen au clic sur "Vs Bot"', () => {
         const { getByText } = renderHomeScreen();
         fireEvent.click(getByText('Vs Bot'));
-        expect(mockNavigation.navigate).toHaveBeenCalledWith('VsBotGameScreen');
+        expect(mockNavigation.navigate).toHaveBeenCalledWith('BotDifficultyScreen');
     });
 
     it('navigue vers HistoryScreen au clic sur "Historique"', () => {

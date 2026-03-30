@@ -8,6 +8,7 @@ interface PlayerInput {
     userId: string | null;
     playerNumber: number;
     isBot: boolean;
+    difficulty?: 'EASY' | 'MEDIUM' | 'HARD' | null;
 }
 
 interface CreateGameInput {
@@ -40,6 +41,7 @@ const HistoryService = {
                             playerNumber: p.playerNumber,
                             userId: p.userId,
                             isBot: p.isBot,
+                            difficulty: p.difficulty ?? null,
                         })),
                     },
                 },

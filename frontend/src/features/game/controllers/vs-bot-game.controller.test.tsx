@@ -26,7 +26,7 @@ describe('VsBotGameController', () => {
                 <VsBotGameController />
             </SocketContext.Provider>
         );
-        expect(mockSocket.emit).toHaveBeenCalledWith('game.vsbot');
+        expect(mockSocket.emit).toHaveBeenCalledWith('game.vsbot', { difficulty: 'MEDIUM' });
     });
 
     it('affiche un message de chargement initialement', () => {
@@ -118,7 +118,7 @@ describe('VsBotGameController', () => {
         mockSocket.emit.mockClear();
         fireEvent.click(getByText('Rejouer'));
 
-        expect(mockSocket.emit).toHaveBeenCalledWith('game.vsbot');
+        expect(mockSocket.emit).toHaveBeenCalledWith('game.vsbot', { difficulty: 'MEDIUM' });
     });
 
     it('le bouton "Retour au menu" après game.end navigue vers HomeScreen', () => {

@@ -30,7 +30,7 @@ const ACTIONS: ActionItem[] = [
         color: colors.primary,
     },
     {
-        screen: 'VsBotGameScreen',
+        screen: 'BotDifficultyScreen',
         icon: 'cpu',
         label: 'Vs Bot',
         description: 'Entraînement tactique',

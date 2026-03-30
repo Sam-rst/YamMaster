@@ -12,9 +12,14 @@ interface VsBotGameScreenProps {
     navigation?: {
         navigate: (screen: string) => void;
     };
+    route?: {
+        params?: {
+            difficulty?: string;
+        };
+    };
 }
 
-const VsBotGameScreen: React.FC<VsBotGameScreenProps> = ({ navigation }) => {
+const VsBotGameScreen: React.FC<VsBotGameScreenProps> = ({ navigation, route }) => {
     const socket = useContext(SocketContext);
 
     return (
@@ -29,7 +34,10 @@ const VsBotGameScreen: React.FC<VsBotGameScreenProps> = ({ navigation }) => {
             )}
 
             {socket && (
-                <VsBotGameController navigation={navigation} />
+                <VsBotGameController
+                    navigation={navigation}
+                    difficulty={route?.params?.difficulty ?? 'MEDIUM'}
+                />
             )}
         </View>
     );

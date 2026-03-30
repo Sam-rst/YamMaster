@@ -6,6 +6,7 @@ import http from 'http';
 import { Server, Socket } from 'socket.io';
 import GameService from '../features/game/services/game.service';
 import { Game, PlayerKey } from '../shared/types';
+import { BotDifficulty } from '../features/bot/services/bot.service';
 import { logger } from '../shared/logger';
 import { newPlayerInQueue, createGameVsBot, removeFromQueueBySocketId } from '../features/matchmaking/handlers/matchmaking.handler';
 import {
@@ -117,9 +118,14 @@ export const setupSocketHandlers = (io: Server, games: Game[]): void => {
             });
         });
 
-        socket.on('game.vsbot', () => {
+        socket.on('game.vsbot', (data?: { difficulty?: string }) => {
             safeHandler('game.vsbot', socket.id, () => {
-                createGameVsBot(socket, games);
+                const VALID_DIFFICULTIES: BotDifficulty[] = ['EASY', 'MEDIUM', 'HARD'];
+                const raw = data?.difficulty?.toUpperCase();
+                const difficulty: BotDifficulty = VALID_DIFFICULTIES.includes(raw as BotDifficulty)
+                    ? (raw as BotDifficulty)
+                    : 'MEDIUM';
+                createGameVsBot(socket, games, difficulty);
                 logServerState(games, 'après game.vsbot');
             });
         });
