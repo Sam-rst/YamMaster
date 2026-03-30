@@ -1,7 +1,8 @@
 // ./App.tsx
 
 import React from 'react';
-import { LogBox, ActivityIndicator, View } from 'react-native';
+import { LogBox, ActivityIndicator, View, Text, StyleSheet, Platform } from 'react-native';
+import { LinearGradient } from 'expo-linear-gradient';
 import { NavigationContainer, getFocusedRouteNameFromRoute } from '@react-navigation/native';
 import { createStackNavigator } from '@react-navigation/stack';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
@@ -97,10 +98,42 @@ const App: React.FC = () => {
     Outfit: Outfit_900Black,
   });
 
+  const fontDisplay = Platform.select({ web: '"Outfit", sans-serif', default: 'Outfit' });
+  const fontSans = Platform.select({ web: '"Inter", sans-serif', default: 'Inter' });
+
   if (!fontsLoaded) {
     return (
-      <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center', backgroundColor: colors.background }}>
-        <ActivityIndicator size="large" color={colors.primary} />
+      <View style={splashStyles.container}>
+        <LinearGradient
+          colors={['rgba(233, 69, 96, 0.15)', 'transparent']}
+          start={{ x: 0, y: 0 }}
+          end={{ x: 1, y: 1 }}
+          style={splashStyles.gradientTopLeft}
+        />
+        <LinearGradient
+          colors={['rgba(83, 52, 131, 0.15)', 'transparent']}
+          start={{ x: 1, y: 1 }}
+          end={{ x: 0, y: 0 }}
+          style={splashStyles.gradientBottomRight}
+        />
+
+        <View style={splashStyles.content}>
+          <Text style={[splashStyles.title, { fontFamily: fontDisplay }]}>YAM</Text>
+          <Text style={[splashStyles.subtitle, { fontFamily: fontSans }]}>Yam Master</Text>
+          <Text style={[splashStyles.tagline, { fontFamily: fontSans }]}>Que le duel commence !</Text>
+
+          <View style={splashStyles.loaderContainer}>
+            <View style={splashStyles.loaderTrack}>
+              <ActivityIndicator size="small" color={colors.primary} style={splashStyles.spinner} />
+              <View style={splashStyles.loaderBar} />
+            </View>
+            <Text style={[splashStyles.loaderText, { fontFamily: fontSans }]}>
+              Préparation du plateau...
+            </Text>
+          </View>
+        </View>
+
+        <Text style={[splashStyles.footer, { fontFamily: fontSans }]}>Est. 2024</Text>
       </View>
     );
   }
@@ -120,3 +153,85 @@ const App: React.FC = () => {
 };
 
 export default App;
+
+const splashStyles = StyleSheet.create({
+  container: {
+    flex: 1,
+    backgroundColor: colors.background,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  gradientTopLeft: {
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    width: '100%',
+    height: '100%',
+  },
+  gradientBottomRight: {
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    width: '100%',
+    height: '100%',
+  },
+  content: {
+    alignItems: 'center',
+    gap: 8,
+  },
+  title: {
+    fontSize: 64,
+    fontWeight: '900',
+    color: colors.primary,
+    letterSpacing: 8,
+    textTransform: 'uppercase',
+  },
+  subtitle: {
+    fontSize: 16,
+    fontWeight: '700',
+    color: colors.textPrimary,
+    letterSpacing: 4,
+    textTransform: 'uppercase',
+  },
+  tagline: {
+    fontSize: 13,
+    color: colors.textSecondary,
+    marginTop: 4,
+  },
+  loaderContainer: {
+    alignItems: 'center',
+    marginTop: 40,
+    gap: 12,
+  },
+  loaderTrack: {
+    width: 200,
+    height: 4,
+    backgroundColor: 'rgba(255, 255, 255, 0.08)',
+    borderRadius: 2,
+    overflow: 'hidden',
+  },
+  loaderBar: {
+    width: '60%',
+    height: '100%',
+    backgroundColor: colors.primary,
+    borderRadius: 2,
+  },
+  spinner: {
+    position: 'absolute',
+    top: -14,
+    alignSelf: 'center',
+  },
+  loaderText: {
+    fontSize: 11,
+    color: colors.textSecondary,
+    letterSpacing: 1,
+  },
+  footer: {
+    position: 'absolute',
+    bottom: 40,
+    fontSize: 11,
+    color: colors.textSecondary,
+    letterSpacing: 3,
+    textTransform: 'uppercase',
+  },
+});

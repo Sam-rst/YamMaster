@@ -31,6 +31,7 @@ Priorisation basée sur la grille d'évaluation (14pts obligatoires + 6pts au ch
 ### 1.5 Écran de fin de partie `FAIT`
 - [x] Écran "Résumé de la partie" dans `OnlineGameController` (vainqueur, perdant, scores, raison)
 - [x] Workflow post-partie : bouton "Retour au menu" + bouton "Rejouer"
+- [x] Affichage personnalisé victoire/défaite/nul par joueur (isWinner, isDraw, opponentName)
 
 ### 1.6 Défi et Yam Predator `FAIT`
 - [x] Bouton "Défi" au 2e lancer → active le flag `isDefi`, recalcule les combinaisons
@@ -62,59 +63,66 @@ Priorisation basée sur la grille d'évaluation (14pts obligatoires + 6pts au ch
 
 ---
 
-## Phase 3 — Feature au choix (6 pts) `PRIORITÉ HAUTE`
+## Phase 3 — Features au choix (6 pts) `TERMINÉE`
 
-> Au moins **une** des options suivantes à implémenter.
+> Les **trois** options ont été implémentées.
 
-### Option A — Auth + BDD + Sauvegarde
-- [ ] Choisir et mettre en place la BDD (SQLite local ou MongoDB Docker)
-- [ ] Implémenter Login/Logout (création auto si user inexistant)
-- [ ] Créer `<AuthScreen>` côté frontend
-- [ ] Ajouter contexte utilisateur authentifié dans `<App>`
-- [ ] Sauvegarder les résultats de parties en BDD
-- [ ] Écran historique de parties pour l'utilisateur connecté
+### Option A — Auth + BDD + Sauvegarde `FAIT`
+- [x] PostgreSQL + Prisma ORM
+- [x] Login/Logout avec création auto si user inexistant
+- [x] `<AuthScreen>` avec mode invité (guest)
+- [x] Contexte utilisateur authentifié dans `<App>`
+- [x] Sauvegarde des résultats de parties en BDD
+- [x] Écran historique de parties avec navigation vers replay
 
-### Option B — UI Premium
-- [ ] Refonte graphique complète (thème cohérent, palette de couleurs, typographie)
-- [ ] Animations de dés (rotation, rebond)
-- [ ] Animations de pose de pions
-- [ ] Effets visuels sur les alignements (glow, pulse)
-- [ ] Écran d'attente stylisé
-- [ ] Responsive et soigné sur mobile
+### Option B — UI Premium (Neon Nocturne) `FAIT`
+- [x] Refonte graphique complète — thème "Neon Nocturne" (dark bg, coral/cyan/gold)
+- [x] Fonts Outfit (display) + Inter (body) via expo-font
+- [x] Dés visuels avec dots et anneau doré de verrouillage
+- [x] Glass morphism, LinearGradient buttons
+- [x] Splash screen stylisé (mesh gradient, branding)
+- [x] Bottom tab bar (Accueil / Règles)
+- [x] Écrans redesignés : Auth, Home, Game Board, History, Replay, End Screen
 
-### Option C — Replay de parties
-- [ ] Enregistrer chaque action (tour par tour) dans un historique
-- [ ] Interface de replay avec contrôles (suivant, précédent, play/pause)
-- [ ] Afficher la grille et les dés à chaque étape
+### Option C — Replay de parties `FAIT`
+- [x] Enregistrement des actions + snapshots GameState tour par tour (backend)
+- [x] Controller replay avec navigation step-by-step
+- [x] Autoplay (500ms) avec Play/Pause
+- [x] Plateau visuel complet : grille avec pions, dés, scores, jetons
+- [x] Compatibilité avec les anciennes parties (sans snapshots)
 
 ---
 
-## Phase 4 — Bonus créatifs `PRIORITÉ BASSE`
+## Phase 4 — Bonus créatifs `EN COURS`
 
-> Points bonus et différenciation. À traiter uniquement si les phases 1–3 sont solides.
+> Points bonus et différenciation.
 
+### Réalisé
+- [x] Page Règles du jeu — accordéon avec 6 sections, accessible via tab bar + modal en partie
+- [x] Mode Ponder — animations step-by-step pour chaque section des règles (5 scènes : Dés, Combinaisons, Actions Spéciales, Grille, Scoring) avec autoplay hybride
+- [x] Versioning SemVer (frontend + backend v1.2.0)
+- [x] README professionnel + licence GPL v3
+- [x] CI/CD GitHub Actions par environnement (develop, recette, main)
+
+### À faire
 - [ ] Mode classé MMR (score Elo, classement des joueurs)
-- [ ] Données interactives (joueurs en ligne, ratio victoires/défaites)
-- [ ] Bouton modal "Règles du jeu" accessible pendant la partie
+- [ ] Leaderboard (classement global)
+- [ ] Profil joueur (stats, avatar)
+- [ ] Niveaux de difficulté bot (Facile / Intermédiaire / Pro)
 - [ ] Notifications mobiles natives (tour adverse terminé)
 - [ ] Interface Shi/Fu/Mi pour déterminer qui commence
-- [ ] Grille étendue / mode 4 joueurs
 
 ---
 
 ## Progression
 
 ```
-Phase 1.1  Corrections bugs       ██████████  FAIT
-Phase 1.2  Scores                 ██████████  FAIT
-Phase 1.3  12 pions               ██████████  FAIT
-Phase 1.4  Victoire               ██████████  FAIT
-Phase 1.5  Écran fin              ██████████  FAIT
-Phase 2.1  Factorisation moteur   ██████████  FAIT
-Phase 2.2  Bot basique            ██████████  FAIT
-Phase 2.3  Frontend VsBot         ██████████  FAIT
-Phase 3    Feature au choix       ░░░░░░░░░░  À FAIRE
-Phase 4    Bonus                  ░░░░░░░░░░  À FAIRE
+Phase 1    Moteur de jeu           ██████████  FAIT
+Phase 2    Mode VS Bot             ██████████  FAIT
+Phase 3A   Auth + BDD              ██████████  FAIT
+Phase 3B   UI Neon Nocturne        ██████████  FAIT
+Phase 3C   Replay de parties       ██████████  FAIT
+Phase 4    Bonus créatifs          ██████░░░░  EN COURS
 ```
 
-Approche **TDD** : chaque tâche commence par l'écriture de tests avant l'implémentation.
+Approche **TDD** (Red → Green → Blue) et **gitflow** strict sur toutes les phases.
