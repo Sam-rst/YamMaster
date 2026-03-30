@@ -41,7 +41,7 @@ describe('Intégration — VsBot Game (controller + board)', () => {
 
         // 1. Chargement
         expect(getByText(/Lancement/)).toBeTruthy();
-        expect(mockSocket.emit).toHaveBeenCalledWith('game.vsbot');
+        expect(mockSocket.emit).toHaveBeenCalledWith('game.vsbot', { difficulty: 'MEDIUM' });
 
         // 2. Board monté
         act(() => simulateGameStart(mockSocket));

@@ -17,9 +17,10 @@ interface VsBotGameControllerProps {
     navigation?: {
         navigate: (screen: string) => void;
     };
+    difficulty?: string;
 }
 
-const VsBotGameController: React.FC<VsBotGameControllerProps> = ({ navigation }) => {
+const VsBotGameController: React.FC<VsBotGameControllerProps> = ({ navigation, difficulty }) => {
     const socket = useContext(SocketContext) as Socket;
 
     const [inGame, setInGame] = useState<boolean>(false);
@@ -27,7 +28,7 @@ const VsBotGameController: React.FC<VsBotGameControllerProps> = ({ navigation })
 
     useEffect(() => {
         console.log('[emit][game.vsbot]:', socket.id);
-        socket.emit('game.vsbot');
+        socket.emit('game.vsbot', { difficulty: difficulty ?? 'MEDIUM' });
 
         const onGameStart = (data: GameStartPayload): void => {
             setInGame(data['inGame']);
@@ -71,7 +72,7 @@ const VsBotGameController: React.FC<VsBotGameControllerProps> = ({ navigation })
                     onReplay={() => {
                         setGameResult(null);
                         setInGame(false);
-                        socket.emit('game.vsbot');
+                        socket.emit('game.vsbot', { difficulty: difficulty ?? 'MEDIUM' });
                     }}
                     onHome={() => navigation?.navigate('HomeScreen')}
                 />

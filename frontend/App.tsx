@@ -15,6 +15,7 @@ import { SocketProvider } from '@/shared/contexts/socket.context';
 import { AuthProvider } from '@/shared/contexts/auth.context';
 import OnlineGameScreen from '@/features/game/screens/online-game.screen';
 import VsBotGameScreen from '@/features/game/screens/vs-bot-game.screen';
+import BotDifficultyScreen from '@/features/game/screens/bot-difficulty.screen';
 import HistoryScreen from '@/features/history/screens/history.screen';
 import ReplayScreen from '@/features/replay/screens/replay.screen';
 import RulesScreen from '@/features/rules/screens/rules.screen';
@@ -28,12 +29,13 @@ type RootStackParamList = {
 type HomeStackParamList = {
   HomeScreen: undefined;
   OnlineGameScreen: undefined;
-  VsBotGameScreen: undefined;
+  BotDifficultyScreen: undefined;
+  VsBotGameScreen: { difficulty: string };
   HistoryScreen: undefined;
   ReplayScreen: { gameId: string };
 };
 
-const SCREENS_WITHOUT_TAB_BAR = ['OnlineGameScreen', 'VsBotGameScreen', 'ReplayScreen'];
+const SCREENS_WITHOUT_TAB_BAR = ['OnlineGameScreen', 'BotDifficultyScreen', 'VsBotGameScreen', 'ReplayScreen'];
 
 const RootStack = createStackNavigator<RootStackParamList>();
 const HomeStack = createStackNavigator<HomeStackParamList>();
@@ -45,6 +47,7 @@ const HomeStackNavigator: React.FC = () => (
   <HomeStack.Navigator screenOptions={{ headerShown: false }}>
     <HomeStack.Screen name="HomeScreen" component={HomeScreen} />
     <HomeStack.Screen name="OnlineGameScreen" component={OnlineGameScreen} />
+    <HomeStack.Screen name="BotDifficultyScreen" component={BotDifficultyScreen} />
     <HomeStack.Screen name="VsBotGameScreen" component={VsBotGameScreen} />
     <HomeStack.Screen name="HistoryScreen" component={HistoryScreen} />
     <HomeStack.Screen name="ReplayScreen" component={ReplayScreen} />
