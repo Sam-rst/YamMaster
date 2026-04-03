@@ -52,14 +52,14 @@
 ```
 features/<nom>/
 ├── screens/          Écrans React Navigation (1 par route)
-│   └── <nom>.screen.js
+│   └── <nom>.screen.tsx
 ├── components/       Composants UI spécifiques à la feature
-│   ├── <widget-a>.component.js
-│   └── <widget-b>.component.js
+│   ├── <widget-a>.component.tsx
+│   └── <widget-b>.component.tsx
 ├── services/         Logique métier, appels API, gestion socket
-│   └── <nom>.service.js
+│   └── <nom>.service.ts
 └── models/           Types, constantes, interfaces
-    └── <nom>.model.js
+    └── <nom>.model.ts
 ```
 
 ### Backend
@@ -95,11 +95,11 @@ frontend/
 │
 ├── shared/
 │   ├── components/
-│   │   ├── button.component.js       Bouton réutilisable
-│   │   ├── card.component.js         Carte générique
-│   │   ├── modal.component.js        Modal générique
-│   │   ├── avatar.component.js       Avatar joueur
-│   │   └── loading.component.js      Indicateur de chargement
+│   │   ├── button.component.tsx       Bouton réutilisable
+│   │   ├── card.component.tsx         Carte générique
+│   │   ├── modal.component.tsx        Modal générique
+│   │   ├── avatar.component.tsx       Avatar joueur
+│   │   └── loading.component.tsx      Indicateur de chargement
 │   ├── contexts/
 │   │   ├── socket.context.js         Connexion Socket.IO
 │   │   └── auth.context.js           Contexte d'authentification
@@ -107,114 +107,115 @@ frontend/
 │   │   ├── useSocket.js              Hook typé pour écouter/émettre
 │   │   └── useAuth.js                Hook d'accès au contexte auth
 │   └── services/
-│       └── api.service.js            Client HTTP de base (fetch wrapper)
+│       └── api.service.ts            Client HTTP de base (fetch wrapper)
 │
 └── features/
     ├── auth/
     │   ├── screens/
-    │   │   └── auth.screen.js
+    │   │   └── auth.screen.tsx
     │   ├── components/
-    │   │   ├── login-form.component.js
-    │   │   └── register-form.component.js
+    │   │   ├── login-form.component.tsx
+    │   │   └── register-form.component.tsx
     │   ├── services/
-    │   │   └── auth.service.js
+    │   │   └── auth.service.ts
     │   └── models/
-    │       └── auth.model.js
+    │       └── auth.model.ts
     │
     ├── home/
     │   ├── screens/
-    │   │   └── home.screen.js
+    │   │   └── home.screen.tsx
     │   ├── components/
-    │   │   ├── menu-card.component.js
-    │   │   ├── player-stats.component.js
-    │   │   └── online-count.component.js
+    │   │   ├── menu-card.component.tsx
+    │   │   ├── player-stats.component.tsx
+    │   │   └── online-count.component.tsx
     │   ├── services/
-    │   │   └── home.service.js
+    │   │   └── home.service.ts
     │   └── models/
-    │       └── home.model.js
+    │       └── home.model.ts
     │
     ├── game/
     │   ├── screens/
-    │   │   ├── online-game.screen.js
-    │   │   └── vs-bot-game.screen.js
+    │   │   ├── online-game.screen.tsx
+    │   │   └── vs-bot-game.screen.tsx
     │   ├── components/
     │   │   ├── board/
-    │   │   │   └── board.component.js
+    │   │   │   └── board.component.tsx
     │   │   ├── grid/
-    │   │   │   ├── grid.component.js
-    │   │   │   └── grid-cell.component.js
+    │   │   │   ├── grid.component.tsx
+    │   │   │   └── grid-cell.component.tsx
     │   │   ├── dice/
-    │   │   │   ├── deck.component.js       UN composant (prop isOpponent)
-    │   │   │   └── die.component.js
+    │   │   │   ├── deck.component.tsx       UN composant (prop isOpponent)
+    │   │   │   └── die.component.tsx
     │   │   ├── choices/
-    │   │   │   └── choices.component.js
+    │   │   │   └── choices.component.tsx
     │   │   ├── player-bar/
-    │   │   │   ├── player-bar.component.js  Barre unifiée (prop isOpponent)
-    │   │   │   ├── timer.component.js
-    │   │   │   ├── score.component.js
-    │   │   │   ├── tokens.component.js
-    │   │   │   └── info.component.js
+    │   │   │   ├── player-bar.component.tsx  Barre unifiée (prop isOpponent)
+    │   │   │   ├── timer.component.tsx
+    │   │   │   ├── score.component.tsx
+    │   │   │   ├── tokens.component.tsx
+    │   │   │   └── info.component.tsx
     │   │   ├── end-screen/
-    │   │   │   └── end-screen.component.js
+    │   │   │   └── end-screen.component.tsx
     │   │   └── dev/
-    │   │       └── dev-panel.component.js
+    │   │       └── dev-panel.component.tsx
     │   ├── controllers/
-    │   │   └── game.controller.js          Controller unifié (mode: online|bot)
+    │   │   ├── online-game.controller.tsx   Controller partie en ligne
+    │   │   └── vs-bot-game.controller.tsx   Controller partie vs bot
     │   ├── services/
-    │   │   └── game-socket.service.js      Encapsule les events socket du jeu
+    │   │   └── game-socket.service.ts      Encapsule les events socket du jeu
     │   └── models/
-    │       └── game.model.js               Types/constantes du jeu
+    │       └── game.model.ts               Types/constantes du jeu
     │
     ├── history/
     │   ├── screens/
-    │   │   └── history.screen.js
+    │   │   └── history.screen.tsx
     │   ├── components/
-    │   │   ├── game-list.component.js
-    │   │   └── game-card.component.js
+    │   │   ├── game-list.component.tsx
+    │   │   └── game-card.component.tsx
     │   ├── services/
-    │   │   └── history.service.js
+    │   │   └── history.service.ts
     │   └── models/
-    │       └── history.model.js
+    │       └── history.model.ts
     │
     ├── replay/
     │   ├── screens/
-    │   │   └── replay.screen.js
+    │   │   └── replay.screen.tsx
     │   ├── components/
-    │   │   ├── replay-board.component.js
-    │   │   └── replay-controls.component.js
+    │   │   ├── replay-board.component.tsx
+    │   │   └── replay-controls.component.tsx
     │   ├── services/
-    │   │   └── replay.service.js
+    │   │   └── replay.service.ts
     │   └── models/
-    │       └── replay.model.js
+    │       └── replay.model.ts
     │
     ├── profile/
     │   ├── screens/
-    │   │   └── profile.screen.js
+    │   │   └── profile.screen.tsx
     │   ├── components/
-    │   │   ├── stats-dashboard.component.js
-    │   │   └── achievement-badge.component.js
+    │   │   ├── stats-dashboard.component.tsx
+    │   │   └── achievement-badge.component.tsx
     │   ├── services/
-    │   │   └── profile.service.js
+    │   │   └── profile.service.ts
     │   └── models/
-    │       └── profile.model.js
+    │       └── profile.model.ts
     │
     └── leaderboard/
         ├── screens/
-        │   └── leaderboard.screen.js
+        │   └── leaderboard.screen.tsx
         ├── components/
-        │   ├── podium.component.js
-        │   └── ranked-list.component.js
+        │   ├── podium.component.tsx
+        │   └── ranked-list.component.tsx
         ├── services/
-        │   └── leaderboard.service.js
+        │   └── leaderboard.service.ts
         └── models/
-            └── leaderboard.model.js
+            └── leaderboard.model.ts
 ```
 
 ### Principes clés frontend
 
 | Principe | Explication |
 |----------|-------------|
-| **Un composant = une responsabilité** | `deck.component.js` gère l'affichage des dés, pas la logique de verrouillage |
+| **Un composant = une responsabilité** | `deck.component.tsx` gère l'affichage des dés, pas la logique de verrouillage |
 | **Props > duplication** | `<PlayerBar isOpponent={true}>` au lieu de `<OpponentInfos>` + `<OpponentTimer>` + `<OpponentScore>` séparés |
 | **Controller = orchestration** | Le controller gère les events socket et distribue l'état aux composants via props |
 | **Service = logique métier** | Les appels API, transformations de données, logique de jeu frontend |
@@ -294,6 +295,16 @@ backend/src/
     │   └── routes/
     │       └── history.routes.ts     GET /history, GET /history/:id
     │
+    ├── profile/
+    │   ├── handlers/
+    │   │   └── profile.handler.ts    (vide — tout passe par REST)
+    │   ├── services/
+    │   │   └── profile.service.ts    Stats, rang, win streak, avatar
+    │   ├── models/
+    │   │   └── profile.model.ts      Types ProfileStats, RankInfo
+    │   └── routes/
+    │       └── profile.routes.ts     GET /api/profile/:userId, PUT /api/profile/:userId/avatar
+    │
     └── leaderboard/
         ├── handlers/
         │   └── leaderboard.handler.ts  (vide — tout passe par REST)
@@ -302,7 +313,7 @@ backend/src/
         ├── models/
         │   └── leaderboard.model.ts    Types PlayerRank, LeaderboardEntry
         └── routes/
-            └── leaderboard.routes.ts   GET /leaderboard
+            └── leaderboard.routes.ts   GET /leaderboard (non implémenté)
 ```
 
 ### Principes clés backend
@@ -344,7 +355,7 @@ Le refactoring du backend se fait en extrayant la logique de `index.ts` (423 lig
 | `features/game/` (VsBot) | `features/bot/` | WebSocket (même API) |
 | `features/history/` | `features/history/` | REST (GET /history) |
 | `features/replay/` | `features/history/` (mêmes données) | REST (GET /history/:id) |
-| `features/profile/` | `features/auth/` (données user) | REST (GET /auth/profile) |
+| `features/profile/` | `features/profile/` | REST (GET /api/profile/:userId, PUT /api/profile/:userId/avatar) |
 | `features/leaderboard/` | `features/leaderboard/` | REST (GET /leaderboard) |
 
 ### Convention de nommage unifiée
@@ -352,7 +363,7 @@ Le refactoring du backend se fait en extrayant la logique de `index.ts` (423 lig
 | Convention | Frontend | Backend |
 |-----------|----------|---------|
 | Fichiers | `kebab-case.<type>.js` | `kebab-case.<type>.ts` |
-| Types de fichiers | `.screen.js`, `.component.js`, `.service.js`, `.model.js` | `.handler.ts`, `.service.ts`, `.model.ts`, `.routes.ts` |
+| Types de fichiers | `.screen.tsx`, `.component.tsx`, `.service.ts`, `.model.ts` | `.handler.ts`, `.service.ts`, `.model.ts`, `.routes.ts` |
 | Dossiers | `features/<nom>/screens,components,services,models/` | `features/<nom>/handlers,services,models,routes/` |
 | Events Socket | — | `domain.action` (ex: `game.dices.roll`) |
 | Routes REST | — | `/<feature>/<action>` (ex: `/auth/login`) |

@@ -56,10 +56,10 @@ Priorisation basée sur la grille d'évaluation (14pts obligatoires + 6pts au ch
 - [x] `VsBotGameScreen` branché sur le controller (plus de stub)
 - [x] Écran de fin : "Vous" / "Bot", boutons Retour/Rejouer
 
-### 2.4 (Optionnel) Niveaux de difficulté
-- [ ] Facile : choix aléatoire
-- [ ] Intermédiaire : privilégie les alignements
-- [ ] Pro : stratégie optimale (maximise score + bloque adversaire)
+### 2.4 Niveaux de difficulté `FAIT`
+- [x] Facile : combinaisons simples, placement aléatoire
+- [x] Moyen : priorité combinaisons fortes, placement adjacent aux pions
+- [x] Difficile : scoring, construction d'alignements, blocage adversaire
 
 ---
 
@@ -101,15 +101,16 @@ Priorisation basée sur la grille d'évaluation (14pts obligatoires + 6pts au ch
 - [x] Page Règles du jeu — accordéon avec 6 sections, accessible via tab bar + modal en partie
 - [x] Mode Ponder — animations step-by-step pour chaque section des règles (5 scènes : Dés, Combinaisons, Actions Spéciales, Grille, Scoring) avec autoplay hybride
 - [x] Niveaux de difficulté bot — 3 stratégies (Débutant/Tactique/Maître IA) avec écran de sélection, stockage BDD et scoring intelligent (alignements + blocage)
+- [x] Profil joueur — stats complètes, système de rang (Bronze → Maître), sélection d'avatar (8 emojis), onglet dédié dans la tab bar
 - [x] Splash screen Neon Nocturne (mesh gradient, branding)
-- [x] Bottom tab bar extensible (Accueil / Règles)
-- [x] Versioning SemVer (frontend + backend v1.2.0)
+- [x] Bottom tab bar extensible (Accueil / Règles / Profil)
+- [x] Versioning SemVer (frontend + backend v1.3.0)
 - [x] README professionnel + licence GPL v3
 - [x] CI/CD GitHub Actions par environnement (develop, recette, main)
+- [x] CHANGELOG.md — historique complet des versions au format Keep a Changelog
 
 ### À faire
 - [ ] Leaderboard (classement global)
-- [ ] Profil joueur (stats, avatar)
 - [ ] Mode classé MMR (score Elo, classement des joueurs)
 - [ ] Notifications mobiles natives (tour adverse terminé)
 - [ ] Interface Shi/Fu/Mi pour déterminer qui commence
