@@ -8,7 +8,7 @@ import EndScreen from '../components/board/end-screen/end-screen.component';
 import { colors } from '@/shared/theme/colors';
 import type { Socket } from 'socket.io-client';
 import type { VictoryResult } from '@shared/types/game.types';
-import type { GameStartPayload } from '@shared/types/socket-events.types';
+import type { GameStartPayload, OpponentInfo } from '@shared/types/socket-events.types';
 
 const fontDisplay = Platform.select({ web: '"Outfit", sans-serif', default: 'Outfit' });
 const fontSans = Platform.select({ web: '"Inter", sans-serif', default: 'Inter' });
@@ -25,6 +25,7 @@ const VsBotGameController: React.FC<VsBotGameControllerProps> = ({ navigation, d
 
     const [inGame, setInGame] = useState<boolean>(false);
     const [gameResult, setGameResult] = useState<VictoryResult | null>(null);
+    const [opponentInfo, setOpponentInfo] = useState<OpponentInfo | null>(null);
 
     useEffect(() => {
         console.log('[emit][game.vsbot]:', socket.id);
@@ -32,6 +33,7 @@ const VsBotGameController: React.FC<VsBotGameControllerProps> = ({ navigation, d
 
         const onGameStart = (data: GameStartPayload): void => {
             setInGame(data['inGame']);
+            setOpponentInfo(data.opponent);
             setGameResult(null);
         };
         const onGameEnd = (data: VictoryResult): void => {
@@ -49,7 +51,7 @@ const VsBotGameController: React.FC<VsBotGameControllerProps> = ({ navigation, d
     }, []);
 
     if (inGame) {
-        return <Board />;
+        return <Board opponentInfo={opponentInfo} />;
     }
 
     return (
