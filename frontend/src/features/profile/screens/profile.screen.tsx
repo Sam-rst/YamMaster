@@ -40,7 +40,7 @@ const fontSans = Platform.select({
 });
 
 export default function ProfileScreen() {
-    const { user } = useAuth();
+    const { user, updateUser } = useAuth();
     const [profile, setProfile] = useState<ProfileStats | null>(null);
     const [loading, setLoading] = useState(true);
     const [avatarPickerVisible, setAvatarPickerVisible] = useState(false);
@@ -66,6 +66,7 @@ export default function ProfileScreen() {
 
         await ProfileService.updateAvatar(user.id, avatar);
         setCurrentAvatar(avatar);
+        updateUser({ avatar });
         setAvatarPickerVisible(false);
     };
 
