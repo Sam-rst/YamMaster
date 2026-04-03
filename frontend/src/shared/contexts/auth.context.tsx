@@ -5,6 +5,7 @@ import React, { createContext, useContext, useState, useCallback } from 'react';
 interface AuthUser {
     id: string;
     username: string;
+    avatar?: string;
     createdAt: string;
 }
 
