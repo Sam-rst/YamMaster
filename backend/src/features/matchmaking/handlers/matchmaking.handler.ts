@@ -147,7 +147,7 @@ export const createGameVsBot = async (playerSocket: SocketLike, games: Game[], d
         cleanupPlayerFromExistingGames(playerSocket.id, games);
         removeFromQueueBySocketId(playerSocket.id);
 
-        const botSocket = createBotSocket();
+        const botSocket = createBotSocket(difficulty);
         const newGame = initializeGame(playerSocket, botSocket);
         games.push(newGame);
 
