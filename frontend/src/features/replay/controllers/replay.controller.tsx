@@ -47,16 +47,19 @@ const DEFAULT_GAME_STATE: GameSnapshot = {
     deck: { dices: [], rollsCounter: 0, rollsMaximum: 3 },
 };
 
-const renderStepContent = (
-    currentStep: number,
-    currentSnapshot: GameSnapshot | null,
-    hasSnapshots: boolean,
-    gameState: GameSnapshot,
-    currentAction: TurnAction | null,
-    playerName: string,
-    player1Name: string,
-    player2Name: string,
-): React.ReactNode => {
+interface StepContentParams {
+    currentStep: number;
+    currentSnapshot: GameSnapshot | null;
+    hasSnapshots: boolean;
+    gameState: GameSnapshot;
+    currentAction: TurnAction | null;
+    playerName: string;
+    player1Name: string;
+    player2Name: string;
+}
+
+const renderStepContent = (params: StepContentParams): React.ReactNode => {
+    const { currentStep, currentSnapshot, hasSnapshots, gameState, currentAction, playerName, player1Name, player2Name } = params;
     const isAtStart = currentStep <= 0;
 
     if (isAtStart) {
@@ -254,7 +257,7 @@ const ReplayController: React.FC<ReplayControllerProps> = ({ navigation, gameId 
                 </View>
             </View>
 
-            {renderStepContent(currentStep, currentSnapshot, hasSnapshots, gameState, currentAction, playerName, player1Name, player2Name)}
+            {renderStepContent({ currentStep, currentSnapshot, hasSnapshots, gameState, currentAction, playerName, player1Name, player2Name })}
 
             <View style={styles.controls}>
                 <TouchableOpacity

@@ -30,7 +30,7 @@ const Die: React.FC<DieProps> = ({ value, locked, dimmed }) => {
         ]}>
             <View style={styles.dotsGrid}>
                 {dots.map((hasDot, i) => (
-                    <View key={i} style={styles.dotSlot}>
+                    <View key={`dot-${i}`} style={styles.dotSlot}>
                         {hasDot && <View style={styles.dot} />}
                     </View>
                 ))}
@@ -120,7 +120,7 @@ const DiceScene: React.FC<DiceSceneProps> = ({ currentStep }) => {
             <View style={styles.diceRow}>
                 {step.dice.map((die, i) => (
                     <Die
-                        key={i}
+                        key={`die-${i}-${die.value}`}
                         value={die.value}
                         locked={die.locked}
                         dimmed={!die.highlighted}

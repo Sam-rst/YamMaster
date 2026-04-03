@@ -13,7 +13,14 @@ interface DiceProps {
     opponent?: boolean;
 }
 
-const DOT_POSITIONS: boolean[][] = [
+const SLOT_IDS = ['tl', 'tc', 'tr', 'ml', 'mc', 'mr', 'bl', 'bc', 'br'] as const;
+
+interface DotSlot {
+    id: string;
+    hasDot: boolean;
+}
+
+const DOT_POSITIONS_RAW: boolean[][] = [
     [false, false, false, false, true, false, false, false, false],  // 1
     [true, false, false, false, false, false, false, false, true],   // 2
     [true, false, false, false, true, false, false, false, true],    // 3
@@ -21,6 +28,10 @@ const DOT_POSITIONS: boolean[][] = [
     [true, false, true, false, true, false, true, false, true],      // 5
     [true, false, true, true, false, true, true, false, true],       // 6
 ];
+
+const DOT_POSITIONS: DotSlot[][] = DOT_POSITIONS_RAW.map((row) =>
+    row.map((hasDot, i) => ({ id: SLOT_IDS[i], hasDot }))
+);
 
 const Dice: React.FC<DiceProps> = ({ index, locked, value, onPress, opponent }) => {
     const handlePress = (): void => {
@@ -30,7 +41,7 @@ const Dice: React.FC<DiceProps> = ({ index, locked, value, onPress, opponent }) 
     };
 
     const numValue = Number.parseInt(value, 10);
-    const dots = (numValue >= 1 && numValue <= 6) ? DOT_POSITIONS[numValue - 1] : [];
+    const dots: DotSlot[] = (numValue >= 1 && numValue <= 6) ? DOT_POSITIONS[numValue - 1] : [];
     const isSmall = !!opponent;
     const dotSize = isSmall ? 4 : 6;
 
@@ -46,9 +57,9 @@ const Dice: React.FC<DiceProps> = ({ index, locked, value, onPress, opponent }) 
             activeOpacity={opponent ? 1 : 0.7}
         >
             <View style={[styles.dotsGrid, isSmall && styles.smallDotsGrid]}>
-                {dots.map((hasDot, dotPosition) => (
-                    <View key={`dot-${dotPosition}`} style={styles.dotSlot}>
-                        {hasDot && (
+                {dots.map((slot) => (
+                    <View key={`dot-${slot.id}`} style={styles.dotSlot}>
+                        {slot.hasDot && (
                             <View style={[
                                 styles.dot,
                                 { width: dotSize, height: dotSize, borderRadius: dotSize / 2 },

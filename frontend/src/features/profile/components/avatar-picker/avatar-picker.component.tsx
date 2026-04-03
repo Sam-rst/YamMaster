@@ -14,7 +14,7 @@ interface AvatarPickerProps {
     onClose: () => void;
 }
 
-export default function AvatarPicker({ visible, currentAvatar, onSelect, onClose }: AvatarPickerProps) {
+export default function AvatarPicker({ visible, currentAvatar, onSelect, onClose }: Readonly<AvatarPickerProps>) {
     return (
         <Modal visible={visible} transparent animationType="fade">
             <View style={styles.overlay}>
