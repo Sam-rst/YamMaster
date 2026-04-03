@@ -111,18 +111,19 @@ interface GamePlayerRecord {
 }
 
 const computeStats = (players: GamePlayerRecord[], userId: string, username: string, avatar: string, createdAt: Date): ProfileStats => {
-    const totalGames = players.length;
-    const wins = players.filter(p => p.result === 'WIN').length;
-    const losses = players.filter(p => p.result === 'LOSE').length;
-    const draws = players.filter(p => p.result === 'DRAW').length;
+    const finishedGames = players.filter(p => p.result !== 'PENDING');
+    const totalGames = finishedGames.length;
+    const wins = finishedGames.filter(p => p.result === 'WIN').length;
+    const losses = finishedGames.filter(p => p.result === 'LOSE').length;
+    const draws = finishedGames.filter(p => p.result === 'DRAW').length;
     const winRate = totalGames > 0 ? Math.round((wins / totalGames) * 100) : 0;
-    const onlineGames = players.filter(p => p.game.mode === 'ONLINE').length;
-    const botGames = players.filter(p => p.game.mode === 'VS_BOT').length;
-    const bestWinStreak = computeBestWinStreak(players.map(p => p.result));
+    const onlineGames = finishedGames.filter(p => p.game.mode === 'ONLINE').length;
+    const botGames = finishedGames.filter(p => p.game.mode === 'VS_BOT').length;
+    const bestWinStreak = computeBestWinStreak(finishedGames.map(p => p.result));
     const averageScore = totalGames > 0
-        ? Math.round((players.reduce((sum, p) => sum + p.score, 0) / totalGames) * 10) / 10
+        ? Math.round((finishedGames.reduce((sum, p) => sum + p.score, 0) / totalGames) * 10) / 10
         : 0;
-    const botGamesList = players.filter(p => p.game.mode === 'VS_BOT');
+    const botGamesList = finishedGames.filter(p => p.game.mode === 'VS_BOT');
     const favoriteBotDifficulty = computeFavoriteBotDifficulty(botGamesList);
     const rank = computeRank(wins);
 
