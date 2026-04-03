@@ -8,7 +8,7 @@ import { Platform } from 'react-native';
 const SERVER_URL_OVERRIDE: string = process.env.EXPO_PUBLIC_SERVER_URL || '';
 
 const SERVER_HOST_WEB: string = process.env.EXPO_PUBLIC_SERVER_HOST_WEB || 'localhost';
-const SERVER_HOST_MOBILE: string = process.env.EXPO_PUBLIC_SERVER_HOST_MOBILE || '10.61.8.6';
+const SERVER_HOST_MOBILE: string = process.env.EXPO_PUBLIC_SERVER_HOST_MOBILE || 'localhost';
 const SERVER_PORT: string = process.env.EXPO_PUBLIC_SERVER_PORT || '3000';
 
 export const SERVER_URL: string = SERVER_URL_OVERRIDE
