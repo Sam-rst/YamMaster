@@ -24,7 +24,7 @@ const Die: React.FC<DieProps> = ({ value }) => {
         <View style={styles.die}>
             <View style={styles.dotsGrid}>
                 {dots.map((hasDot, i) => (
-                    <View key={i} style={styles.dotSlot}>
+                    <View key={`dot-${i}`} style={styles.dotSlot}>
                         {hasDot && <View style={styles.dot} />}
                     </View>
                 ))}
