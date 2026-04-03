@@ -1,6 +1,6 @@
 // backend/src/features/bot/handlers/bot.handler.ts
 
-import { EventEmitter } from 'events';
+import { EventEmitter } from 'node:events';
 import uniqid from 'uniqid';
 import GameService from '../../game/services/game.service';
 import BotService, { BotDifficulty } from '../services/bot.service';

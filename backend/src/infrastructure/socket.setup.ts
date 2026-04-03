@@ -2,7 +2,7 @@
 
 import express from 'express';
 import cors from 'cors';
-import http from 'http';
+import http from 'node:http';
 import { Server, Socket } from 'socket.io';
 import GameService from '../features/game/services/game.service';
 import { Game, PlayerKey } from '../shared/types';

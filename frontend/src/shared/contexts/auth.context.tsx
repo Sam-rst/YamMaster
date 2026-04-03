@@ -1,6 +1,6 @@
 // frontend/src/shared/contexts/auth.context.tsx
 
-import React, { createContext, useContext, useState, useCallback } from 'react';
+import React, { createContext, useContext, useState, useCallback, useMemo } from 'react';
 
 interface AuthUser {
     id: string;
@@ -46,13 +46,13 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         setUser((prev) => prev ? { ...prev, ...fields } : prev);
     }, []);
 
-    const value: AuthContextType = {
+    const value: AuthContextType = useMemo(() => ({
         user,
         isAuthenticated: user !== null,
         login,
         logout,
         updateUser,
-    };
+    }), [user, login, logout, updateUser]);
 
     return (
         <AuthContext.Provider value={value}>

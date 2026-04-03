@@ -1,5 +1,5 @@
 // Silence les logs pendant les tests
-global.console = {
+globalThis.console = {
     ...console,
     log: jest.fn(),
     warn: jest.fn(),

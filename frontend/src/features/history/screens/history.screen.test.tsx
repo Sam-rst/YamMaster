@@ -17,7 +17,8 @@ jest.mock('../services/history.service', () => ({
 const mockNavigate = jest.fn();
 const navigation = { navigate: mockNavigate };
 
-const renderHistoryScreen = (user = { id: 'user-1', username: 'alice', createdAt: '2026-01-01' }) => {
+const DEFAULT_USER = { id: 'user-1', username: 'alice', createdAt: '2026-01-01' };
+const renderHistoryScreen = (user = DEFAULT_USER) => {
     return render(
         <AuthContext.Provider value={{
             user,

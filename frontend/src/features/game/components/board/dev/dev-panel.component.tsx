@@ -61,22 +61,27 @@ const DevPanel: React.FC = () => {
 
             <View style={styles.devGrid}>
                 {grid.map((row: GridCell[], rowIndex: number) => (
-                    <View key={rowIndex} style={styles.devRow}>
-                        {row.map((cell: GridCell, cellIndex: number) => (
-                            <TouchableOpacity
-                                key={cellIndex}
-                                style={[
-                                    styles.devCell,
-                                    cell.owner === 'player:1' && styles.cellP1,
-                                    cell.owner === 'player:2' && styles.cellP2,
-                                ]}
-                                onPress={() => handleDevPlace(rowIndex, cellIndex)}
-                            >
-                                <Text style={styles.devCellText}>
-                                    {cell.owner === 'player:1' ? 'J1' : cell.owner === 'player:2' ? 'J2' : '.'}
-                                </Text>
-                            </TouchableOpacity>
-                        ))}
+                    <View key={`dev-row-${row[0]?.id ?? rowIndex}`} style={styles.devRow}>
+                        {row.map((cell: GridCell, cellIndex: number) => {
+                            const cellLabel = cell.owner === 'player:1' ? 'J1'
+                                : cell.owner === 'player:2' ? 'J2'
+                                : '.';
+                            return (
+                                <TouchableOpacity
+                                    key={cell.id}
+                                    style={[
+                                        styles.devCell,
+                                        cell.owner === 'player:1' && styles.cellP1,
+                                        cell.owner === 'player:2' && styles.cellP2,
+                                    ]}
+                                    onPress={() => handleDevPlace(rowIndex, cellIndex)}
+                                >
+                                    <Text style={styles.devCellText}>
+                                        {cellLabel}
+                                    </Text>
+                                </TouchableOpacity>
+                            );
+                        })}
                     </View>
                 ))}
             </View>

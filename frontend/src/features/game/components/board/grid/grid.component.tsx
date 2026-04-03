@@ -66,7 +66,7 @@ const Grid: React.FC = () => {
             {displayGrid && (
                 <View style={styles.gridWrapper}>
                     {grid.map((row: GridCell[], rowIndex: number) => (
-                        <View key={rowIndex} style={styles.row}>
+                        <View key={`row-${row[0]?.id ?? rowIndex}`} style={styles.row}>
                             {row.map((cell: GridCell, cellIndex: number) => (
                                 <TouchableOpacity
                                     key={`${rowIndex}-${cellIndex}`}

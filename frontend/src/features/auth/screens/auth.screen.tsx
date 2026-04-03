@@ -91,11 +91,12 @@ const AuthScreen: React.FC<Props> = ({ navigation }) => {
     const isNewUser = userExists === false;
     const isExistingUser = userExists === true;
 
-    const buttonLabel = loading
-        ? 'Chargement...'
-        : isNewUser
-            ? 'Créer mon compte'
-            : 'Se connecter';
+    const getButtonLabel = (): string => {
+        if (loading) return 'Chargement...';
+        if (isNewUser) return 'Créer mon compte';
+        return 'Se connecter';
+    };
+    const buttonLabel = getButtonLabel();
 
     const passwordPlaceholder = isNewUser
         ? 'Choisir un mot de passe'
