@@ -7,6 +7,12 @@ import type { Socket } from "socket.io-client";
 import type { GridCell, PlayerKey } from "@shared/types/game.types";
 import type { GridViewStatePayload } from "@shared/types/socket-events.types";
 
+const getCellLabel = (owner: string | null): string => {
+    if (owner === 'player:1') return 'J1';
+    if (owner === 'player:2') return 'J2';
+    return '.';
+};
+
 const DevPanel: React.FC = () => {
     const socket = useContext(SocketContext) as Socket;
     const [visible, setVisible] = useState<boolean>(false);
@@ -63,9 +69,7 @@ const DevPanel: React.FC = () => {
                 {grid.map((row: GridCell[], rowIndex: number) => (
                     <View key={`dev-row-${row[0]?.id ?? rowIndex}`} style={styles.devRow}>
                         {row.map((cell: GridCell, cellIndex: number) => {
-                            const cellLabel = cell.owner === 'player:1' ? 'J1'
-                                : cell.owner === 'player:2' ? 'J2'
-                                : '.';
+                            const cellLabel = getCellLabel(cell.owner);
                             return (
                                 <TouchableOpacity
                                     key={cell.id}

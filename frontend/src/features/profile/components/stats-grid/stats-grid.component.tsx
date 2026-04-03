@@ -27,7 +27,7 @@ interface StatsGridProps {
     stats: Stats;
 }
 
-function StatCard({ value, label, color }: { value: string | number; label: string; color?: string }) {
+function StatCard({ value, label, color }: Readonly<{ value: string | number; label: string; color?: string }>) {
     return (
         <View style={styles.statCard}>
             <Text style={[styles.statValue, color ? { color } : {}]}>{value}</Text>
@@ -36,7 +36,7 @@ function StatCard({ value, label, color }: { value: string | number; label: stri
     );
 }
 
-function ModeStatCard({ value, label, color }: { value: string | number; label: string; color?: string }) {
+function ModeStatCard({ value, label, color }: Readonly<{ value: string | number; label: string; color?: string }>) {
     return (
         <View style={styles.modeCard}>
             <Text style={[styles.modeValue, color ? { color } : {}]}>{value}</Text>
@@ -45,7 +45,7 @@ function ModeStatCard({ value, label, color }: { value: string | number; label: 
     );
 }
 
-function AdvancedRow({ label, value }: { label: string; value: string }) {
+function AdvancedRow({ label, value }: Readonly<{ label: string; value: string }>) {
     return (
         <View style={styles.advancedRow}>
             <Text style={styles.advancedLabel}>{label}</Text>
@@ -54,7 +54,7 @@ function AdvancedRow({ label, value }: { label: string; value: string }) {
     );
 }
 
-export default function StatsGrid({ stats }: StatsGridProps) {
+export default function StatsGrid({ stats }: Readonly<StatsGridProps>) {
     const botLabel = stats.favoriteBotDifficulty
         ? BOT_DIFFICULTY_LABELS[stats.favoriteBotDifficulty] ?? '—'
         : '—';

@@ -29,7 +29,7 @@ const Cell: React.FC<CellProps> = ({ state }) => {
 type GridData = CellState[][];
 
 const buildEmptyGrid = (): GridData =>
-    Array.from({ length: 5 }, () => Array(5).fill('empty') as CellState[]);
+    Array.from({ length: 5 }, () => new Array(5).fill('empty') as CellState[]);
 
 const markCells = (
     base: GridData,
@@ -100,9 +100,9 @@ const ScoringScene: React.FC<ScoringSceneProps> = ({ currentStep }) => {
 
             <View style={styles.grid}>
                 {step.grid.map((row, r) => (
-                    <View key={r} style={styles.row}>
+                    <View key={`row-${r}`} style={styles.row}>
                         {row.map((cellState, c) => (
-                            <Cell key={c} state={cellState} />
+                            <Cell key={`cell-${r}-${c}`} state={cellState} />
                         ))}
                     </View>
                 ))}
