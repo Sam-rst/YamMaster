@@ -46,8 +46,8 @@ const Dice: React.FC<DiceProps> = ({ index, locked, value, onPress, opponent }) 
             activeOpacity={opponent ? 1 : 0.7}
         >
             <View style={[styles.dotsGrid, isSmall && styles.smallDotsGrid]}>
-                {dots.map((hasDot, i) => (
-                    <View key={i} style={styles.dotSlot}>
+                {dots.map((hasDot, dotPosition) => (
+                    <View key={`dot-${dotPosition}`} style={styles.dotSlot}>
                         {hasDot && (
                             <View style={[
                                 styles.dot,

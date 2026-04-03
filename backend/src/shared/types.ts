@@ -50,6 +50,8 @@ export interface GameState {
 export interface SocketLike {
     id: string;
     userId?: string;
+    username?: string;
+    avatar?: string;
     emit: (event: string, ...args: unknown[]) => void;
     on: (event: string, listener: (...args: unknown[]) => void) => void;
 }

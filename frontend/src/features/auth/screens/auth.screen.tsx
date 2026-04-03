@@ -75,7 +75,7 @@ const AuthScreen: React.FC<Props> = ({ navigation }) => {
             setAuthUser(result.user);
 
             setTimeout(() => {
-                navigation.navigate('HomeScreen');
+                navigation.navigate('MainTabs');
             }, REDIRECT_DELAY_MS);
         } else {
             setError(result.error || 'Erreur inconnue');
@@ -84,18 +84,19 @@ const AuthScreen: React.FC<Props> = ({ navigation }) => {
 
     const handleGuestLogin = (): void => {
         setAuthUser({ id: '', username: 'Invité', createdAt: new Date().toISOString() });
-        navigation.navigate('HomeScreen');
+        navigation.navigate('MainTabs');
     };
 
     const isFormValid = username.trim().length >= 2 && password.length >= 1;
     const isNewUser = userExists === false;
     const isExistingUser = userExists === true;
 
-    const buttonLabel = loading
-        ? 'Chargement...'
-        : isNewUser
-            ? 'Créer mon compte'
-            : 'Se connecter';
+    const getButtonLabel = (): string => {
+        if (loading) return 'Chargement...';
+        if (isNewUser) return 'Créer mon compte';
+        return 'Se connecter';
+    };
+    const buttonLabel = getButtonLabel();
 
     const passwordPlaceholder = isNewUser
         ? 'Choisir un mot de passe'

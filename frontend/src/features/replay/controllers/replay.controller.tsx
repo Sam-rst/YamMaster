@@ -35,6 +35,84 @@ const fontSans = Platform.select({ web: '"Inter", sans-serif', default: 'Inter' 
 
 const AUTOPLAY_INTERVAL_MS = 1000;
 
+const DEFAULT_GAME_STATE: GameSnapshot = {
+    currentTurn: '',
+    timer: 0,
+    player1Score: 0,
+    player2Score: 0,
+    player1Tokens: 12,
+    player2Tokens: 12,
+    grid: [],
+    choices: { isDefi: false, isSec: false, idSelectedChoice: null, availableChoices: [] },
+    deck: { dices: [], rollsCounter: 0, rollsMaximum: 3 },
+};
+
+const renderStepContent = (
+    currentStep: number,
+    currentSnapshot: GameSnapshot | null,
+    hasSnapshots: boolean,
+    gameState: GameSnapshot,
+    currentAction: TurnAction | null,
+    playerName: string,
+    player1Name: string,
+    player2Name: string,
+): React.ReactNode => {
+    const isAtStart = currentStep <= 0;
+
+    if (isAtStart) {
+        return (
+            <View style={styles.startCard}>
+                <Feather name="play-circle" size={28} color={colors.textSecondary} />
+                <Text style={styles.startText}>Début de la partie</Text>
+                <Text style={styles.startSubtext}>
+                    Utilisez les contrôles pour naviguer tour par tour
+                </Text>
+            </View>
+        );
+    }
+
+    if (currentSnapshot) {
+        return (
+            <ReplayBoard
+                gameState={gameState}
+                action={currentAction}
+                playerName={playerName}
+                player1Name={player1Name}
+                player2Name={player2Name}
+            />
+        );
+    }
+
+    if (!hasSnapshots) {
+        return (
+            <ReplayActionInfo
+                action={currentAction}
+                playerName={playerName}
+            />
+        );
+    }
+
+    return (
+        <View style={styles.startCard}>
+            <Feather name="play-circle" size={28} color={colors.textSecondary} />
+            <Text style={styles.startText}>Début de la partie</Text>
+            <Text style={styles.startSubtext}>
+                Utilisez les contrôles pour naviguer tour par tour
+            </Text>
+        </View>
+    );
+};
+
+const resolvePlayerName = (
+    players: GameWithTurns['players'],
+    playerNumber: number,
+): string => {
+    const player = players.find(p => p.playerNumber === playerNumber);
+    if (!player) return `Joueur ${playerNumber}`;
+    if (player.isBot) return 'Bot';
+    return player.user?.username || `Joueur ${playerNumber}`;
+};
+
 const ReplayController: React.FC<ReplayControllerProps> = ({ navigation, gameId }) => {
     const [game, setGame] = useState<GameWithTurns | null>(null);
     const [loading, setLoading] = useState(true);
@@ -123,16 +201,14 @@ const ReplayController: React.FC<ReplayControllerProps> = ({ navigation, gameId 
 
     const currentAction = getActionForStep(currentStep);
     const currentSnapshot = getSnapshotForStep(currentStep);
-
-    const getPlayerName = (playerNumber: number): string => {
-        const player = game.players.find(p => p.playerNumber === playerNumber);
-        if (!player) return `Joueur ${playerNumber}`;
-        if (player.isBot) return 'Bot';
-        return player.user?.username || `Joueur ${playerNumber}`;
-    };
-
-    const player1Name = getPlayerName(1);
-    const player2Name = getPlayerName(2);
+    const player1Name = resolvePlayerName(game.players, 1);
+    const player2Name = resolvePlayerName(game.players, 2);
+    const gameState = currentSnapshot ?? DEFAULT_GAME_STATE;
+    const playerName = currentAction ? resolvePlayerName(game.players, currentAction.playerNumber) : '';
+    const isAtFirst = currentStep === 0;
+    const isAtLast = currentStep === totalSteps;
+    const prevColor = isAtFirst ? 'rgba(255,255,255,0.2)' : colors.textPrimary;
+    const nextColor = isAtLast ? 'rgba(255,255,255,0.2)' : colors.white;
 
     const goNext = (): void => {
         if (currentStep < totalSteps) setCurrentStep(currentStep + 1);
@@ -149,21 +225,6 @@ const ReplayController: React.FC<ReplayControllerProps> = ({ navigation, gameId 
             startAutoplay();
         }
     };
-
-    const defaultGameState: GameSnapshot = {
-        currentTurn: '',
-        timer: 0,
-        player1Score: 0,
-        player2Score: 0,
-        player1Tokens: 12,
-        player2Tokens: 12,
-        grid: [],
-        choices: { isDefi: false, isSec: false, idSelectedChoice: null, availableChoices: [] },
-        deck: { dices: [], rollsCounter: 0, rollsMaximum: 3 },
-    };
-
-    const gameState = currentSnapshot ?? defaultGameState;
-    const playerName = currentAction ? getPlayerName(currentAction.playerNumber) : '';
 
     return (
         <ScrollView style={styles.scrollView} contentContainerStyle={styles.scrollContent}>
@@ -193,38 +254,17 @@ const ReplayController: React.FC<ReplayControllerProps> = ({ navigation, gameId 
                 </View>
             </View>
 
-            {currentStep > 0 && currentSnapshot ? (
-                <ReplayBoard
-                    gameState={gameState}
-                    action={currentAction}
-                    playerName={playerName}
-                    player1Name={player1Name}
-                    player2Name={player2Name}
-                />
-            ) : currentStep > 0 && !hasSnapshots ? (
-                <ReplayActionInfo
-                    action={currentAction}
-                    playerName={playerName}
-                />
-            ) : (
-                <View style={styles.startCard}>
-                    <Feather name="play-circle" size={28} color={colors.textSecondary} />
-                    <Text style={styles.startText}>Début de la partie</Text>
-                    <Text style={styles.startSubtext}>
-                        Utilisez les contrôles pour naviguer tour par tour
-                    </Text>
-                </View>
-            )}
+            {renderStepContent(currentStep, currentSnapshot, hasSnapshots, gameState, currentAction, playerName, player1Name, player2Name)}
 
             <View style={styles.controls}>
                 <TouchableOpacity
-                    style={[styles.controlButton, currentStep === 0 && styles.controlDisabled]}
+                    style={[styles.controlButton, isAtFirst && styles.controlDisabled]}
                     onPress={goPrev}
-                    disabled={currentStep === 0 || isPlaying}
+                    disabled={isAtFirst || isPlaying}
                     activeOpacity={0.7}
                 >
-                    <Feather name="skip-back" size={18} color={currentStep === 0 ? 'rgba(255,255,255,0.2)' : colors.textPrimary} />
-                    <Text style={[styles.controlText, currentStep === 0 && styles.controlTextDisabled]}>
+                    <Feather name="skip-back" size={18} color={prevColor} />
+                    <Text style={[styles.controlText, isAtFirst && styles.controlTextDisabled]}>
                         Précédent
                     </Text>
                 </TouchableOpacity>
@@ -243,15 +283,15 @@ const ReplayController: React.FC<ReplayControllerProps> = ({ navigation, gameId 
                 </TouchableOpacity>
 
                 <TouchableOpacity
-                    style={[styles.controlButton, styles.controlButtonPrimary, currentStep === totalSteps && styles.controlDisabled]}
+                    style={[styles.controlButton, styles.controlButtonPrimary, isAtLast && styles.controlDisabled]}
                     onPress={goNext}
-                    disabled={currentStep === totalSteps || isPlaying}
+                    disabled={isAtLast || isPlaying}
                     activeOpacity={0.7}
                 >
-                    <Text style={[styles.controlText, styles.controlTextPrimary, currentStep === totalSteps && styles.controlTextDisabled]}>
+                    <Text style={[styles.controlText, styles.controlTextPrimary, isAtLast && styles.controlTextDisabled]}>
                         Suivant
                     </Text>
-                    <Feather name="skip-forward" size={18} color={currentStep === totalSteps ? 'rgba(255,255,255,0.2)' : colors.white} />
+                    <Feather name="skip-forward" size={18} color={nextColor} />
                 </TouchableOpacity>
             </View>
         </ScrollView>

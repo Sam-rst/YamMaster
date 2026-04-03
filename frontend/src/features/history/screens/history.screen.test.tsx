@@ -17,7 +17,8 @@ jest.mock('../services/history.service', () => ({
 const mockNavigate = jest.fn();
 const navigation = { navigate: mockNavigate };
 
-const renderHistoryScreen = (user = { id: 'user-1', username: 'alice', createdAt: '2026-01-01' }) => {
+const DEFAULT_USER = { id: 'user-1', username: 'alice', createdAt: '2026-01-01' };
+const renderHistoryScreen = (user = DEFAULT_USER) => {
     return render(
         <AuthContext.Provider value={{
             user,
@@ -144,5 +145,77 @@ describe('HistoryScreen', () => {
             expect(getByText('Vs Bot')).toBeTruthy();
             expect(getByText('Bot')).toBeTruthy();
         });
+    });
+
+    test('affiche "Aujourd\'hui" pour une partie du jour', async () => {
+        const today = new Date().toISOString();
+        mockGetGamesByUserId.mockResolvedValue([
+            {
+                id: 'game-today',
+                mode: 'ONLINE',
+                status: 'FINISHED',
+                myScore: 3,
+                opponentScore: 2,
+                scoreDisplay: '3 - 2',
+                myResult: 'WIN',
+                opponentName: 'bob',
+                createdAt: today,
+            },
+        ]);
+
+        const { getByText } = renderHistoryScreen();
+
+        await waitFor(() => {
+            expect(getByText("Aujourd'hui")).toBeTruthy();
+        });
+    });
+
+    test('affiche "Hier" pour une partie de la veille', async () => {
+        const yesterday = new Date(Date.now() - 86400000).toISOString();
+        mockGetGamesByUserId.mockResolvedValue([
+            {
+                id: 'game-yesterday',
+                mode: 'ONLINE',
+                status: 'FINISHED',
+                myScore: 1,
+                opponentScore: 4,
+                scoreDisplay: '1 - 4',
+                myResult: 'LOSE',
+                opponentName: 'charlie',
+                createdAt: yesterday,
+            },
+        ]);
+
+        const { getByText } = renderHistoryScreen();
+
+        await waitFor(() => {
+            expect(getByText('Hier')).toBeTruthy();
+        });
+    });
+
+    test('navigue vers le replay au clic sur une partie', async () => {
+        mockGetGamesByUserId.mockResolvedValue([
+            {
+                id: 'game-1',
+                mode: 'ONLINE',
+                status: 'FINISHED',
+                myScore: 5,
+                opponentScore: 3,
+                scoreDisplay: '5 - 3',
+                myResult: 'WIN',
+                opponentName: 'bob',
+                createdAt: '2026-03-26T10:00:00Z',
+            },
+        ]);
+
+        const { getByText } = renderHistoryScreen();
+
+        await waitFor(() => {
+            expect(getByText(/bob/)).toBeTruthy();
+        });
+
+        const { fireEvent } = require('@testing-library/react');
+        fireEvent.click(getByText(/bob/));
+        expect(mockNavigate).toHaveBeenCalledWith('ReplayScreen', { gameId: 'game-1' });
     });
 });

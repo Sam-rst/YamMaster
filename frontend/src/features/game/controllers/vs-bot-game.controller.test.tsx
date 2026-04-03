@@ -4,9 +4,11 @@ import VsBotGameController from './vs-bot-game.controller';
 import { SocketContext } from '@/shared/contexts/socket.context';
 import { createMockSocket } from '@/__mocks__/socket.mock';
 
+let lastBoardProps: Record<string, unknown> = {};
 jest.mock('../components/board/board.component', () => {
     const React = require('react');
-    return function MockBoard() {
+    return function MockBoard(props: Record<string, unknown>) {
+        lastBoardProps = props;
         return React.createElement('Text', {}, 'MockBoard');
     };
 });
@@ -18,6 +20,7 @@ describe('VsBotGameController', () => {
     beforeEach(() => {
         jest.clearAllMocks();
         mockSocket = createMockSocket();
+        lastBoardProps = {};
     });
 
     it('émet game.vsbot à l\'initialisation', () => {
@@ -26,7 +29,7 @@ describe('VsBotGameController', () => {
                 <VsBotGameController />
             </SocketContext.Provider>
         );
-        expect(mockSocket.emit).toHaveBeenCalledWith('game.vsbot');
+        expect(mockSocket.emit).toHaveBeenCalledWith('game.vsbot', { difficulty: 'MEDIUM' });
     });
 
     it('affiche un message de chargement initialement', () => {
@@ -84,6 +87,26 @@ describe('VsBotGameController', () => {
         expect(getByText('Rejouer')).toBeTruthy();
     });
 
+    it('passe opponentInfo au Board après game.start', () => {
+        const opponent = { username: 'Bot Facile', avatar: '🤖', rank: null };
+        render(
+            <SocketContext.Provider value={mockSocket}>
+                <VsBotGameController />
+            </SocketContext.Provider>
+        );
+
+        act(() => {
+            mockSocket.__simulateEvent('game.start', {
+                inQueue: false,
+                inGame: true,
+                idOpponent: 'bot-id',
+                opponent,
+            });
+        });
+
+        expect(lastBoardProps.opponentInfo).toEqual(opponent);
+    });
+
     it('écoute game.start et game.end', () => {
         render(
             <SocketContext.Provider value={mockSocket}>
@@ -118,7 +141,7 @@ describe('VsBotGameController', () => {
         mockSocket.emit.mockClear();
         fireEvent.click(getByText('Rejouer'));
 
-        expect(mockSocket.emit).toHaveBeenCalledWith('game.vsbot');
+        expect(mockSocket.emit).toHaveBeenCalledWith('game.vsbot', { difficulty: 'MEDIUM' });
     });
 
     it('le bouton "Retour au menu" après game.end navigue vers HomeScreen', () => {

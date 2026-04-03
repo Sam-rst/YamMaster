@@ -2,10 +2,11 @@
 
 import express from 'express';
 import cors from 'cors';
-import http from 'http';
+import http from 'node:http';
 import { Server, Socket } from 'socket.io';
 import GameService from '../features/game/services/game.service';
 import { Game, PlayerKey } from '../shared/types';
+import { BotDifficulty } from '../features/bot/services/bot.service';
 import { logger } from '../shared/logger';
 import { newPlayerInQueue, createGameVsBot, removeFromQueueBySocketId } from '../features/matchmaking/handlers/matchmaking.handler';
 import {
@@ -33,6 +34,7 @@ export const isCurrentPlayerTurn = (game: Game, socketId: string): boolean => {
 
 import { authRouter } from '../features/auth/routes/auth.routes';
 import { historyRouter } from '../features/history/routes/history.routes';
+import { profileRouter } from '../features/profile/routes/profile.routes';
 
 export const createServer = (): { app: ReturnType<typeof express>; server: http.Server; io: Server } => {
     const app = express();
@@ -40,6 +42,7 @@ export const createServer = (): { app: ReturnType<typeof express>; server: http.
     app.use(express.json());
     app.use('/api/auth', authRouter);
     app.use('/api/history', historyRouter);
+    app.use('/api/profile', profileRouter);
 
     const server = http.createServer(app);
     const io = new Server(server, {
@@ -99,9 +102,12 @@ export const setupSocketHandlers = (io: Server, games: Game[]): void => {
     io.on('connection', (socket: Socket) => {
         const userId = socket.handshake.query.userId as string | undefined;
         const username = socket.handshake.query.username as string | undefined;
+        const avatar = socket.handshake.query.avatar as string | undefined;
 
-        // Stocker le userId dans le socket pour l'utiliser dans les handlers
+        // Stocker les infos utilisateur dans le socket pour les handlers
         (socket as unknown as Record<string, unknown>).userId = userId;
+        (socket as unknown as Record<string, unknown>).username = username;
+        (socket as unknown as Record<string, unknown>).avatar = avatar;
 
         logger.info('Socket connecté', {
             socketId: socket.id,
@@ -117,9 +123,14 @@ export const setupSocketHandlers = (io: Server, games: Game[]): void => {
             });
         });
 
-        socket.on('game.vsbot', () => {
+        socket.on('game.vsbot', (data?: { difficulty?: string }) => {
             safeHandler('game.vsbot', socket.id, () => {
-                createGameVsBot(socket, games);
+                const VALID_DIFFICULTIES: BotDifficulty[] = ['EASY', 'MEDIUM', 'HARD'];
+                const raw = data?.difficulty?.toUpperCase();
+                const difficulty: BotDifficulty = VALID_DIFFICULTIES.includes(raw as BotDifficulty)
+                    ? (raw as BotDifficulty)
+                    : 'MEDIUM';
+                createGameVsBot(socket, games, difficulty);
                 logServerState(games, 'après game.vsbot');
             });
         });

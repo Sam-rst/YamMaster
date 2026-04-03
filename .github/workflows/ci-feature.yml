@@ -11,3 +11,4 @@ jobs:
   ci:
     name: Lint → Tests → Build
     uses: ./.github/workflows/_ci-shared.yml
+    secrets: inherit

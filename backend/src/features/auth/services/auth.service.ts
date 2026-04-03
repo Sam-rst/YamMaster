@@ -16,6 +16,7 @@ interface AuthResult {
 interface SanitizedUser {
     id: string;
     username: string;
+    avatar: string;
     createdAt: Date;
 }
 
@@ -23,6 +24,7 @@ interface UserWithPassword {
     id: string;
     username: string;
     password: string;
+    avatar: string;
     createdAt: Date;
     updatedAt: Date;
 }
@@ -111,7 +113,7 @@ const AuthService = {
     },
 
     sanitizeUser: (user: UserWithPassword): SanitizedUser => {
-        return { id: user.id, username: user.username, createdAt: user.createdAt };
+        return { id: user.id, username: user.username, avatar: user.avatar, createdAt: user.createdAt };
     },
 };
 

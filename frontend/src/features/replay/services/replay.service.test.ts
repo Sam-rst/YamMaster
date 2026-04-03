@@ -3,7 +3,7 @@
 import ReplayService from './replay.service';
 
 const mockFetch = jest.fn();
-global.fetch = mockFetch;
+globalThis.fetch = mockFetch;
 
 describe('ReplayService', () => {
 

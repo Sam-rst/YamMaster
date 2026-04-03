@@ -1,7 +1,7 @@
 // backend/src/__tests__/e2e/socket.setup.e2e.test.ts
 // Tests E2E : vrai serveur Socket.IO + vrais clients
 
-import http from 'http';
+import http from 'node:http';
 import { Server } from 'socket.io';
 import { io as Client, Socket as ClientSocket } from 'socket.io-client';
 import { Game } from '../../shared/types';

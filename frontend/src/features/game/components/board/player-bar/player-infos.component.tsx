@@ -9,12 +9,17 @@ const fontSans = Platform.select({ web: '"Inter", sans-serif', default: 'Inter' 
 const PlayerInfos: React.FC = () => {
     const { user } = useAuth();
     const username = user?.username ?? 'Joueur';
+    const avatar = user?.avatar;
 
     return (
         <View style={styles.container}>
             <View style={styles.avatarBorder}>
                 <View style={styles.avatar}>
-                    <Feather name="user" size={14} color={colors.textSecondary} />
+                    {avatar ? (
+                        <Text style={styles.avatarEmoji}>{avatar}</Text>
+                    ) : (
+                        <Feather name="user" size={14} color={colors.textSecondary} />
+                    )}
                 </View>
             </View>
             <View>
@@ -48,6 +53,9 @@ const styles = StyleSheet.create({
         backgroundColor: colors.card,
         justifyContent: 'center',
         alignItems: 'center',
+    },
+    avatarEmoji: {
+        fontSize: 16,
     },
     label: {
         fontFamily: fontSans,

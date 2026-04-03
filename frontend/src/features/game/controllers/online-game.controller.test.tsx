@@ -4,9 +4,11 @@ import OnlineGameController from './online-game.controller';
 import { SocketContext } from '@/shared/contexts/socket.context';
 import { createMockSocket } from '@/__mocks__/socket.mock';
 
+let lastBoardProps: Record<string, unknown> = {};
 jest.mock('../components/board/board.component', () => {
     const React = require('react');
-    return function MockBoard() {
+    return function MockBoard(props: Record<string, unknown>) {
+        lastBoardProps = props;
         return React.createElement('Text', {}, 'MockBoard');
     };
 });
@@ -18,6 +20,7 @@ describe('OnlineGameController', () => {
     beforeEach(() => {
         jest.clearAllMocks();
         mockSocket = createMockSocket();
+        lastBoardProps = {};
     });
 
     it('émet queue.join à l\'initialisation', () => {
@@ -68,6 +71,26 @@ describe('OnlineGameController', () => {
         });
 
         expect(getByText('MockBoard')).toBeTruthy();
+    });
+
+    it('passe opponentInfo au Board après game.start', () => {
+        const opponent = { username: 'Alice', avatar: '🎲', rank: { name: 'Or', tier: 'gold', color: '#FFD700' } };
+        render(
+            <SocketContext.Provider value={mockSocket}>
+                <OnlineGameController />
+            </SocketContext.Provider>
+        );
+
+        act(() => {
+            mockSocket.__simulateEvent('game.start', {
+                inQueue: false,
+                inGame: true,
+                idOpponent: 'opponent-id',
+                opponent,
+            });
+        });
+
+        expect(lastBoardProps.opponentInfo).toEqual(opponent);
     });
 
     it('écoute les événements queue.added, game.start et game.end', () => {

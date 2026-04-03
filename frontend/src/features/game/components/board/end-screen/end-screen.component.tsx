@@ -24,6 +24,44 @@ const REASON_LABELS: Record<string, string> = {
     noTokens: 'Plus de pions disponibles',
 };
 
+type GameOutcome = 'draw' | 'win' | 'loss';
+
+const OUTCOME_ACCENT_COLOR: Record<GameOutcome, string> = {
+    draw: colors.gold,
+    win: colors.gold,
+    loss: colors.primary,
+};
+
+const OUTCOME_ICON: Record<GameOutcome, keyof typeof Feather.glyphMap> = {
+    draw: 'minus-circle',
+    win: 'award',
+    loss: 'x-circle',
+};
+
+const OUTCOME_TITLE: Record<GameOutcome, string> = {
+    draw: 'Égalité !',
+    win: 'Victoire !',
+    loss: 'Défaite',
+};
+
+const OUTCOME_SUBTITLE: Record<GameOutcome, string> = {
+    draw: 'Match serré !',
+    win: 'Vous êtes le maître du Yam',
+    loss: 'Continuez à vous entraîner',
+};
+
+const OUTCOME_ICON_COLOR: Record<GameOutcome, string> = {
+    draw: colors.background,
+    win: colors.background,
+    loss: colors.white,
+};
+
+function resolveOutcome(isWin: boolean, isDraw: boolean): GameOutcome {
+    if (isDraw) return 'draw';
+    if (isWin) return 'win';
+    return 'loss';
+}
+
 const EndScreen: React.FC<EndScreenProps> = ({
     isWin,
     isDraw,
@@ -34,20 +72,18 @@ const EndScreen: React.FC<EndScreenProps> = ({
     onReplay,
     onHome,
 }) => {
-    const accentColor = isDraw ? colors.gold : isWin ? colors.gold : colors.primary;
-    const iconName: keyof typeof Feather.glyphMap = isDraw ? 'minus-circle' : isWin ? 'award' : 'x-circle';
-
-    const title = isDraw ? 'Égalité !' : isWin ? 'Victoire !' : 'Défaite';
-    const subtitle = isDraw
-        ? 'Match serré !'
-        : isWin
-            ? 'Vous êtes le maître du Yam'
-            : 'Continuez à vous entraîner';
+    const outcome = resolveOutcome(isWin, isDraw);
+    const accentColor = OUTCOME_ACCENT_COLOR[outcome];
+    const iconName = OUTCOME_ICON[outcome];
+    const title = OUTCOME_TITLE[outcome];
+    const subtitle = OUTCOME_SUBTITLE[outcome];
+    const iconColor = OUTCOME_ICON_COLOR[outcome];
+    const isAlignment = reason === 'alignment5';
 
     return (
         <View style={styles.container}>
             <View style={[styles.iconCircle, { backgroundColor: accentColor }]}>
-                <Feather name={iconName} size={56} color={isDraw ? colors.background : isWin ? colors.background : colors.white} />
+                <Feather name={iconName} size={56} color={iconColor} />
             </View>
 
             <View style={styles.titleSection}>
@@ -55,7 +91,7 @@ const EndScreen: React.FC<EndScreenProps> = ({
                 <Text style={styles.subtitle}>{subtitle}</Text>
             </View>
 
-            {reason === 'alignment5' ? (
+            {isAlignment ? (
                 <View style={styles.alignmentCard}>
                     <Feather name="target" size={20} color={accentColor} />
                     <Text style={[styles.alignmentText, { color: accentColor }]}>
@@ -76,7 +112,7 @@ const EndScreen: React.FC<EndScreenProps> = ({
                 </View>
             )}
 
-            {reason !== 'alignment5' && (
+            {!isAlignment && (
                 <View style={styles.reasonCard}>
                     <Feather name="info" size={14} color={colors.textSecondary} />
                     <Text style={styles.reasonText}>{REASON_LABELS[reason] || reason}</Text>
@@ -89,8 +125,8 @@ const EndScreen: React.FC<EndScreenProps> = ({
                     onPress={onReplay}
                     activeOpacity={0.85}
                 >
-                    <Feather name="rotate-ccw" size={20} color={isDraw ? colors.background : isWin ? colors.background : colors.white} />
-                    <Text style={[styles.replayButtonText, { color: isDraw ? colors.background : isWin ? colors.background : colors.white }]}>
+                    <Feather name="rotate-ccw" size={20} color={iconColor} />
+                    <Text style={[styles.replayButtonText, { color: iconColor }]}>
                         Rejouer
                     </Text>
                 </TouchableOpacity>

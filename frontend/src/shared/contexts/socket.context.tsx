@@ -27,6 +27,7 @@ export const SocketProvider: React.FC<{ children: React.ReactNode }> = ({ childr
             query: {
                 ...(user.id ? { userId: user.id } : {}),
                 username: user.username,
+                avatar: user.avatar,
             },
         });
 

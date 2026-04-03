@@ -26,7 +26,7 @@ const fontSans = Platform.select({ web: '"Inter", sans-serif', default: 'Inter' 
 const PlayerDeck: React.FC = () => {
     const socket = useContext(SocketContext) as Socket;
     const [displayPlayerDeck, setDisplayPlayerDeck] = useState<boolean>(false);
-    const [dices, setDices] = useState<DiceType[]>(Array(5).fill(false));
+    const [dices, setDices] = useState<DiceType[]>(new Array(5).fill(false));
     const [displayRollButton, setDisplayRollButton] = useState<boolean>(false);
     const [rollsCounter, setRollsCounter] = useState<number>(0);
     const [rollsMaximum, setRollsMaximum] = useState<number>(3);
