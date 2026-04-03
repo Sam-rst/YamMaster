@@ -61,7 +61,7 @@ YamMaster/
 │       └── shared/             # Types, logger, exceptions
 ├── 📂 frontend/                # App React Native / Expo
 │   └── src/
-│       ├── features/           # auth, home, game, history, replay, rules, profile, leaderboard
+│       ├── features/           # auth, home, game, history, replay, rules, profile
 │       └── shared/             # Contextes, theme, hooks, services
 ├── 📂 shared/                  # Types partages (frontend + backend)
 │   └── types/                  # game.types.ts, socket-events.types.ts

@@ -1,53 +1,96 @@
-// frontend/src/shared/contexts/socket.context.test.tsx
-// Tests du SocketContext et SocketProvider
+// frontend/src/shared/contexts/socket-provider.test.tsx
+// Tests du SocketProvider — connexion socket liée à l'auth
 
 import React from 'react';
-import { render } from '@testing-library/react';
+import { render, waitFor } from '@testing-library/react';
 import { SocketContext, SocketProvider } from './socket.context';
 import { AuthContext } from './auth.context';
 
 // Mock socket.io-client
-const mockOn = jest.fn();
+const mockConnect = jest.fn();
 const mockDisconnect = jest.fn();
-const mockSocket = { id: 'test-id', on: mockOn, disconnect: mockDisconnect, connected: true };
+const mockOn = jest.fn();
+const mockSocket = {
+    id: 'test-socket-id',
+    on: mockOn,
+    disconnect: mockDisconnect,
+    connected: true,
+};
 
 jest.mock('socket.io-client', () => ({
     __esModule: true,
-    default: jest.fn(() => mockSocket),
+    default: (...args: unknown[]) => {
+        mockConnect(...args);
+        return mockSocket;
+    },
 }));
 
 const TestConsumer: React.FC = () => {
     const socket = React.useContext(SocketContext);
-    return <span data-testid="has-socket">{socket ? 'yes' : 'no'}</span>;
+    return <span data-testid="socket-id">{socket ? socket.id : 'null'}</span>;
 };
 
-describe('SocketContext', () => {
+const renderWithAuth = (user: { id: string; username: string; createdAt: string } | null) => {
+    return render(
+        <AuthContext.Provider value={{
+            user,
+            isAuthenticated: user !== null,
+            login: jest.fn(),
+            logout: jest.fn(),
+        }}>
+            <SocketProvider>
+                <TestConsumer />
+            </SocketProvider>
+        </AuthContext.Provider>
+    );
+};
 
-    test('SocketContext est un React context avec Provider', () => {
-        expect(SocketContext).toBeDefined();
-        expect(SocketContext.Provider).toBeDefined();
+describe('SocketProvider', () => {
+
+    beforeEach(() => {
+        jest.clearAllMocks();
     });
 
-    test('SocketProvider fournit null quand pas authentifié', () => {
-        const { getByTestId } = render(
-            <AuthContext.Provider value={{
-                user: null, isAuthenticated: false, login: jest.fn(), logout: jest.fn(),
-            }}>
-                <SocketProvider><TestConsumer /></SocketProvider>
-            </AuthContext.Provider>
-        );
-        expect(getByTestId('has-socket').textContent).toBe('no');
+    test('ne se connecte pas quand l\'utilisateur n\'est pas authentifié', () => {
+        const { getByTestId } = renderWithAuth(null);
+
+        expect(getByTestId('socket-id').textContent).toBe('null');
+        expect(mockConnect).not.toHaveBeenCalled();
     });
 
-    test('SocketProvider fournit un socket quand authentifié', () => {
-        const { getByTestId } = render(
-            <AuthContext.Provider value={{
-                user: { id: 'u1', username: 'alice', createdAt: '2026-01-01' },
-                isAuthenticated: true, login: jest.fn(), logout: jest.fn(),
-            }}>
-                <SocketProvider><TestConsumer /></SocketProvider>
-            </AuthContext.Provider>
-        );
-        expect(getByTestId('has-socket').textContent).toBe('yes');
+    test('se connecte quand l\'utilisateur est authentifié', async () => {
+        const user = { id: 'user-1', username: 'alice', createdAt: '2026-01-01' };
+        const { getByTestId } = renderWithAuth(user);
+
+        await waitFor(() => {
+            expect(mockConnect).toHaveBeenCalled();
+            expect(getByTestId('socket-id').textContent).toBe('test-socket-id');
+        });
+    });
+
+    test('passe le userId et username dans la query de connexion', async () => {
+        const user = { id: 'user-1', username: 'alice', createdAt: '2026-01-01' };
+        renderWithAuth(user);
+
+        await waitFor(() => {
+            expect(mockConnect).toHaveBeenCalledWith(
+                expect.any(String),
+                expect.objectContaining({
+                    query: { userId: 'user-1', username: 'alice' },
+                }),
+            );
+        });
+    });
+
+    test('déconnecte le socket au démontage', async () => {
+        const user = { id: 'user-1', username: 'alice', createdAt: '2026-01-01' };
+        const { unmount } = renderWithAuth(user);
+
+        await waitFor(() => {
+            expect(mockConnect).toHaveBeenCalled();
+        });
+
+        unmount();
+        expect(mockDisconnect).toHaveBeenCalled();
     });
 });
