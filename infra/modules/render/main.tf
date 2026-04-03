@@ -13,6 +13,10 @@ resource "render_web_service" "backend" {
   region        = var.region
   start_command = var.start_command
 
+  lifecycle {
+    ignore_changes = [maintenance_mode]
+  }
+
   runtime_source = {
     native_runtime = {
       repo_url      = var.repo_url
