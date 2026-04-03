@@ -102,9 +102,12 @@ export const setupSocketHandlers = (io: Server, games: Game[]): void => {
     io.on('connection', (socket: Socket) => {
         const userId = socket.handshake.query.userId as string | undefined;
         const username = socket.handshake.query.username as string | undefined;
+        const avatar = socket.handshake.query.avatar as string | undefined;
 
-        // Stocker le userId dans le socket pour l'utiliser dans les handlers
+        // Stocker les infos utilisateur dans le socket pour les handlers
         (socket as unknown as Record<string, unknown>).userId = userId;
+        (socket as unknown as Record<string, unknown>).username = username;
+        (socket as unknown as Record<string, unknown>).avatar = avatar;
 
         logger.info('Socket connecté', {
             socketId: socket.id,

@@ -5,6 +5,7 @@ import React, { createContext, useContext, useState, useCallback } from 'react';
 interface AuthUser {
     id: string;
     username: string;
+    avatar?: string;
     createdAt: string;
 }
 
@@ -13,6 +14,7 @@ interface AuthContextType {
     isAuthenticated: boolean;
     login: (user: AuthUser) => void;
     logout: () => void;
+    updateUser: (fields: Partial<AuthUser>) => void;
 }
 
 const defaultContext: AuthContextType = {
@@ -20,6 +22,7 @@ const defaultContext: AuthContextType = {
     isAuthenticated: false,
     login: () => {},
     logout: () => {},
+    updateUser: () => {},
 };
 
 export const AuthContext = createContext<AuthContextType>(defaultContext);
@@ -39,11 +42,16 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         setUser(null);
     }, []);
 
+    const updateUser = useCallback((fields: Partial<AuthUser>) => {
+        setUser((prev) => prev ? { ...prev, ...fields } : prev);
+    }, []);
+
     const value: AuthContextType = {
         user,
         isAuthenticated: user !== null,
         login,
         logout,
+        updateUser,
     };
 
     return (

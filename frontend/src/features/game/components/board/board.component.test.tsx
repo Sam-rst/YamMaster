@@ -40,9 +40,13 @@ jest.mock('./player-bar/player-infos.component', () => {
     const React = require('react');
     return () => React.createElement('Text', {}, 'PlayerInfos');
 });
+let lastOpponentInfosProps: Record<string, unknown> = {};
 jest.mock('./player-bar/opponent-infos.component', () => {
     const React = require('react');
-    return () => React.createElement('Text', {}, 'OpponentInfos');
+    return (props: Record<string, unknown>) => {
+        lastOpponentInfosProps = props;
+        return React.createElement('Text', {}, 'OpponentInfos');
+    };
 });
 jest.mock('./dev/dev-panel.component', () => {
     const React = require('react');
@@ -58,6 +62,37 @@ jest.mock('./player-bar/opponent-tokens.component', () => {
 });
 
 describe('Board', () => {
+
+    beforeEach(() => {
+        lastOpponentInfosProps = {};
+    });
+
+    it('transmet opponentInfo à OpponentInfos', () => {
+        const mockSocket = createMockSocket();
+        const opponentInfo = { username: 'Alice', avatar: '🎲', rank: { name: 'Or', tier: 'gold', color: '#FFD700' } };
+        render(
+            <SocketContext.Provider value={mockSocket}>
+                <Board opponentInfo={opponentInfo} />
+            </SocketContext.Provider>
+        );
+
+        expect(lastOpponentInfosProps.username).toBe('Alice');
+        expect(lastOpponentInfosProps.avatar).toBe('🎲');
+        expect(lastOpponentInfosProps.rank).toEqual({ name: 'Or', tier: 'gold', color: '#FFD700' });
+    });
+
+    it('transmet undefined à OpponentInfos quand opponentInfo est null', () => {
+        const mockSocket = createMockSocket();
+        render(
+            <SocketContext.Provider value={mockSocket}>
+                <Board opponentInfo={null} />
+            </SocketContext.Provider>
+        );
+
+        expect(lastOpponentInfosProps.username).toBeUndefined();
+        expect(lastOpponentInfosProps.avatar).toBeUndefined();
+        expect(lastOpponentInfosProps.rank).toBeUndefined();
+    });
 
     it('rend tous les sous-composants', () => {
         const mockSocket = createMockSocket();

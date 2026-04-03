@@ -22,10 +22,18 @@ const DELAY_GAME_START_MS = 1500;
 const MINIMUM_ROLLS_TO_PLACE = 2;
 const MAXIMUM_ROLLS = 3;
 
-export const createBotSocket = (): SocketLike => {
+const BOT_NAMES: Record<string, string> = {
+    EASY: 'Bot Debutant',
+    MEDIUM: 'Bot Tactique',
+    HARD: 'Bot Maitre IA',
+};
+
+export const createBotSocket = (difficulty: string = 'MEDIUM'): SocketLike => {
     const emitter = new EventEmitter();
     return {
         id: 'bot-' + uniqid(),
+        username: BOT_NAMES[difficulty] ?? 'Bot',
+        avatar: '🤖',
         emit: (event: string, ...args: unknown[]) => emitter.emit(event, ...args),
         on: (event: string, listener: (...args: unknown[]) => void) => { emitter.on(event, listener); },
     };

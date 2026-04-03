@@ -17,10 +17,12 @@ jest.mock('../services/profile.service', () => ({
 }));
 
 // Mock auth context
+const mockUpdateUser = jest.fn();
 jest.mock('@/shared/contexts/auth.context', () => ({
     useAuth: () => ({
         user: { id: 'u1', username: 'alice', createdAt: '2024-03-14T00:00:00.000Z' },
         isAuthenticated: true,
+        updateUser: mockUpdateUser,
     }),
 }));
 
@@ -153,5 +155,6 @@ describe('ProfileScreen', () => {
         });
 
         expect(mockUpdateAvatar).toHaveBeenCalledWith('u1', '🎯');
+        expect(mockUpdateUser).toHaveBeenCalledWith({ avatar: '🎯' });
     });
 });

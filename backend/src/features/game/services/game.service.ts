@@ -115,12 +115,20 @@ const GameService = {
 
     send: {
         forPlayer: {
-            viewGameState: (playerKey: PlayerKey, game: Game) => {
+            viewGameState: (playerKey: PlayerKey, game: Game, opponentRank: { name: string; tier: string; color: string } | null = null) => {
+                const isPlayer1 = playerKey === 'player:1';
+                const opponentSocket = isPlayer1 ? game.player2Socket : game.player1Socket;
+
                 return {
                     inQueue: false,
                     inGame: true,
-                    idPlayer: playerKey === 'player:1' ? game.player1Socket.id : game.player2Socket.id,
-                    idOpponent: playerKey === 'player:1' ? game.player2Socket.id : game.player1Socket.id,
+                    idPlayer: isPlayer1 ? game.player1Socket.id : game.player2Socket.id,
+                    idOpponent: opponentSocket.id,
+                    opponent: {
+                        username: opponentSocket.username ?? 'Adversaire',
+                        avatar: opponentSocket.avatar ?? '🎲',
+                        rank: opponentRank,
+                    },
                 };
             },
 

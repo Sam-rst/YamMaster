@@ -43,10 +43,17 @@ export interface QueueAddedPayload {
     inGame: boolean;
 }
 
+export interface OpponentInfo {
+    username: string;
+    avatar: string;
+    rank: { name: string; tier: string; color: string } | null;
+}
+
 export interface GameStartPayload {
     inQueue: boolean;
     inGame: boolean;
     idOpponent: string;
+    opponent: OpponentInfo;
 }
 
 export interface TimerPayload {

@@ -20,12 +20,14 @@ import OpponentTokens from './player-bar/opponent-tokens.component';
 import DevPanel from './dev/dev-panel.component';
 import { DEV_MODE } from '@/shared/services/config';
 import { colors } from '@/shared/theme/colors';
+import type { OpponentInfo } from '@shared/types/socket-events.types';
 
 interface BoardProps {
     _gameViewState?: Record<string, unknown>;
+    opponentInfo?: OpponentInfo | null;
 }
 
-const Board: React.FC<BoardProps> = ({ _gameViewState }) => {
+const Board: React.FC<BoardProps> = ({ _gameViewState, opponentInfo }) => {
     const [rulesVisible, setRulesVisible] = useState(false);
 
     return (
@@ -34,7 +36,7 @@ const Board: React.FC<BoardProps> = ({ _gameViewState }) => {
 
             <View style={styles.opponentHeader}>
                 <View style={styles.opponentBarRow}>
-                    <OpponentInfos />
+                    <OpponentInfos username={opponentInfo?.username} avatar={opponentInfo?.avatar} rank={opponentInfo?.rank} />
                     <View style={styles.opponentStats}>
                         <View style={styles.scoreTokenGroup}>
                             <OpponentScore />

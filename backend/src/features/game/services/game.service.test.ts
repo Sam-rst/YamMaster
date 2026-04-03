@@ -537,6 +537,46 @@ describe('GameService.send', () => {
             expect(state.idPlayer).toBe('socket-p2');
             expect(state.idOpponent).toBe('socket-p1');
         });
+
+        it('retourne les infos adversaire pour player:1 (adversaire = player:2)', () => {
+            const gameWithProfiles = {
+                ...mockGame,
+                player1Socket: { id: 'socket-p1', username: 'Alice', avatar: '🦊', emit: jest.fn(), on: jest.fn() },
+                player2Socket: { id: 'socket-p2', username: 'Bob', avatar: '🐺', emit: jest.fn(), on: jest.fn() },
+            };
+            const state = GameService.send.forPlayer.viewGameState('player:1', gameWithProfiles);
+            expect(state.opponent).toBeDefined();
+            expect(state.opponent.username).toBe('Bob');
+            expect(state.opponent.avatar).toBe('🐺');
+        });
+
+        it('retourne les infos adversaire pour player:2 (adversaire = player:1)', () => {
+            const gameWithProfiles = {
+                ...mockGame,
+                player1Socket: { id: 'socket-p1', username: 'Alice', avatar: '🦊', emit: jest.fn(), on: jest.fn() },
+                player2Socket: { id: 'socket-p2', username: 'Bob', avatar: '🐺', emit: jest.fn(), on: jest.fn() },
+            };
+            const state = GameService.send.forPlayer.viewGameState('player:2', gameWithProfiles);
+            expect(state.opponent.username).toBe('Alice');
+            expect(state.opponent.avatar).toBe('🦊');
+        });
+
+        it('utilise "Adversaire" et "🎲" si username/avatar ne sont pas définis sur le socket', () => {
+            const state = GameService.send.forPlayer.viewGameState('player:1', mockGame);
+            expect(state.opponent.username).toBe('Adversaire');
+            expect(state.opponent.avatar).toBe('🎲');
+        });
+
+        it('retourne opponent.rank à null par défaut (opponentRank non fourni)', () => {
+            const state = GameService.send.forPlayer.viewGameState('player:1', mockGame);
+            expect(state.opponent.rank).toBeNull();
+        });
+
+        it('retourne opponent.rank avec les données fournies', () => {
+            const opponentRank = { name: 'Or', tier: 'gold', color: '#FFD700' };
+            const state = GameService.send.forPlayer.viewGameState('player:1', mockGame, opponentRank);
+            expect(state.opponent.rank).toEqual(opponentRank);
+        });
     });
 
     describe('viewQueueState', () => {
