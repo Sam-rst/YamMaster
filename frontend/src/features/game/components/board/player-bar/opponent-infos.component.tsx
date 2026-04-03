@@ -20,7 +20,7 @@ const OpponentInfos: React.FC<OpponentInfosProps> = ({
         <View style={styles.container}>
             <View style={styles.avatarBorder}>
                 <View style={styles.avatar}>
-                    {avatar ? (
+                    {avatar && avatar !== 'undefined' ? (
                         <Text style={styles.avatarEmoji}>{avatar}</Text>
                     ) : (
                         <Feather name="user" size={14} color="rgba(255,255,255,0.2)" />

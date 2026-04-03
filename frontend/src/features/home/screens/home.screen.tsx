@@ -65,7 +65,11 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ navigation }) => {
                 <View style={styles.headerLeft}>
                     <View style={styles.avatarBorder}>
                         <View style={styles.avatar}>
-                            <Feather name="user" size={20} color={colors.textSecondary} />
+                            {user?.avatar ? (
+                                <Text style={{ fontSize: 20 }}>{user.avatar}</Text>
+                            ) : (
+                                <Feather name="user" size={20} color={colors.textSecondary} />
+                            )}
                         </View>
                     </View>
                     <View>
