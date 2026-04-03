@@ -55,30 +55,41 @@
 
 | Composant | Rôle |
 |-----------|------|
-| `index.js` | Point d'entrée, gestion des connexions Socket.IO, orchestration |
-| `services/game.service.js` | Moteur de jeu pur (sans side effects) : dés, combinaisons, grille, scores, victoire |
-| `services/bot.service.js` | Logique décisionnelle du bot (externalisée du moteur) |
+| `index.ts` | Point d'entrée, gestion des connexions Socket.IO, orchestration |
+| `features/game/services/game.service.ts` | Moteur de jeu pur (sans side effects) : dés, combinaisons, grille, scores, victoire |
+| `features/bot/services/bot.service.ts` | Logique décisionnelle du bot (3 niveaux : EASY, MEDIUM, HARD) |
+| `features/matchmaking/` | Gestion de la file d'attente et création des parties |
+| `features/auth/` | Authentification (login/register avec bcrypt) |
+| `features/history/` | Sauvegarde et consultation des parties |
+| `features/profile/` | Statistiques joueur, rang et avatar |
 
 **Principe clé** : Le `game.service.js` doit rester une librairie de fonctions pures (entrée → sortie, sans état). Toute la gestion d'état est dans `index.js`.
 
 ### 2. Database Server — Stockage Service (au choix)
 
 **Options** :
-- **Option A** : Intégré au serveur Express (SQLite via `better-sqlite3`)
-- **Option B** : Serveur séparé (API REST) avec MongoDB/PostgreSQL sous Docker
+- **Choix retenu** : PostgreSQL 16 via Prisma ORM, intégré au serveur Express
+- Docker Compose pour le développement local (`docker-compose up`)
 
 **Modèles de données minimum** :
 
 ```
 User {
-  id, username, passwordHash, createdAt
+  id (UUID), username (unique), password (bcrypt),
+  avatar (emoji, défaut 🎲), createdAt, updatedAt
 }
 
 Game {
-  id, player1Id, player2Id, winnerId,
-  player1Score, player2Score,
-  reason (alignment5 | noTokens),
-  createdAt, duration
+  id (UUID), mode (ONLINE | VS_BOT), status (IN_PROGRESS | FINISHED),
+  reason (alignment5 | noTokens), turns (JSON — données replay),
+  createdAt, endedAt
+}
+
+GamePlayer {
+  id (UUID), gameId (FK), userId (FK, nullable si bot),
+  playerNumber, isBot, score, tokensLeft,
+  result (PENDING | WIN | LOSE | DRAW),
+  difficulty (EASY | MEDIUM | HARD, nullable)
 }
 ```
 
@@ -136,10 +147,13 @@ Game {
 | Événement | Payload | Description |
 |-----------|---------|-------------|
 | `queue.join` | `{ userId? }` | Rejoindre la file d'attente |
+| `game.vsbot` | `{ difficulty }` | Démarrer une partie vs bot (EASY/MEDIUM/HARD) |
 | `game.dices.roll` | — | Lancer les dés |
 | `game.dices.lock` | `idDice` | Verrouiller/déverrouiller un dé |
 | `game.choices.selected` | `{ choiceId }` | Sélectionner une combinaison |
 | `game.grid.selected` | `{ cellId, rowIndex, cellIndex }` | Poser un pion |
+| `game.defi` | — | Activer le mode Défi |
+| `game.grid.yamPredator` | `{ rowIndex, cellIndex }` | Retirer un pion adverse (Yam Predator) |
 | `game.leave` | — | Quitter la partie |
 | `disconnect` | — | Déconnexion |
 
@@ -155,4 +169,5 @@ Game {
 | `game.grid.view-state` | `{ grid, canSelectCells }` | État de la grille |
 | `game.score` | `{ playerScore, opponentScore, playerTokens, opponentTokens }` | Scores et pions (émis au start + après chaque pose) |
 | `game.end` | `{ winner, reason, player1Score, player2Score }` | Fin de partie |
+| `game.yamPredator.activate` | — | Yam Predator disponible (Yam détecté) |
 | `game.opponent.leave` | — | Adversaire déconnecté |
