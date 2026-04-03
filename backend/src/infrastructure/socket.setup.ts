@@ -36,9 +36,16 @@ import { authRouter } from '../features/auth/routes/auth.routes';
 import { historyRouter } from '../features/history/routes/history.routes';
 import { profileRouter } from '../features/profile/routes/profile.routes';
 
+const getAllowedOrigins = (): string[] | '*' => {
+    const origins = process.env.ALLOWED_ORIGINS;
+    if (!origins) return '*';
+    return origins.split(',').map(o => o.trim());
+};
+
 export const createServer = (): { app: ReturnType<typeof express>; server: http.Server; io: Server } => {
+    const allowedOrigins = getAllowedOrigins();
     const app = express();
-    app.use(cors());
+    app.use(cors({ origin: allowedOrigins }));
     app.use(express.json());
     app.use('/api/auth', authRouter);
     app.use('/api/history', historyRouter);
@@ -46,7 +53,7 @@ export const createServer = (): { app: ReturnType<typeof express>; server: http.
 
     const server = http.createServer(app);
     const io = new Server(server, {
-        cors: { origin: '*' },
+        cors: { origin: allowedOrigins },
     });
     return { app, server, io };
 };
