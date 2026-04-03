@@ -49,8 +49,14 @@ variable "dev_mode" {
   default     = "false"
 }
 
-variable "extra_env_vars" {
-  description = "Variables d'environnement supplementaires"
-  type        = map(string)
-  default     = {}
+variable "build_command" {
+  description = "Commande de build"
+  type        = string
+  default     = "cd backend && npm ci --legacy-peer-deps && npx prisma generate && npm run build"
+}
+
+variable "start_command" {
+  description = "Commande de demarrage"
+  type        = string
+  default     = "cd backend && npm run start"
 }

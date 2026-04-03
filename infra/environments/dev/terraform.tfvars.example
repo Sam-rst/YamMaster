@@ -2,6 +2,7 @@
 # NE JAMAIS COMMITER terraform.tfvars (il contient des secrets)
 
 render_api_key  = "rnd_XXXXXXXXXXXXXXXXXXXXXXXXXX"
+render_owner_id = "usr_XXXXXXXXXXXXXXXXXXXXXXXXXX"
 neon_api_key    = "XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX"
 repo_url        = "https://github.com/Sam-rst/YamMaster"
 allowed_origins = ""
