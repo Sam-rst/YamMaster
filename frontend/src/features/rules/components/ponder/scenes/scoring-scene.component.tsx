@@ -26,10 +26,13 @@ const Cell: React.FC<CellProps> = ({ state }) => {
     );
 };
 
-type GridData = CellState[][];
+interface GridCell { id: string; state: CellState }
+type GridData = GridCell[][];
 
 const buildEmptyGrid = (): GridData =>
-    Array.from({ length: 5 }, () => new Array(5).fill('empty') as CellState[]);
+    Array.from({ length: 5 }, (_, r) =>
+        Array.from({ length: 5 }, (__, c) => ({ id: `${r}-${c}`, state: 'empty' as CellState }))
+    );
 
 const markCells = (
     base: GridData,
@@ -37,9 +40,9 @@ const markCells = (
     state: CellState,
 ): GridData =>
     base.map((row, r) =>
-        row.map((cell, c): CellState => {
+        row.map((cell, c) => {
             const match = cells.find(([cr, cc]) => cr === r && cc === c);
-            return match ? state : cell;
+            return match ? { ...cell, state } : cell;
         })
     );
 
@@ -99,10 +102,10 @@ const ScoringScene: React.FC<ScoringSceneProps> = ({ currentStep }) => {
             <Text style={styles.label}>{step.label}</Text>
 
             <View style={styles.grid}>
-                {step.grid.map((row, r) => (
-                    <View key={`row-${r}`} style={styles.row}>
-                        {row.map((cellState, c) => (
-                            <Cell key={`cell-${r}-${c}`} state={cellState} />
+                {step.grid.map((row) => (
+                    <View key={row[0].id.split('-')[0]} style={styles.row}>
+                        {row.map((cell) => (
+                            <Cell key={cell.id} state={cell.state} />
                         ))}
                     </View>
                 ))}

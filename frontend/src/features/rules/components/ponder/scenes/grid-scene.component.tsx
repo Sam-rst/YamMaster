@@ -28,32 +28,34 @@ const Cell: React.FC<CellProps> = ({ state }) => {
     );
 };
 
-type GridData = CellState[][];
+interface GridCell { id: string; state: CellState }
+type GridData = GridCell[][];
 
 const buildEmptyGrid = (): GridData =>
-    Array.from({ length: 5 }, () => new Array(5).fill('empty') as CellState[]);
+    Array.from({ length: 5 }, (_, r) =>
+        Array.from({ length: 5 }, (__, c) => ({ id: `${r}-${c}`, state: 'empty' as CellState }))
+    );
+
+const mapGrid = (grid: GridData, fn: (state: CellState, r: number, c: number) => CellState): GridData =>
+    grid.map((row, r) => row.map((cell, c) => ({ ...cell, state: fn(cell.state, r, c) })));
 
 const STEP_0_GRID: GridData = buildEmptyGrid();
 
-const STEP_1_GRID: GridData = buildEmptyGrid().map((row, r) =>
-    row.map((_, c): CellState => (r === 2 && c >= 1 && c <= 3 ? 'highlighted' : 'empty'))
+const STEP_1_GRID: GridData = mapGrid(buildEmptyGrid(), (_, r, c) =>
+    (r === 2 && c >= 1 && c <= 3 ? 'highlighted' : 'empty')
 );
 
-const STEP_2_GRID: GridData = buildEmptyGrid().map((row, r) =>
-    row.map((_, c): CellState => {
-        if (r === 2 && c === 2) return 'player';
-        if (r === 2 && c >= 1 && c <= 3) return 'highlighted';
-        return 'empty';
-    })
-);
+const STEP_2_GRID: GridData = mapGrid(buildEmptyGrid(), (_, r, c) => {
+    if (r === 2 && c === 2) return 'player';
+    if (r === 2 && c >= 1 && c <= 3) return 'highlighted';
+    return 'empty';
+});
 
-const STEP_3_GRID: GridData = buildEmptyGrid().map((row, r) =>
-    row.map((_, c): CellState => {
-        if (r === 2 && c === 2) return 'player';
-        if (r === 1 && c === 3) return 'opponent';
-        return 'empty';
-    })
-);
+const STEP_3_GRID: GridData = mapGrid(buildEmptyGrid(), (_, r, c) => {
+    if (r === 2 && c === 2) return 'player';
+    if (r === 1 && c === 3) return 'opponent';
+    return 'empty';
+});
 
 interface StepConfig {
     label: string;
@@ -97,10 +99,10 @@ const GridScene: React.FC<GridSceneProps> = ({ currentStep }) => {
             <Text style={styles.description}>{step.description}</Text>
 
             <View style={styles.grid}>
-                {step.grid.map((row, r) => (
-                    <View key={`row-${r}`} style={styles.row}>
-                        {row.map((cellState, c) => (
-                            <Cell key={`cell-${r}-${c}`} state={cellState} />
+                {step.grid.map((row) => (
+                    <View key={row[0].id.split('-')[0]} style={styles.row}>
+                        {row.map((cell) => (
+                            <Cell key={cell.id} state={cell.state} />
                         ))}
                     </View>
                 ))}
