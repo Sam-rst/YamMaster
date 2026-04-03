@@ -7,7 +7,7 @@ export interface MockSocket extends SocketLike {
     emittedEvents: Array<{ event: string; args: unknown[] }>;
     registeredListeners: Map<string, Array<(...args: unknown[]) => void>>;
     getEmitted: (event: string) => unknown[];
-    getLastEmitted: (event: string) => unknown | undefined;
+    getLastEmitted: (event: string) => unknown;
     countEmitted: (event: string) => number;
     triggerEvent: (event: string, ...args: unknown[]) => void;
     reset: () => void;
@@ -41,7 +41,7 @@ export const createMockSocket = (id = 'test-socket-1'): MockSocket => {
 
         getLastEmitted: (event: string) => {
             const events = emittedEvents.filter(e => e.event === event);
-            return events.length > 0 ? events[events.length - 1].args[0] : undefined;
+            return events.length > 0 ? events.at(-1)!.args[0] : undefined;
         },
 
         countEmitted: (event: string) => {

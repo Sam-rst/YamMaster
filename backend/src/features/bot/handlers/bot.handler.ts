@@ -1,9 +1,9 @@
 // backend/src/features/bot/handlers/bot.handler.ts
 
-import { EventEmitter } from 'events';
+import { EventEmitter } from 'node:events';
 import uniqid from 'uniqid';
 import GameService from '../../game/services/game.service';
-import BotService from '../services/bot.service';
+import BotService, { BotDifficulty } from '../services/bot.service';
 import { Game, SocketLike } from '../../../shared/types';
 import { logger } from '../../../shared/logger';
 import {
@@ -22,10 +22,18 @@ const DELAY_GAME_START_MS = 1500;
 const MINIMUM_ROLLS_TO_PLACE = 2;
 const MAXIMUM_ROLLS = 3;
 
-export const createBotSocket = (): SocketLike => {
+const BOT_NAMES: Record<string, string> = {
+    EASY: 'Bot Debutant',
+    MEDIUM: 'Bot Tactique',
+    HARD: 'Bot Maitre IA',
+};
+
+export const createBotSocket = (difficulty: string = 'MEDIUM'): SocketLike => {
     const emitter = new EventEmitter();
     return {
         id: 'bot-' + uniqid(),
+        username: BOT_NAMES[difficulty] ?? 'Bot',
+        avatar: '🤖',
         emit: (event: string, ...args: unknown[]) => emitter.emit(event, ...args),
         on: (event: string, listener: (...args: unknown[]) => void) => { emitter.on(event, listener); },
     };
@@ -35,12 +43,12 @@ const isGameActive = (game: Game, games: Game[]): boolean => {
     return games.includes(game) && game.gameState.currentTurn === BOT_PLAYER;
 };
 
-const selectAndPlaceCombination = (game: Game, games: Game[], choiceId: string): void => {
+const selectAndPlaceCombination = (game: Game, games: Game[], choiceId: string, difficulty: BotDifficulty): void => {
     handleChoiceSelected(game, choiceId);
 
     setTimeout(() => {
         if (!isGameActive(game, games)) return;
-        const cell = BotService.chooseBestCell(choiceId, game.gameState.grid);
+        const cell = BotService.chooseBestCell(choiceId, game.gameState.grid, difficulty);
         if (cell) {
             handleGridSelected(game, games, cell);
             logger.info('Bot a posé un pion', { gameId: game.idGame, action: choiceId });
@@ -48,8 +56,8 @@ const selectAndPlaceCombination = (game: Game, games: Game[], choiceId: string):
     }, DELAY_PLACE_ON_GRID_MS);
 };
 
-const lockDicesForNextRoll = (game: Game): void => {
-    const diceIdsToLock = BotService.chooseDicesToLock(game.gameState.deck.dices);
+const lockDicesForNextRoll = (game: Game, difficulty: BotDifficulty): void => {
+    const diceIdsToLock = BotService.chooseDicesToLock(game.gameState.deck.dices, difficulty);
 
     for (const dice of game.gameState.deck.dices) {
         const shouldBeLocked = diceIdsToLock.includes(dice.id);
@@ -61,7 +69,7 @@ const lockDicesForNextRoll = (game: Game): void => {
     }
 };
 
-export const setupBotListeners = (botSocket: SocketLike, game: Game, games: Game[]): void => {
+export const setupBotListeners = (botSocket: SocketLike, game: Game, games: Game[], difficulty: BotDifficulty = 'MEDIUM'): void => {
     const playTurn = (rollNumber: number): void => {
         if (!isGameActive(game, games)) return;
 
@@ -74,6 +82,7 @@ export const setupBotListeners = (botSocket: SocketLike, game: Game, games: Game
                 const bestChoice = BotService.chooseBestCombination(
                     game.gameState.choices.availableChoices,
                     game.gameState.grid,
+                    difficulty,
                 );
 
                 const canPlaceNow = bestChoice && rollNumber >= MINIMUM_ROLLS_TO_PLACE;
@@ -81,12 +90,12 @@ export const setupBotListeners = (botSocket: SocketLike, game: Game, games: Game
                 const isLastRoll = rollNumber >= MAXIMUM_ROLLS;
 
                 if (canPlaceNow) {
-                    selectAndPlaceCombination(game, games, bestChoice);
+                    selectAndPlaceCombination(game, games, bestChoice, difficulty);
                 } else if (hasMoreRolls) {
-                    lockDicesForNextRoll(game);
+                    lockDicesForNextRoll(game, difficulty);
                     setTimeout(() => playTurn(rollNumber + 1), DELAY_BETWEEN_ROLLS_MS);
                 } else if (isLastRoll && bestChoice) {
-                    selectAndPlaceCombination(game, games, bestChoice);
+                    selectAndPlaceCombination(game, games, bestChoice, difficulty);
                 }
             }, DELAY_ANALYSIS_MS);
         } catch (error) {

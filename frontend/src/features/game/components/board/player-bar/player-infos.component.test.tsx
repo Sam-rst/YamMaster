@@ -10,6 +10,13 @@ const mockAuthContext = {
     logout: jest.fn(),
 };
 
+const mockAuthContextWithAvatar = {
+    user: { id: '1', username: 'TestUser', avatar: '🎲', createdAt: '2024-01-01' },
+    isAuthenticated: true,
+    login: jest.fn(),
+    logout: jest.fn(),
+};
+
 describe('PlayerInfos', () => {
     it('affiche "Vous"', () => {
         const { getByText } = render(
@@ -18,5 +25,14 @@ describe('PlayerInfos', () => {
             </AuthContext.Provider>
         );
         expect(getByText('Vous')).toBeTruthy();
+    });
+
+    it('affiche l\'emoji avatar quand le joueur a un avatar', () => {
+        const { getByText } = render(
+            <AuthContext.Provider value={mockAuthContextWithAvatar}>
+                <PlayerInfos />
+            </AuthContext.Provider>
+        );
+        expect(getByText('🎲')).toBeTruthy();
     });
 });

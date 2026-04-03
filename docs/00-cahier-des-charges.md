@@ -57,10 +57,15 @@ La partie se termine quand :
 - **Setup dev** : Web / Android Studio / QR Code vers mobile physique
 - **Écrans** :
   - `<App>` — Conteneur principal + contexte utilisateur
-  - `<MenuScreen>` — Boutons vers les modes de jeu et paramètres
+  - `<AuthScreen>` — Écran d'authentification
+  - `<HomeScreen>` — Menu principal avec stats et actions
   - `<OnlineGameScreen>` — Mode de jeu en ligne
   - `<VsBotGameScreen>` — Mode de jeu contre l'ordinateur
-  - `<AuthScreen>` — Écran d'authentification
+  - `<BotDifficultyScreen>` — Sélection de la difficulté du bot
+  - `<HistoryScreen>` — Historique des parties
+  - `<ReplayScreen>` — Replay visuel tour par tour
+  - `<RulesScreen>` — Règles du jeu avec accordéons
+  - `<ProfileScreen>` — Profil joueur (stats, avatar, rang)
 - **Architecture des écrans de jeu** : Chaque écran délègue à un `Controller` (ex: `OnlineGameController`) qui instancie un composant `<Board>`. Le `<Board>` orchestre les sous-composants graphiques interactifs.
 - **Sous-composants de `<Board>`** :
   - `<OpponentInfos>`, `<OpponentTimer>`, `<OpponentScore>`, `<OpponentDeck>`
@@ -80,15 +85,21 @@ La partie se termine quand :
 | Client → Server | `queue.join` | Rejoindre la file d'attente |
 | Client → Server | `disconnect` | Déconnexion |
 | Client → Server | `game.leave` | Quitter la partie |
-| Client → Server | `game.end-turn` | Fin de tour |
 | Client → Server | `game.dices.roll` | Lancer les dés |
 | Client → Server | `game.dices.lock` | Verrouiller/déverrouiller un dé |
 | Client → Server | `game.choices.selected` | Sélectionner une combinaison |
 | Client → Server | `game.grid.selected` | Sélectionner une case de la grille |
+| Client → Server | `game.defi` | Activer le mode Défi |
+| Client → Server | `game.grid.yamPredator` | Retirer un pion adverse (Yam Predator) |
 | Server → Client | `queue.added` | Ajouté en file d'attente |
 | Server → Client | `game.start` | Début de partie |
 | Server → Client | `game.end` | Fin de partie |
 | Server → Client | `game.timer` | Mise à jour du timer (chaque seconde) |
+| Server → Client | `game.deck.view-state` | État des dés après lancer |
+| Server → Client | `game.choices.view-state` | Combinaisons disponibles |
+| Server → Client | `game.grid.view-state` | État de la grille |
+| Server → Client | `game.score` | Scores et pions restants |
+| Server → Client | `game.yamPredator.activate` | Yam Predator disponible |
 | Server → Client | `game.opponent.leave` | Adversaire déconnecté |
 
 #### Database Server — Stockage Service (stack au choix)

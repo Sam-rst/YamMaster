@@ -1,7 +1,9 @@
 // frontend/src/features/game/components/board/board.component.tsx
 
-import React from 'react';
-import { View, ScrollView, StyleSheet } from 'react-native';
+import React, { useState } from 'react';
+import { View, ScrollView, StyleSheet, TouchableOpacity } from 'react-native';
+import { Feather } from '@expo/vector-icons';
+import RulesModal from '@/features/rules/components/rules-modal/rules-modal.component';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import PlayerTimer from './player-bar/player-timer.component';
 import OpponentTimer from './player-bar/opponent-timer.component';
@@ -18,19 +20,23 @@ import OpponentTokens from './player-bar/opponent-tokens.component';
 import DevPanel from './dev/dev-panel.component';
 import { DEV_MODE } from '@/shared/services/config';
 import { colors } from '@/shared/theme/colors';
+import type { OpponentInfo } from '@shared/types/socket-events.types';
 
 interface BoardProps {
     _gameViewState?: Record<string, unknown>;
+    opponentInfo?: OpponentInfo | null;
 }
 
-const Board: React.FC<BoardProps> = ({ _gameViewState }) => {
+const Board: React.FC<BoardProps> = ({ _gameViewState, opponentInfo }) => {
+    const [rulesVisible, setRulesVisible] = useState(false);
+
     return (
         <SafeAreaView style={styles.container}>
             {DEV_MODE && <DevPanel />}
 
             <View style={styles.opponentHeader}>
                 <View style={styles.opponentBarRow}>
-                    <OpponentInfos />
+                    <OpponentInfos username={opponentInfo?.username} avatar={opponentInfo?.avatar} rank={opponentInfo?.rank} />
                     <View style={styles.opponentStats}>
                         <View style={styles.scoreTokenGroup}>
                             <OpponentScore />
@@ -64,6 +70,14 @@ const Board: React.FC<BoardProps> = ({ _gameViewState }) => {
                     </View>
                 </View>
             </View>
+
+            <TouchableOpacity
+                style={styles.rulesButton}
+                onPress={() => setRulesVisible(true)}
+            >
+                <Feather name="book-open" size={18} color={colors.textSecondary} />
+            </TouchableOpacity>
+            <RulesModal visible={rulesVisible} onClose={() => setRulesVisible(false)} />
         </SafeAreaView>
     );
 };
@@ -124,6 +138,19 @@ const styles = StyleSheet.create({
     scoreTokenGroup: {
         alignItems: 'flex-end',
         gap: 2,
+    },
+    rulesButton: {
+        position: 'absolute',
+        bottom: 12,
+        right: 12,
+        width: 36,
+        height: 36,
+        borderRadius: 18,
+        backgroundColor: colors.glass,
+        borderWidth: 1,
+        borderColor: colors.border,
+        justifyContent: 'center',
+        alignItems: 'center',
     },
 });
 

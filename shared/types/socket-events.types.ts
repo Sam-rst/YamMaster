@@ -1,7 +1,7 @@
 // shared/types/socket-events.types.ts
 // Types des événements Socket.IO — contrat entre client et serveur
 
-import { Dice, Combination, GridCell, PlayerKey, VictoryResult } from './game.types';
+import { Dice, Combination, GridCell, PlayerKey, VictoryResult, BotDifficulty } from './game.types';
 
 // ================================================================
 // SERVER → CLIENT (le client écoute ces événements)
@@ -24,7 +24,7 @@ export interface ServerToClientEvents {
 
 export interface ClientToServerEvents {
     'queue.join': () => void;
-    'game.vsbot': () => void;
+    'game.vsbot': (data: { difficulty: BotDifficulty }) => void;
     'game.dices.roll': () => void;
     'game.dices.lock': (diceId: number) => void;
     'game.defi': () => void;
@@ -43,10 +43,17 @@ export interface QueueAddedPayload {
     inGame: boolean;
 }
 
+export interface OpponentInfo {
+    username: string;
+    avatar: string;
+    rank: { name: string; tier: string; color: string } | null;
+}
+
 export interface GameStartPayload {
     inQueue: boolean;
     inGame: boolean;
     idOpponent: string;
+    opponent: OpponentInfo;
 }
 
 export interface TimerPayload {

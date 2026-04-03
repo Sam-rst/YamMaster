@@ -15,7 +15,7 @@ interface OpponentDeckViewStateData {
 const OpponentDeck: React.FC = () => {
     const socket = useContext(SocketContext) as Socket;
     const [displayOpponentDeck, setDisplayOpponentDeck] = useState<boolean>(false);
-    const [opponentDices, setOpponentDices] = useState<DiceType[]>(Array(5).fill({ value: '', locked: false }));
+    const [opponentDices, setOpponentDices] = useState<DiceType[]>(new Array(5).fill({ value: '', locked: false }));
 
     useEffect(() => {
         const onDeckViewState = (data: OpponentDeckViewStateData): void => {
@@ -32,9 +32,9 @@ const OpponentDeck: React.FC = () => {
         <View style={styles.container}>
             {displayOpponentDeck && (
                 <View style={styles.diceRow}>
-                    {opponentDices.map((diceData: DiceType, index: number) => (
+                    {opponentDices.map((diceData: DiceType, dicePosition: number) => (
                         <Dice
-                            key={index}
+                            key={`opponent-die-${dicePosition}`}
                             locked={diceData.locked}
                             value={diceData.value}
                             opponent={true}

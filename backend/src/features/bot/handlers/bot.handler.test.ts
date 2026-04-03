@@ -31,6 +31,36 @@ describe('Bot Handler - createBotSocket', () => {
         const bot2 = createBotSocket();
         expect(bot1.id).not.toBe(bot2.id);
     });
+
+    test('le bot EASY a le username "Bot Debutant"', () => {
+        const botSocket = createBotSocket('EASY');
+        expect(botSocket.username).toBe('Bot Debutant');
+    });
+
+    test('le bot MEDIUM a le username "Bot Tactique"', () => {
+        const botSocket = createBotSocket('MEDIUM');
+        expect(botSocket.username).toBe('Bot Tactique');
+    });
+
+    test('le bot HARD a le username "Bot Maitre IA"', () => {
+        const botSocket = createBotSocket('HARD');
+        expect(botSocket.username).toBe('Bot Maitre IA');
+    });
+
+    test('le bot a un avatar 🤖', () => {
+        const botSocket = createBotSocket();
+        expect(botSocket.avatar).toBe('🤖');
+    });
+
+    test('le bot sans difficulté précisée a le username "Bot Tactique" (MEDIUM par défaut)', () => {
+        const botSocket = createBotSocket();
+        expect(botSocket.username).toBe('Bot Tactique');
+    });
+
+    test('une difficulté inconnue utilise le nom "Bot" par défaut', () => {
+        const botSocket = createBotSocket('UNKNOWN');
+        expect(botSocket.username).toBe('Bot');
+    });
 });
 
 // ================================================================

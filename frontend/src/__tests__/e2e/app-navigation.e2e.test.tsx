@@ -7,6 +7,7 @@ import { SocketContext } from '@/shared/contexts/socket.context';
 import { AuthProvider } from '@/shared/contexts/auth.context';
 import { createMockSocket } from '@/__mocks__/socket.mock';
 import HomeScreen from '@/features/home/screens/home.screen';
+import BotDifficultyScreen from '@/features/game/screens/bot-difficulty.screen';
 import OnlineGameController from '@/features/game/controllers/online-game.controller';
 import VsBotGameController from '@/features/game/controllers/vs-bot-game.controller';
 
@@ -38,14 +39,23 @@ jest.mock('@/features/game/components/board/dev/dev-panel.component', () => {
  */
 const MiniApp: React.FC = () => {
     const [screen, setScreen] = React.useState<string>('HomeScreen');
-    const navigation = { navigate: (s: string) => setScreen(s) };
+    const [screenParams, setScreenParams] = React.useState<Record<string, string>>({});
+    const navigation = {
+        navigate: (s: string, params?: Record<string, string>) => {
+            setScreen(s);
+            setScreenParams(params ?? {});
+        },
+        goBack: () => setScreen('HomeScreen'),
+    };
     switch (screen) {
         case 'HomeScreen':
             return <HomeScreen navigation={navigation} />;
+        case 'BotDifficultyScreen':
+            return <BotDifficultyScreen navigation={navigation} />;
         case 'OnlineGameScreen':
             return <OnlineGameController navigation={navigation} />;
         case 'VsBotGameScreen':
-            return <VsBotGameController navigation={navigation} />;
+            return <VsBotGameController navigation={navigation} difficulty={screenParams.difficulty ?? 'MEDIUM'} />;
         default:
             return null;
     }
@@ -88,7 +98,12 @@ describe('E2E — App Navigation', () => {
             fireEvent.click(getByText(/Vs Bot/));
         });
 
-        expect(mockSocket.emit).toHaveBeenCalledWith('game.vsbot');
+        // On est sur BotDifficultyScreen — cliquer sur une difficulté
+        act(() => {
+            fireEvent.click(getByText('Tactique'));
+        });
+
+        expect(mockSocket.emit).toHaveBeenCalledWith('game.vsbot', { difficulty: 'MEDIUM' });
         expect(getByText(/Lancement/)).toBeTruthy();
     });
 
@@ -128,9 +143,12 @@ describe('E2E — App Navigation', () => {
     it('flow E2E : menu → VsBot → fin → retour menu', () => {
         const { getByText, mockSocket } = renderApp();
 
-        // 1. Menu → VsBot
+        // 1. Menu → BotDifficultyScreen → VsBot
         act(() => {
             fireEvent.click(getByText(/Vs Bot/));
+        });
+        act(() => {
+            fireEvent.click(getByText('Tactique'));
         });
 
         // 2. Game start

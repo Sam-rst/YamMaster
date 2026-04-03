@@ -8,7 +8,7 @@ import EndScreen from '../components/board/end-screen/end-screen.component';
 import { colors } from '@/shared/theme/colors';
 import type { Socket } from 'socket.io-client';
 import type { VictoryResult } from '@shared/types/game.types';
-import type { QueueAddedPayload, GameStartPayload } from '@shared/types/socket-events.types';
+import type { QueueAddedPayload, GameStartPayload, OpponentInfo } from '@shared/types/socket-events.types';
 
 const fontDisplay = Platform.select({ web: '"Outfit", sans-serif', default: 'Outfit' });
 const fontSans = Platform.select({ web: '"Inter", sans-serif', default: 'Inter' });
@@ -25,6 +25,7 @@ const OnlineGameController: React.FC<OnlineGameControllerProps> = ({ navigation 
     const [inQueue, setInQueue] = useState<boolean>(false);
     const [inGame, setInGame] = useState<boolean>(false);
     const [gameResult, setGameResult] = useState<VictoryResult | null>(null);
+    const [opponentInfo, setOpponentInfo] = useState<OpponentInfo | null>(null);
 
     useEffect(() => {
         console.log('[emit][queue.join]:', socket.id);
@@ -39,6 +40,7 @@ const OnlineGameController: React.FC<OnlineGameControllerProps> = ({ navigation 
         const onGameStart = (data: GameStartPayload): void => {
             setInQueue(data['inQueue']);
             setInGame(data['inGame']);
+            setOpponentInfo(data.opponent);
             setGameResult(null);
         };
         const onGameEnd = (data: VictoryResult): void => {
@@ -58,7 +60,7 @@ const OnlineGameController: React.FC<OnlineGameControllerProps> = ({ navigation 
     }, []);
 
     if (inGame) {
-        return <Board />;
+        return <Board opponentInfo={opponentInfo} />;
     }
 
     return (
