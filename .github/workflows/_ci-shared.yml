@@ -133,7 +133,7 @@ jobs:
           npm ci --legacy-peer-deps
           npx jest --coverage || true
       - name: SonarCloud Scan
-        uses: SonarSource/sonarqube-scan-action@v5
+        uses: SonarSource/sonarqube-scan-action@v6
         env:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
         with:
