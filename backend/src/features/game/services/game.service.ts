@@ -81,6 +81,140 @@ const GRID_INIT: Grid = [
     ]
 ];
 
+interface DiceAnalysis {
+    counts: number[];
+    hasPair: boolean;
+    threeOfAKindValue: number | null;
+    hasThreeOfAKind: boolean;
+    hasFourOfAKind: boolean;
+    hasFiveOfAKind: boolean;
+    hasStraight: boolean;
+    isLessThanEqual8: boolean;
+}
+
+type Segment = { owner: PlayerKey; length: number };
+
+const analyzeDice = (dices: Dice[]): DiceAnalysis => {
+    const counts = new Array<number>(7).fill(0);
+    let sum = 0;
+
+    for (const dice of dices) {
+        const diceValue = Number.parseInt(dice.value);
+        counts[diceValue]++;
+        sum += diceValue;
+    }
+
+    let hasPair = false;
+    let threeOfAKindValue: number | null = null;
+    let hasThreeOfAKind = false;
+    let hasFourOfAKind = false;
+    let hasFiveOfAKind = false;
+
+    for (let i = 1; i <= 6; i++) {
+        if (counts[i] >= 5) {
+            hasFiveOfAKind = true;
+            hasFourOfAKind = true;
+            hasThreeOfAKind = true;
+            threeOfAKindValue = i;
+        } else if (counts[i] >= 4) {
+            hasFourOfAKind = true;
+            hasThreeOfAKind = true;
+            threeOfAKindValue = i;
+        } else if (counts[i] >= 3) {
+            hasThreeOfAKind = true;
+            threeOfAKindValue = i;
+        } else if (counts[i] === 2) {
+            hasPair = true;
+        }
+    }
+
+    const sortedValues = dices.map(dice => Number.parseInt(dice.value)).sort((a, b) => a - b);
+    const hasStraight = sortedValues.every((value, index) => index === 0 || value === sortedValues[index - 1] + 1);
+
+    return { counts, hasPair, threeOfAKindValue, hasThreeOfAKind, hasFourOfAKind, hasFiveOfAKind, hasStraight, isLessThanEqual8: sum <= 8 };
+};
+
+const matchesCombination = (combination: Combination, analysis: DiceAnalysis): boolean => {
+    if (combination.id.includes('brelan')) {
+        return analysis.hasThreeOfAKind && Number.parseInt(combination.id.slice(-1)) === analysis.threeOfAKindValue;
+    }
+    if (combination.id === 'full') return analysis.hasPair && analysis.hasThreeOfAKind;
+    if (combination.id === 'carre') return analysis.hasFourOfAKind;
+    if (combination.id === 'yam') return analysis.hasFiveOfAKind;
+    if (combination.id === 'suite') return analysis.hasStraight;
+    if (combination.id === 'moinshuit') return analysis.isLessThanEqual8;
+    return false;
+};
+
+const checkLine = (cells: (PlayerKey | null)[]): Segment[] => {
+    let current: PlayerKey | null = null;
+    let count = 0;
+    const segments: Segment[] = [];
+
+    for (const cell of cells) {
+        if (cell !== null && cell === current) {
+            count++;
+            continue;
+        }
+        if (current !== null && count >= 3) {
+            segments.push({ owner: current, length: count });
+        }
+        current = cell;
+        count = 1;
+    }
+    if (current !== null && count >= 3) {
+        segments.push({ owner: current, length: count });
+    }
+    return segments;
+};
+
+const collectRows = (grid: Grid, size: number): (PlayerKey | null)[][] => {
+    return grid.map(row => row.map(cell => cell.owner));
+};
+
+const collectColumns = (grid: Grid, size: number): (PlayerKey | null)[][] => {
+    const lines: (PlayerKey | null)[][] = [];
+    for (let c = 0; c < size; c++) {
+        const owners: (PlayerKey | null)[] = [];
+        for (let r = 0; r < size; r++) owners.push(grid[r][c].owner);
+        lines.push(owners);
+    }
+    return lines;
+};
+
+const collectDiagonals = (grid: Grid, size: number): (PlayerKey | null)[][] => {
+    const lines: (PlayerKey | null)[][] = [];
+    for (let start = -(size - 3); start <= size - 3; start++) {
+        const owners: (PlayerKey | null)[] = [];
+        for (let i = 0; i < size; i++) {
+            const c = i + start;
+            if (c >= 0 && c < size) owners.push(grid[i][c].owner);
+        }
+        lines.push(owners);
+    }
+    return lines;
+};
+
+const collectAntiDiagonals = (grid: Grid, size: number): (PlayerKey | null)[][] => {
+    const lines: (PlayerKey | null)[][] = [];
+    for (let start = 2; start <= 2 * (size - 1) - 2; start++) {
+        const owners: (PlayerKey | null)[] = [];
+        for (let i = 0; i < size; i++) {
+            const c = start - i;
+            if (c >= 0 && c < size) owners.push(grid[i][c].owner);
+        }
+        lines.push(owners);
+    }
+    return lines;
+};
+
+const scoreSegment = (segment: Segment): number => {
+    if (segment.length >= 5) return Infinity;
+    if (segment.length === 4) return 2;
+    if (segment.length === 3) return 1;
+    return 0;
+};
+
 const GameService = {
 
     init: {
@@ -226,10 +360,10 @@ const GameService = {
             return dicesToRoll.map(dice => {
                 if (dice.value === '') {
                     return { id: dice.id, value: String(Math.floor(Math.random() * 6) + 1), locked: false };
-                } else if (!dice.locked) {
-                    return { ...dice, value: String(Math.floor(Math.random() * 6) + 1) };
-                } else {
+                } else if (dice.locked) {
                     return dice;
+                } else {
+                    return { ...dice, value: String(Math.floor(Math.random() * 6) + 1) };
                 }
             });
         },
@@ -241,56 +375,11 @@ const GameService = {
 
     choices: {
         findCombinations: (dices: Dice[], isDefi: boolean, isSec: boolean): Combination[] => {
-            const availableCombinations: Combination[] = [];
+            const analysis = analyzeDice(dices);
 
-            const counts = Array(7).fill(0) as number[];
-            let hasPair = false;
-            let threeOfAKindValue: number | null = null;
-            let hasThreeOfAKind = false;
-            let hasFourOfAKind = false;
-            let hasFiveOfAKind = false;
-            let sum = 0;
-
-            for (const dice of dices) {
-                const diceValue = parseInt(dice.value);
-                counts[diceValue]++;
-                sum += diceValue;
-            }
-
-            for (let i = 1; i <= 6; i++) {
-                if (counts[i] === 2) {
-                    hasPair = true;
-                } else if (counts[i] === 3) {
-                    threeOfAKindValue = i;
-                    hasThreeOfAKind = true;
-                } else if (counts[i] === 4) {
-                    threeOfAKindValue = i;
-                    hasThreeOfAKind = true;
-                    hasFourOfAKind = true;
-                } else if (counts[i] === 5) {
-                    threeOfAKindValue = i;
-                    hasThreeOfAKind = true;
-                    hasFourOfAKind = true;
-                    hasFiveOfAKind = true;
-                }
-            }
-
-            const sortedValues = dices.map(dice => parseInt(dice.value)).sort((a, b) => a - b);
-            const hasStraight = sortedValues.every((value, index) => index === 0 || value === sortedValues[index - 1] + 1);
-            const isLessThanEqual8 = sum <= 8;
-
-            for (const combination of ALL_COMBINATIONS) {
-                if (
-                    (combination.id.includes('brelan') && hasThreeOfAKind && parseInt(combination.id.slice(-1)) === threeOfAKindValue) ||
-                    (combination.id === 'full' && hasPair && hasThreeOfAKind) ||
-                    (combination.id === 'carre' && hasFourOfAKind) ||
-                    (combination.id === 'yam' && hasFiveOfAKind) ||
-                    (combination.id === 'suite' && hasStraight) ||
-                    (combination.id === 'moinshuit' && isLessThanEqual8)
-                ) {
-                    availableCombinations.push(combination);
-                }
-            }
+            const availableCombinations = ALL_COMBINATIONS.filter(
+                combination => matchesCombination(combination, analysis)
+            );
 
             const notOnlyBrelan = availableCombinations.some(c => !c.id.includes('brelan'));
 
@@ -313,60 +402,18 @@ const GameService = {
             const scores: Scores = { player1Score: 0, player2Score: 0 };
             const size = grid.length;
 
-            const checkLine = (cells: (PlayerKey | null)[]) => {
-                let current: PlayerKey | null = null;
-                let count = 0;
-                const segments: { owner: PlayerKey; length: number }[] = [];
+            const allLines = [
+                ...collectRows(grid, size),
+                ...collectColumns(grid, size),
+                ...collectDiagonals(grid, size),
+                ...collectAntiDiagonals(grid, size),
+            ];
 
-                for (const cell of cells) {
-                    if (cell !== null && cell === current) {
-                        count++;
-                    } else {
-                        if (current !== null && count >= 3) {
-                            segments.push({ owner: current, length: count });
-                        }
-                        current = cell;
-                        count = 1;
-                    }
-                }
-                if (current !== null && count >= 3) {
-                    segments.push({ owner: current, length: count });
-                }
-                return segments;
-            };
-
-            const allSegments: { owner: PlayerKey; length: number }[] = [];
-
-            for (let r = 0; r < size; r++) {
-                allSegments.push(...checkLine(grid[r].map(cell => cell.owner)));
-            }
-            for (let c = 0; c < size; c++) {
-                const owners: (PlayerKey | null)[] = [];
-                for (let r = 0; r < size; r++) owners.push(grid[r][c].owner);
-                allSegments.push(...checkLine(owners));
-            }
-            for (let start = -(size - 3); start <= size - 3; start++) {
-                const owners: (PlayerKey | null)[] = [];
-                for (let i = 0; i < size; i++) {
-                    const c = i + start;
-                    if (c >= 0 && c < size) owners.push(grid[i][c].owner);
-                }
-                allSegments.push(...checkLine(owners));
-            }
-            for (let start = 2; start <= 2 * (size - 1) - 2; start++) {
-                const owners: (PlayerKey | null)[] = [];
-                for (let i = 0; i < size; i++) {
-                    const c = start - i;
-                    if (c >= 0 && c < size) owners.push(grid[i][c].owner);
-                }
-                allSegments.push(...checkLine(owners));
-            }
+            const allSegments = allLines.flatMap(line => checkLine(line));
 
             for (const seg of allSegments) {
                 const key = seg.owner === 'player:1' ? 'player1Score' : 'player2Score';
-                if (seg.length >= 5) scores[key] = Infinity;
-                else if (seg.length === 4) scores[key] += 2;
-                else if (seg.length === 3) scores[key] += 1;
+                scores[key] += scoreSegment(seg);
             }
 
             return scores;
