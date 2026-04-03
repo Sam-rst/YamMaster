@@ -39,7 +39,7 @@ const RANK_THRESHOLDS = [
     { name: 'Bronze', min: 0 },
 ];
 
-const SUB_TIER_BOUNDARIES = [0, 0.25, 0.5, 0.75, 1.0];
+const SUB_TIER_BOUNDARIES = [0, 0.25, 0.5, 0.75, 1];
 const SUB_TIER_NAMES = ['IV', 'III', 'II', 'I'];
 
 const RANK_COLORS: Record<string, string> = {
@@ -51,7 +51,7 @@ const RANK_COLORS: Record<string, string> = {
 };
 
 export const computeRank = (wins: number): RankInfo => {
-    const tier = RANK_THRESHOLDS.find(t => wins >= t.min) ?? RANK_THRESHOLDS[RANK_THRESHOLDS.length - 1];
+    const tier = RANK_THRESHOLDS.find(t => wins >= t.min) ?? RANK_THRESHOLDS.at(-1)!;
     const nextTier = RANK_THRESHOLDS.find(t => t.min > tier.min);
     const color = RANK_COLORS[tier.name] ?? '#cd7f32';
 
@@ -64,7 +64,7 @@ export const computeRank = (wins: number): RankInfo => {
     const subIndex = SUB_TIER_BOUNDARIES.findIndex((boundary, i) =>
         i < SUB_TIER_BOUNDARIES.length - 1 && progress < SUB_TIER_BOUNDARIES[i + 1]
     );
-    const subTier = subIndex >= 0 ? SUB_TIER_NAMES[subIndex] : SUB_TIER_NAMES[SUB_TIER_NAMES.length - 1];
+    const subTier = subIndex >= 0 ? SUB_TIER_NAMES[subIndex] : SUB_TIER_NAMES.at(-1)!;
 
     return { name: tier.name, tier: subTier, color };
 };
@@ -99,7 +99,7 @@ const computeFavoriteBotDifficulty = (botGamesData: Array<{ difficulty: string |
     const entries = Object.entries(counts);
     if (entries.length === 0) return null;
 
-    return entries.reduce((best, current) => current[1] > best[1] ? current : best)[0];
+    return entries.reduce((best, current) => current[1] > best[1] ? current : best, entries[0])[0];
 };
 
 interface GamePlayerRecord {
