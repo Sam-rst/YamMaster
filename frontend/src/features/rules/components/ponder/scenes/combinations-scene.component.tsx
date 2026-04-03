@@ -4,14 +4,16 @@ import { colors } from '@/shared/theme/colors';
 
 const fontSans = Platform.select({ web: '"Inter", sans-serif', default: 'Inter' });
 
-const DOT_POSITIONS: boolean[][] = [
+const SLOT_IDS = ['tl', 'tc', 'tr', 'ml', 'mc', 'mr', 'bl', 'bc', 'br'] as const;
+
+const DOT_POSITIONS = [
     [false, false, false, false, true,  false, false, false, false], // 1
     [true,  false, false, false, false, false, false, false, true],  // 2
     [true,  false, false, false, true,  false, false, false, true],  // 3
     [true,  false, true,  false, false, false, true,  false, true],  // 4
     [true,  false, true,  false, true,  false, true,  false, true],  // 5
     [true,  false, true,  true,  false, true,  true,  false, true],  // 6
-];
+].map(row => row.map((hasDot, idx) => ({ id: SLOT_IDS[idx], hasDot })));
 
 interface DieProps {
     value: number;
@@ -29,9 +31,9 @@ const Die: React.FC<DieProps> = ({ value, highlighted, goldBorder }) => {
             goldBorder && styles.dieGoldBorder,
         ]}>
             <View style={styles.dotsGrid}>
-                {dots.map((hasDot, i) => (
-                    <View key={`dot-${i}`} style={styles.dotSlot}>
-                        {hasDot && <View style={styles.dot} />}
+                {dots.map((slot) => (
+                    <View key={slot.id} style={styles.dotSlot}>
+                        {slot.hasDot && <View style={styles.dot} />}
                     </View>
                 ))}
             </View>
