@@ -16,6 +16,8 @@ import { createBotSocket, setupBotListeners } from '../../bot/handlers/bot.handl
 import { BotDifficulty } from '../../bot/services/bot.service';
 import HistoryService from '../../history/services/history.service';
 import TurnRecorderService from '../../game/services/turn-recorder.service';
+import { computeRank } from '../../profile/services/profile.service';
+import { getPrismaClient } from '../../../infrastructure/database';
 
 const MINIMUM_PLAYERS_FOR_MATCH = 2;
 const queue: Socket[] = [];
@@ -59,9 +61,30 @@ const initializeGame = (player1Socket: SocketLike, player2Socket: SocketLike): G
     return newGame;
 };
 
-const broadcastInitialState = (game: Game): void => {
-    game.player1Socket.emit('game.start', GameService.send.forPlayer.viewGameState('player:1', game));
-    game.player2Socket.emit('game.start', GameService.send.forPlayer.viewGameState('player:2', game));
+const getWinsCount = async (userId: string | undefined): Promise<number> => {
+    if (!userId) return 0;
+    const prisma = getPrismaClient();
+    return prisma.gamePlayer.count({ where: { userId, result: 'WIN' } });
+};
+
+const broadcastInitialState = async (game: Game): Promise<void> => {
+    try {
+        const [player2Wins, player1Wins] = await Promise.all([
+            getWinsCount(game.player2Socket.userId),
+            getWinsCount(game.player1Socket.userId),
+        ]);
+
+        const player2Rank = computeRank(player2Wins);
+        const player1Rank = computeRank(player1Wins);
+
+        game.player1Socket.emit('game.start', GameService.send.forPlayer.viewGameState('player:1', game, player2Rank));
+        game.player2Socket.emit('game.start', GameService.send.forPlayer.viewGameState('player:2', game, player1Rank));
+    } catch (error) {
+        logger.error('[MATCHMAKING] Erreur calcul rang au start', { error: error as Error });
+        game.player1Socket.emit('game.start', GameService.send.forPlayer.viewGameState('player:1', game, null));
+        game.player2Socket.emit('game.start', GameService.send.forPlayer.viewGameState('player:2', game, null));
+    }
+
     updateClientsViewTimers(game);
     updateClientsViewDecks(game);
     updateClientsViewGrid(game);
@@ -104,7 +127,7 @@ export const createGame = async (player1Socket: SocketLike, player2Socket: Socke
         games.push(newGame);
 
         await saveGameToDatabase(newGame, 'ONLINE');
-        broadcastInitialState(newGame);
+        await broadcastInitialState(newGame);
         startGameTimer(newGame, games);
 
         player1Socket.on('disconnect', () => { clearInterval(newGame.gameInterval); });
@@ -130,7 +153,7 @@ export const createGameVsBot = async (playerSocket: SocketLike, games: Game[], d
 
         await saveGameToDatabase(newGame, 'VS_BOT', difficulty);
         setupBotListeners(botSocket, newGame, games, difficulty);
-        broadcastInitialState(newGame);
+        await broadcastInitialState(newGame);
         startGameTimer(newGame, games);
 
         playerSocket.on('disconnect', () => removeGameOnDisconnect(newGame, games));

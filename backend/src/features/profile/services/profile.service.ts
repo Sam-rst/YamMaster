@@ -50,7 +50,7 @@ const RANK_COLORS: Record<string, string> = {
     'Bronze': '#cd7f32',
 };
 
-const computeRank = (wins: number): RankInfo => {
+export const computeRank = (wins: number): RankInfo => {
     const tier = RANK_THRESHOLDS.find(t => wins >= t.min) ?? RANK_THRESHOLDS[RANK_THRESHOLDS.length - 1];
     const nextTier = RANK_THRESHOLDS.find(t => t.min > tier.min);
     const color = RANK_COLORS[tier.name] ?? '#cd7f32';
