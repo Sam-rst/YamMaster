@@ -32,9 +32,9 @@ const OpponentDeck: React.FC = () => {
         <View style={styles.container}>
             {displayOpponentDeck && (
                 <View style={styles.diceRow}>
-                    {opponentDices.map((diceData: DiceType, dicePosition: number) => (
+                    {opponentDices.map((diceData: DiceType) => (
                         <Dice
-                            key={`opponent-die-${dicePosition}`}
+                            key={`opponent-die-${diceData.id}`}
                             locked={diceData.locked}
                             value={diceData.value}
                             opponent={true}

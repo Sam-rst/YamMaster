@@ -33,7 +33,7 @@ const ReplayGrid: React.FC<ReplayGridProps> = ({ grid }) => {
     return (
         <View style={styles.container}>
             {grid.map((row, rowIndex) => (
-                <View key={rowIndex} style={styles.row}>
+                <View key={`row-${row[0]?.id ?? rowIndex}`} style={styles.row}>
                     {row.map((cell) => {
                         const ownerStyles = getOwnerStyles(cell.owner);
 
