@@ -74,10 +74,21 @@ CI/CD via GitHub Actions — workflows séparés par environnement dans `.github
 
 ## Networking
 
-Backend listens on `localhost:3000`. Frontend connects via hardcoded IP for native platforms (requires ngrok for HTTPS tunneling on physical devices — see README). Web platform connects to `localhost:3000`.
+Backend listens on `localhost:3000`. Frontend connects via `EXPO_PUBLIC_SERVER_URL` (prod) ou `EXPO_PUBLIC_SERVER_HOST_MOBILE` (dev mobile). Web platform connects to `localhost:3000`. CORS piloté par `ALLOWED_ORIGINS` (env var).
+
+## Versioning (SemVer strict)
+
+- **0.x.y** = en développement (état actuel, pas encore lancé publiquement)
+- **1.0.0** = premier lancement public (réservé)
+- Pre-release : `1.0.0-alpha.x`, `1.0.0-beta.x`, `1.0.0-rc.x`
+- À chaque merge dans develop : **MINOR** (+feature) ou **PATCH** (+bugfix)
+- À chaque merge dans main : **tag Git** (`git tag -a v0.x.y -m "description"`)
+- Les versions sont synchronisées dans `backend/package.json` et `frontend/package.json`
+- Voir `CHANGELOG.md` pour l'historique complet
 
 ## Workflow Rules
 
+- **Versioning SemVer strict**: 0.x.y = dev, 1.0.0 = lancement public. MINOR pour les features, PATCH pour les bugfixes. Tag Git sur chaque merge dans main. Toujours mettre à jour `version` dans les deux package.json.
 - **Auto-commit**: When a bug is confirmed fixed or a feature works, commit immediately without asking.
 - **No Co-Authored-By**: Never add `Co-Authored-By` lines in commit messages.
 - **Commit language**: Write commit messages in **French**.

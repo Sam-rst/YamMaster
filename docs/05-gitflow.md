@@ -11,12 +11,30 @@
 | `bugfix/*` | Corrections de bugs | Lint → Tests → Build |
 | `hotfix/*` | Corrections urgentes en prod | Lint → Tests → Build |
 
+## Versioning (SemVer strict)
+
+Le projet suit [Semantic Versioning](https://semver.org/lang/fr/) :
+
+```
+0.x.y            En développement (état actuel)
+1.0.0-alpha.x    Alpha — tests internes (5-10 proches)
+1.0.0-beta.x     Beta — testeurs externes (50-200)
+1.0.0-rc.x       Release Candidate — feature freeze
+1.0.0            Premier lancement public
+1.x.y            Post-launch (MINOR = feature, PATCH = bugfix)
+```
+
+**Règles** :
+- À chaque merge dans `develop` : incrémenter MINOR (feature) ou PATCH (bugfix) dans les deux `package.json`
+- À chaque merge dans `main` : créer un tag Git (`git tag -a v0.x.y -m "description"` + `git push origin v0.x.y`)
+- Les versions `backend/package.json` et `frontend/package.json` sont **toujours synchronisées**
+
 ## Flow
 
 ```
-feature/xxx  ──PR──▶  develop  ──PR──▶  recette  ──PR──▶  main
-bugfix/xxx   ──PR──▶  develop
-hotfix/xxx   ──PR──▶  main (+ cherry-pick sur develop)
+feature/xxx  ──merge──▶  develop  ──merge──▶  recette  ──merge──▶  main  ──tag──▶  v0.x.y
+bugfix/xxx   ──merge──▶  develop
+hotfix/xxx   ──merge──▶  main (+ cherry-pick sur develop)
 ```
 
 ### Développement d'une feature
@@ -77,13 +95,18 @@ Exemples **rejetés** (CI en erreur) :
            ▼                   ▼
     ┌─────────────┐     ┌──────────────┐
     │Backend Tests│     │Frontend Tests│
-    │ (cover≥90%) │     │              │
+    │ (cover≥90%) │     │ (cover≥90%) │
     └──────┬──────┘     └──────┬───────┘
            ▼                   ▼
     ┌─────────────┐     ┌──────────────┐
     │Backend Build│     │Frontend Build│
     │ (TypeScript)│     │ (Expo Web)   │
-    └─────────────┘     └──────────────┘
+    └──────┬──────┘     └──────┬───────┘
+           └───────┬───────────┘
+                   ▼
+          ┌─────────────────┐
+          │ SonarCloud Scan │
+          └─────────────────┘
 ```
 
-Appelé par chaque workflow d'environnement via `workflow_call` (zéro duplication).
+Appelé par chaque workflow d'environnement via `workflow_call` + `secrets: inherit` (zéro duplication).

@@ -104,7 +104,7 @@ Priorisation basée sur la grille d'évaluation (14pts obligatoires + 6pts au ch
 - [x] Profil joueur — stats complètes, système de rang (Bronze → Maître), sélection d'avatar (8 emojis), onglet dédié dans la tab bar
 - [x] Splash screen Neon Nocturne (mesh gradient, branding)
 - [x] Bottom tab bar extensible (Accueil / Règles / Profil)
-- [x] Versioning SemVer (frontend + backend v1.3.0)
+- [x] Versioning SemVer strict (0.x.y = dev, 1.0.0 = lancement public)
 - [x] README professionnel + licence GPL v3
 - [x] CI/CD GitHub Actions par environnement (develop, recette, main)
 - [x] CHANGELOG.md — historique complet des versions au format Keep a Changelog
@@ -114,6 +114,32 @@ Priorisation basée sur la grille d'évaluation (14pts obligatoires + 6pts au ch
 - [ ] Mode classé MMR (score Elo, classement des joueurs)
 - [ ] Notifications mobiles natives (tour adverse terminé)
 - [ ] Interface Shi/Fu/Mi pour déterminer qui commence
+
+---
+
+## Phase 5 — Industrialisation & Lancement
+
+### 5.1 Infrastructure (Terraform)
+- [ ] Déploiement backend (Fly.io ou Hetzner)
+- [ ] Base de données PostgreSQL (Neon)
+- [ ] Configuration Expo EAS (builds iOS + Android)
+- [ ] CORS restreint aux origines autorisées en prod
+
+### 5.2 Alpha (v1.0.0-alpha.x)
+- [ ] Distribution interne via Expo EAS
+- [ ] Logs centralisés + crash reporting (Sentry)
+- [ ] Feedback loop avec 5-10 testeurs
+
+### 5.3 Beta (v1.0.0-beta.x)
+- [ ] TestFlight (iOS) + Google Play Internal Testing
+- [ ] Analytics (PostHog)
+- [ ] CGU + Politique de confidentialité
+- [ ] Load testing
+
+### 5.4 Launch (v1.0.0)
+- [ ] Publication App Store + Google Play
+- [ ] Monitoring + alertes
+- [ ] Runbook opérationnel
 
 ---
 
