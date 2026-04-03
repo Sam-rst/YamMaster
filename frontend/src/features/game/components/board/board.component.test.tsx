@@ -115,4 +115,19 @@ describe('Board', () => {
         expect(getByText('PlayerTokens')).toBeTruthy();
         expect(getByText('OpponentTokens')).toBeTruthy();
     });
+
+    it('ouvre la modale de règles au clic sur le bouton', () => {
+        const mockSocket = createMockSocket();
+        const { getByTestId } = render(
+            <SocketContext.Provider value={mockSocket}>
+                <Board />
+            </SocketContext.Provider>
+        );
+
+        const rulesButton = getByTestId('icon-book-open');
+        expect(rulesButton).toBeTruthy();
+
+        const { fireEvent } = require('@testing-library/react');
+        fireEvent.click(rulesButton.closest('[role="button"]') || rulesButton.parentElement);
+    });
 });

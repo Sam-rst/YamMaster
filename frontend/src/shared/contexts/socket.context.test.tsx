@@ -30,13 +30,14 @@ const TestConsumer: React.FC = () => {
     return <span data-testid="socket-id">{socket ? socket.id : 'null'}</span>;
 };
 
-const renderWithAuth = (user: { id: string; username: string; createdAt: string } | null) => {
+const renderWithAuth = (user: { id: string; username: string; avatar?: string; createdAt: string } | null) => {
     return render(
         <AuthContext.Provider value={{
             user,
             isAuthenticated: user !== null,
             login: jest.fn(),
             logout: jest.fn(),
+            updateUser: jest.fn(),
         }}>
             <SocketProvider>
                 <TestConsumer />
@@ -92,5 +93,54 @@ describe('SocketProvider', () => {
 
         unmount();
         expect(mockDisconnect).toHaveBeenCalled();
+    });
+
+    test('déconnecte le socket quand l\'utilisateur se déconnecte', async () => {
+        const user = { id: 'user-1', username: 'alice', createdAt: '2026-01-01' };
+        const { rerender } = renderWithAuth(user);
+
+        await waitFor(() => {
+            expect(mockConnect).toHaveBeenCalled();
+        });
+
+        rerender(
+            <AuthContext.Provider value={{
+                user: null,
+                isAuthenticated: false,
+                login: jest.fn(),
+                logout: jest.fn(),
+                updateUser: jest.fn(),
+            }}>
+                <SocketProvider>
+                    <TestConsumer />
+                </SocketProvider>
+            </AuthContext.Provider>
+        );
+
+        expect(mockDisconnect).toHaveBeenCalled();
+    });
+
+    test('enregistre les handlers connect et disconnect', async () => {
+        const user = { id: 'user-1', username: 'alice', createdAt: '2026-01-01' };
+        renderWithAuth(user);
+
+        await waitFor(() => {
+            expect(mockOn).toHaveBeenCalledWith('connect', expect.any(Function));
+            expect(mockOn).toHaveBeenCalledWith('disconnect', expect.any(Function));
+        });
+    });
+
+    test('passe l\'avatar dans la query de connexion', async () => {
+        const user = { id: 'user-1', username: 'alice', avatar: '🎯', createdAt: '2026-01-01' };
+        renderWithAuth(user);
+
+        await waitFor(() => {
+            expect(mockConnect).toHaveBeenCalledWith(
+                expect.any(String),
+                expect.objectContaining({
+                    query: expect.objectContaining({ avatar: '🎯' }),
+                }),
+            );
+        });
     });
 });

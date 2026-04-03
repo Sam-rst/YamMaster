@@ -157,4 +157,57 @@ describe('ProfileScreen', () => {
         expect(mockUpdateAvatar).toHaveBeenCalledWith('u1', '🎯');
         expect(mockUpdateUser).toHaveBeenCalledWith({ avatar: '🎯' });
     });
+
+    test('ferme l\'AvatarPicker via le bouton Fermer', async () => {
+        mockGetProfile.mockResolvedValue(mockProfile);
+
+        const { getByTestId, getByText, queryByTestId } = render(<ProfileScreen />);
+
+        await waitFor(() => {
+            expect(queryByTestId('profile-loader')).toBeNull();
+        });
+
+        fireEvent.click(getByTestId('avatar-button'));
+        expect(getByTestId('avatar-picker')).toBeTruthy();
+
+        fireEvent.click(getByText('Fermer'));
+        expect(queryByTestId('avatar-picker')).toBeNull();
+    });
+
+    test('ouvre l\'AvatarPicker via le bouton "Changer d\'avatar"', async () => {
+        mockGetProfile.mockResolvedValue(mockProfile);
+
+        const { getByText, getByTestId, queryByTestId } = render(<ProfileScreen />);
+
+        await waitFor(() => {
+            expect(queryByTestId('profile-loader')).toBeNull();
+        });
+
+        fireEvent.click(getByText(/changer d'avatar/i));
+        expect(getByTestId('avatar-picker')).toBeTruthy();
+    });
+
+    test('affiche le rang du joueur', async () => {
+        mockGetProfile.mockResolvedValue(mockProfile);
+
+        const { getByText, queryByTestId } = render(<ProfileScreen />);
+
+        await waitFor(() => {
+            expect(queryByTestId('profile-loader')).toBeNull();
+        });
+
+        expect(getByText('Bronze')).toBeTruthy();
+    });
+
+    test('affiche "Membre depuis" avec le mois et l\'année', async () => {
+        mockGetProfile.mockResolvedValue(mockProfile);
+
+        const { getByText, queryByTestId } = render(<ProfileScreen />);
+
+        await waitFor(() => {
+            expect(queryByTestId('profile-loader')).toBeNull();
+        });
+
+        expect(getByText(/Membre depuis mars 2024/)).toBeTruthy();
+    });
 });

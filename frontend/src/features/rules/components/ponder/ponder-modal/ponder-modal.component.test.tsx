@@ -48,4 +48,40 @@ describe('PonderModal', () => {
         fireEvent.click(getByTestId('icon-chevron-right'));
         expect(getByText('Étape 2 / 5')).toBeTruthy();
     });
+
+    test('prev recule manuellement', () => {
+        const { getByText, getByTestId } = render(<PonderModal visible={true} onClose={mockClose} sceneId="dice" />);
+        fireEvent.click(getByTestId('icon-chevron-right'));
+        expect(getByText('Étape 2 / 5')).toBeTruthy();
+        fireEvent.click(getByTestId('icon-chevron-left'));
+        expect(getByText('Étape 1 / 5')).toBeTruthy();
+    });
+
+    test('prev ne descend pas en dessous de 0', () => {
+        const { getByText, getByTestId } = render(<PonderModal visible={true} onClose={mockClose} sceneId="dice" />);
+        fireEvent.click(getByTestId('icon-chevron-left'));
+        expect(getByText('Étape 1 / 5')).toBeTruthy();
+    });
+
+    test('play/pause relance l\'autoplay depuis le début si à la dernière étape', () => {
+        const { getByText, getByTestId } = render(<PonderModal visible={true} onClose={mockClose} sceneId="dice" />);
+        // Avance jusqu'à la dernière étape
+        fireEvent.click(getByTestId('icon-pause'));
+        for (let i = 0; i < 4; i++) {
+            fireEvent.click(getByTestId('icon-chevron-right'));
+        }
+        expect(getByText('Étape 5 / 5')).toBeTruthy();
+        // Relance la lecture → revient à l'étape 1
+        fireEvent.click(getByTestId('icon-play'));
+        expect(getByText('Étape 1 / 5')).toBeTruthy();
+    });
+
+    test('next ne dépasse pas la dernière étape', () => {
+        const { getByText, getByTestId } = render(<PonderModal visible={true} onClose={mockClose} sceneId="dice" />);
+        fireEvent.click(getByTestId('icon-pause'));
+        for (let i = 0; i < 10; i++) {
+            fireEvent.click(getByTestId('icon-chevron-right'));
+        }
+        expect(getByText('Étape 5 / 5')).toBeTruthy();
+    });
 });

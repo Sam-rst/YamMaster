@@ -51,4 +51,33 @@ describe('RulesContent', () => {
         fireEvent.click(getAllByText(/Voir en action/)[0]);
         expect(getByText(/Les Dés/)).toBeTruthy();
     });
+
+    test('affiche le contenu de la section Actions Spéciales', () => {
+        const { getByText } = render(<RulesContent />);
+        fireEvent.click(getByText('Actions Spéciales'));
+        expect(getByText(/Sec/)).toBeTruthy();
+        expect(getByText(/Défi/)).toBeTruthy();
+        expect(getByText(/Yam Predator/)).toBeTruthy();
+    });
+
+    test('affiche le contenu de la section La Grille & les Pions', () => {
+        const { getByText } = render(<RulesContent />);
+        fireEvent.click(getByText('La Grille & les Pions'));
+        expect(getByText(/grille de jeu est de 5×5/)).toBeTruthy();
+    });
+
+    test('affiche le contenu de la section Scoring & Victoire', () => {
+        const { getByText } = render(<RulesContent />);
+        fireEvent.click(getByText('Scoring & Victoire'));
+        expect(getByText(/3 pions alignés/)).toBeTruthy();
+        expect(getByText(/Victoire immédiate/)).toBeTruthy();
+    });
+
+    test('refermer une section ouverte en cliquant dessus', () => {
+        const { getByText, queryByText } = render(<RulesContent />);
+        fireEvent.click(getByText('Les Dés'));
+        expect(getByText(/jusqu'à 3 lancers/i)).toBeTruthy();
+        fireEvent.click(getByText('Les Dés'));
+        expect(queryByText(/jusqu'à 3 lancers/i)).toBeNull();
+    });
 });
