@@ -168,7 +168,7 @@ const checkLine = (cells: (PlayerKey | null)[]): Segment[] => {
     return segments;
 };
 
-const collectRows = (grid: Grid, size: number): (PlayerKey | null)[][] => {
+const collectRows = (grid: Grid, _size: number): (PlayerKey | null)[][] => {
     return grid.map(row => row.map(cell => cell.owner));
 };
 
