@@ -54,7 +54,7 @@ jobs:
           cache-dependency-path: backend/package-lock.json
       - run: npm ci --legacy-peer-deps
       - run: npx prisma generate
-      - run: npx jest --coverage --coverageThreshold='{"global":{"statements":90,"branches":80,"functions":90,"lines":90}}'
+      - run: npm run test:coverage
 
   frontend-tests:
     name: Frontend Tests (coverage ≥ 90%)
@@ -71,7 +71,7 @@ jobs:
           cache: npm
           cache-dependency-path: frontend/package-lock.json
       - run: npm ci --legacy-peer-deps
-      - run: npx jest --coverage --coverageThreshold='{"global":{"statements":90,"branches":80,"functions":90,"lines":90}}'
+      - run: npm run test:coverage
 
   backend-build:
     name: Backend Build (TypeScript)
