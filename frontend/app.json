@@ -7,7 +7,11 @@
     "icon": "./assets/icon.png",
     "userInterfaceStyle": "dark",
     "scheme": "yammaster",
-    "platforms": ["ios", "android", "web"],
+    "platforms": [
+      "ios",
+      "android",
+      "web"
+    ],
     "ios": {
       "supportsTablet": true,
       "bundleIdentifier": "com.samrst.yammaster"
@@ -22,16 +26,17 @@
     "web": {
       "favicon": "./assets/favicon.png"
     },
-    "extra": {
-      "eas": {
-        "projectId": "YOUR_EAS_PROJECT_ID"
-      }
-    },
     "runtimeVersion": {
       "policy": "sdkVersion"
     },
     "updates": {
-      "url": "https://u.expo.dev/YOUR_EAS_PROJECT_ID"
-    }
+      "url": "https://u.expo.dev/7a1bd324-603d-4b05-8bbc-1e263cf8e442"
+    },
+    "extra": {
+      "eas": {
+        "projectId": "7a1bd324-603d-4b05-8bbc-1e263cf8e442"
+      }
+    },
+    "owner": "samrst"
   }
 }
