@@ -1,10 +1,11 @@
 import { ExpoConfig, ConfigContext } from 'expo/config';
+import { version } from '../version.json';
 
 export default ({ config }: ConfigContext): ExpoConfig => ({
   ...config,
   name: 'YamMaster',
   slug: 'yammaster',
-  version: '0.14.0',
+  version,
   orientation: 'portrait',
   icon: './assets/icon.png',
   userInterfaceStyle: 'dark',
