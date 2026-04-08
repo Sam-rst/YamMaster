@@ -86,6 +86,24 @@ Backend listens on `localhost:3000`. Frontend connects via `EXPO_PUBLIC_SERVER_U
 - Les versions sont synchronisées dans `backend/package.json` et `frontend/package.json`
 - Voir `CHANGELOG.md` pour l'historique complet
 
+## Infrastructure
+
+- **Backend** : Render (free tier, auto-deploy depuis `develop`)
+- **Base de données** : Neon PostgreSQL (Francfort, free tier)
+- **Frontend web** : Vercel
+- **Mobile** : Expo EAS (builds + OTA updates)
+- **Infrastructure as Code** : Terraform dans `infra/`
+- **Qualité** : SonarCloud (0 issue), couverture 90%+
+
+## Gestion de projet
+
+- **Jira** : source de vérité des tickets (https://samrst-studies.atlassian.net/jira/software/projects/YAM)
+- **Confluence** : documentation projet (https://samrst-studies.atlassian.net/wiki/spaces/YAM)
+- **Workflow** : Nouveau → Backlog → À spécifier → À estimer → Prêt → En développement → En revue → En QA → En recette → Terminé
+- **Branches** : `feature/YAM-XX-description`, `bugfix/YAM-XX-description`
+- **Commits** : en français, référencer le ticket Jira (`YAM-XX`)
+- **Version centralisée** : `version.json` → `node scripts/sync-version.js`
+
 ## Workflow Rules
 
 - **Versioning SemVer strict**: 0.x.y = dev, 1.0.0 = lancement public. MINOR pour les features, PATCH pour les bugfixes. Tag Git sur chaque merge dans main. Toujours mettre à jour `version` dans les deux package.json.
