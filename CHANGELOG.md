@@ -13,6 +13,34 @@ et ce projet adhere au [Semantic Versioning](https://semver.org/lang/fr/).
 
 ---
 
+## [0.15.0] — 2026-04-08
+
+### Ajoute
+- **Infrastructure Terraform** — modules Render (backend) + Neon (PostgreSQL), environnements dev et prod
+- **Backend deploye** sur Render (free, branche develop, auto-deploy)
+- **Base PostgreSQL** sur Neon (Francfort, migration Prisma auto au deploy)
+- **Expo EAS** — configuration builds mobile (development, preview, production)
+- **CI : rebuild APK/IPA auto** quand package.json, app.json, eas.json ou assets changent
+- **CI : OTA updates auto** sur push develop/recette/main (changements JS)
+- **URL backend par profil EAS** (dev → Render dev, prod → Render prod)
+- **Version centralisee** — `version.json` source unique + script `sync-version.js`
+- **Assets placeholder** — icon.png, adaptive-icon.png, favicon.png, splash-icon.png
+- **Documentation** — convention SemVer, roadmap Phase 5, pipeline SonarCloud dans gitflow
+
+### Corrige
+- Host endpoint Neon (utilisait le host projet au lieu de l'endpoint branche)
+- `expo-dev-client` retire (cassait la compatibilite Expo Go en local)
+- URL backend injectee via `app.config.ts` + `expo-constants`
+- Migration Prisma ajoutee au build command Render
+
+### Modifie
+- `app.json` remplace par `app.config.ts` (config dynamique)
+- CORS pilote par `ALLOWED_ORIGINS` (variable d'environnement)
+- IP hardcodee supprimee du fallback mobile
+- Reset versioning SemVer (1.3.0 → 0.15.0, 1.0.0 reserve pour le lancement public)
+
+---
+
 ## [0.14.0] — 2026-04-03
 
 ### Ajoute
