@@ -10,6 +10,7 @@ module.exports = {
     testPathIgnorePatterns: ['/node_modules/', '/__tests__/helpers/'],
     moduleNameMapper: {
         '^react-native$': '<rootDir>/src/__mocks__/react-native.mock.js',
+        '^expo-constants$': '<rootDir>/src/__mocks__/expo-constants.mock.js',
         '^@/(.*)$': '<rootDir>/src/$1',
         '^@shared/(.*)$': '<rootDir>/../shared/$1',
     },
