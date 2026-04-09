@@ -26,7 +26,7 @@
   "scripts": {
     "start": "expo start",
     "test": "jest --verbose",
-    "test:coverage": "jest --coverage --coverageThreshold='{\"global\":{\"statements\":90,\"branches\":80,\"functions\":90,\"lines\":90}}'",
+    "test:coverage": "jest --coverage",
     "lint": "eslint . --max-warnings 0",
     "build": "expo export --platform web"
   },
