@@ -1,1 +1,4 @@
-neon_api_key = "neon_xxxxxxxx"
+neon_api_key        = "neon_xxxxxxxx"
+vercel_api_token    = "vcp_xxxxxxxx"
+backend_url_preview = "https://yammaster-preview.onrender.com"
+backend_url_prod    = "https://yammaster-prod.onrender.com"
