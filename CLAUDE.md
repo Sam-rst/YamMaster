@@ -97,7 +97,7 @@ Backend listens on `localhost:3000`. Frontend connects via `EXPO_PUBLIC_SERVER_U
 - **Mobile** : Expo EAS (builds preview + production, OTA updates)
 - **Infrastructure as Code** : Terraform dans `infra/` — modules `neon/`, `render/`, `vercel/` ; environnements `shared/`, `preview/`, `prod/`
 - **Déploiement** : aucun auto-deploy — tout passe par la CI/CD (tests verts → deploy hooks Render + Vercel CLI)
-- **Secrets CI** : `RENDER_DEPLOY_HOOK_PREVIEW`, `RENDER_DEPLOY_HOOK_PROD`, `VERCEL_TOKEN` dans GitHub Secrets
+- **Secrets CI** : `RENDER_DEPLOY_HOOK` et `VERCEL_TOKEN` par environnement GitHub (`preview`, `production`)
 - **Qualité** : SonarCloud (0 issue), couverture 90%+
 
 ## Gestion de projet
