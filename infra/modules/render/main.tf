@@ -14,7 +14,11 @@ resource "render_web_service" "backend" {
   start_command = var.start_command
 
   lifecycle {
-    ignore_changes = [maintenance_mode]
+    ignore_changes = [
+      notification_override,
+      previews,
+      root_directory,
+    ]
   }
 
   runtime_source = {
