@@ -16,3 +16,4 @@ infra/**/terraform.tfvars
 frontend/.expo/
 frontend/android/
 frontend/ios/
+.vercel
