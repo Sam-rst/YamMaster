@@ -5,20 +5,20 @@ variable "render_api_key" {
 }
 
 variable "render_owner_id" {
-  description = "Owner ID Render (https://dashboard.render.com/u/settings → Owner ID)"
+  description = "Owner ID Render"
   type        = string
-}
-
-variable "neon_api_key" {
-  description = "Cle API Neon"
-  type        = string
-  sensitive   = true
 }
 
 variable "repo_url" {
   description = "URL du repo GitHub"
   type        = string
   default     = "https://github.com/Sam-rst/YamMaster"
+}
+
+variable "database_url" {
+  description = "URI de connexion PostgreSQL production (depuis shared/outputs)"
+  type        = string
+  sensitive   = true
 }
 
 variable "allowed_origins" {

@@ -9,20 +9,20 @@ variable "region" {
   default     = "aws-eu-central-1"
 }
 
-variable "branch_name" {
-  description = "Nom de la branche Neon"
-  type        = string
-  default     = "main"
+variable "branches" {
+  description = "Liste des branches supplementaires a creer (main existe par defaut)"
+  type        = list(string)
+  default     = []
 }
 
 variable "database_name" {
-  description = "Nom de la base de donnees"
+  description = "Nom de la base de donnees (identique sur chaque branche)"
   type        = string
   default     = "yammaster"
 }
 
 variable "role_name" {
-  description = "Nom du role PostgreSQL"
+  description = "Nom du role PostgreSQL (identique sur chaque branche)"
   type        = string
   default     = "yammaster"
 }
