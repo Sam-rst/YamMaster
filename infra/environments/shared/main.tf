@@ -52,10 +52,20 @@ module "frontend" {
       value  = var.backend_url_preview
       target = ["preview"]
     },
+    {
+      key    = "EXPO_PUBLIC_DEV_MODE"
+      value  = "true"
+      target = ["preview"]
+    },
     # --- Production ---
     {
       key    = "EXPO_PUBLIC_SERVER_URL"
       value  = var.backend_url_prod
+      target = ["production"]
+    },
+    {
+      key    = "EXPO_PUBLIC_DEV_MODE"
+      value  = "false"
       target = ["production"]
     },
   ]

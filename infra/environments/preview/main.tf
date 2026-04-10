@@ -25,5 +25,5 @@ module "backend" {
   database_url    = var.database_url
   allowed_origins = var.allowed_origins
   environment     = "preview"
-  dev_mode        = "false"
+  dev_mode        = "true"
 }
