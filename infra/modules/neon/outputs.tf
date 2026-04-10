@@ -3,13 +3,19 @@ output "project_id" {
   value       = neon_project.this.id
 }
 
-# --- Connection URIs ---
+# --- Branche main (creee automatiquement par Neon) ---
 output "connection_uri_main" {
   description = "URI de connexion PostgreSQL branche main (production)"
-  value       = "postgresql://${neon_role.main.name}:${neon_role.main.password}@${neon_endpoint.main.host}/${neon_database.main.name}?sslmode=require"
+  value       = neon_project.this.connection_uri
   sensitive   = true
 }
 
+output "host_main" {
+  description = "Host de la branche main"
+  value       = neon_project.this.database_host
+}
+
+# --- Branches supplementaires ---
 output "connection_uris" {
   description = "URIs de connexion PostgreSQL par branche supplementaire"
   value = {
@@ -17,12 +23,6 @@ output "connection_uris" {
     name => "postgresql://${neon_role.extra[name].name}:${neon_role.extra[name].password}@${neon_endpoint.extra[name].host}/${neon_database.extra[name].name}?sslmode=require"
   }
   sensitive = true
-}
-
-# --- Hosts ---
-output "host_main" {
-  description = "Host de la branche main"
-  value       = neon_endpoint.main.host
 }
 
 output "hosts" {
