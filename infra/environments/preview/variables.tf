@@ -22,7 +22,7 @@ variable "repo_url" {
 }
 
 variable "allowed_origins" {
-  description = "Origines CORS autorisees (separees par virgules)"
+  description = "Origines CORS autorisees en preview"
   type        = string
   default     = ""
 }

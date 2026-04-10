@@ -1,0 +1,4 @@
+render_api_key  = "rnd_xxxxxxxx"
+render_owner_id = "usr_xxxxxxxx"
+neon_api_key    = "neon_xxxxxxxx"
+allowed_origins = "https://yammaster-preview.vercel.app"
