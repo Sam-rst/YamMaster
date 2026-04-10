@@ -89,13 +89,15 @@ Backend listens on `localhost:3000`. Frontend connects via `EXPO_PUBLIC_SERVER_U
 
 ## Infrastructure
 
-- **Backend preview** : Render `yammaster-preview` (free tier, auto-deploy depuis `preview`)
-- **Backend prod** : Render `yammaster-prod` (free tier, auto-deploy depuis `main`)
+- **Backend preview** : Render `yammaster-preview` (free tier, deploy via CI uniquement)
+- **Backend prod** : Render `yammaster-prod` (free tier, deploy via CI uniquement)
 - **Base de données preview** : Neon PostgreSQL branche `preview` (Francfort, free tier)
 - **Base de données prod** : Neon PostgreSQL branche `main` (Francfort, free tier)
-- **Frontend web** : Vercel (preview auto + prod)
+- **Frontend web** : Vercel (deploy via CI — `vercel deploy` après tests verts)
 - **Mobile** : Expo EAS (builds preview + production, OTA updates)
-- **Infrastructure as Code** : Terraform dans `infra/environments/preview/` et `infra/environments/prod/`
+- **Infrastructure as Code** : Terraform dans `infra/` — modules `neon/`, `render/`, `vercel/` ; environnements `shared/`, `preview/`, `prod/`
+- **Déploiement** : aucun auto-deploy — tout passe par la CI/CD (tests verts → deploy hooks Render + Vercel CLI)
+- **Secrets CI** : `RENDER_DEPLOY_HOOK_PREVIEW`, `RENDER_DEPLOY_HOOK_PROD`, `VERCEL_TOKEN` dans GitHub Secrets
 - **Qualité** : SonarCloud (0 issue), couverture 90%+
 
 ## Gestion de projet
