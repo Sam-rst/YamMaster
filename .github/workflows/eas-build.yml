@@ -2,7 +2,7 @@ name: EAS Build (Native)
 
 on:
   push:
-    branches: [develop, main]
+    branches: [preview, main]
     paths:
       - 'frontend/package.json'
       - 'frontend/package-lock.json'

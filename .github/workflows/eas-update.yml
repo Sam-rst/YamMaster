@@ -2,7 +2,7 @@ name: EAS Update (OTA)
 
 on:
   push:
-    branches: [develop, recette, main]
+    branches: [preview, main]
     paths:
       - 'frontend/**'
       - 'shared/**'
@@ -35,12 +35,9 @@ jobs:
           if [ "${{ github.ref_name }}" = "main" ]; then
             echo "channel=production" >> $GITHUB_OUTPUT
             echo "message=Production release" >> $GITHUB_OUTPUT
-          elif [ "${{ github.ref_name }}" = "recette" ]; then
-            echo "channel=preview" >> $GITHUB_OUTPUT
-            echo "message=Recette release" >> $GITHUB_OUTPUT
           else
-            echo "channel=development" >> $GITHUB_OUTPUT
-            echo "message=Dev update" >> $GITHUB_OUTPUT
+            echo "channel=preview" >> $GITHUB_OUTPUT
+            echo "message=Preview release" >> $GITHUB_OUTPUT
           fi
 
       - name: Publish EAS Update
