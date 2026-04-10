@@ -1,4 +1,4 @@
 render_api_key  = "rnd_xxxxxxxx"
 render_owner_id = "usr_xxxxxxxx"
-neon_api_key    = "neon_xxxxxxxx"
+database_url    = "postgresql://yammaster:xxx@ep-xxx.eu-central-1.aws.neon.tech/yammaster?sslmode=require"
 allowed_origins = "https://yammaster-preview.vercel.app"
