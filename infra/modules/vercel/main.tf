@@ -29,6 +29,9 @@ resource "vercel_project" "frontend" {
     on_pull_request = false
   }
 
+  # Ignore tous les builds Git automatiques — déploiement uniquement via CI
+  ignore_command = "exit 0"
+
   # Variables d'environnement
   environment = var.environment_variables
 }
