@@ -23,7 +23,7 @@ resource "render_web_service" "backend" {
       branch        = var.branch
       runtime       = "node"
       build_command = var.build_command
-      auto_deploy   = true
+      auto_deploy   = false
     }
   }
 
