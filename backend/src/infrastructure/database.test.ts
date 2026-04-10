@@ -8,8 +8,8 @@ jest.mock('../generated/prisma/client', () => ({
     })),
 }));
 
-jest.mock('@prisma/adapter-pg', () => ({
-    PrismaPg: jest.fn(),
+jest.mock('@prisma/adapter-neon', () => ({
+    PrismaNeon: jest.fn(),
 }));
 
 describe('database', () => {
