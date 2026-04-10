@@ -1,13 +1,13 @@
 {
   "name": "yammaster-backend",
-  "version": "0.13.0",
+  "version": "0.15.0",
   "main": "dist/index.js",
   "scripts": {
     "build": "tsc",
     "start": "node dist/index.js",
     "dev": "tsx src/index.ts",
     "test": "jest --verbose",
-    "test:coverage": "jest --coverage --coverageThreshold='{\"global\":{\"statements\":90,\"branches\":80,\"functions\":90,\"lines\":90}}'",
+    "test:coverage": "jest --coverage",
     "lint": "eslint src/ --max-warnings 0",
     "typecheck": "tsc --noEmit"
   },

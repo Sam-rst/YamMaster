@@ -1,0 +1,6 @@
+{
+    "sonarlint.connectedMode.project": {
+        "connectionId": "sam-rst",
+        "projectKey": "Sam-rst_YamMaster"
+    }
+}

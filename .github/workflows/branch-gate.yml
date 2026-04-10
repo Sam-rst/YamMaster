@@ -2,9 +2,9 @@ name: Branch Gate
 
 on:
   push:
-    branches-ignore: [main, develop, recette]
+    branches-ignore: [main, develop, preview]
   pull_request:
-    branches: [main, develop, recette]
+    branches: [main, develop, preview]
 
 jobs:
   check-naming:
@@ -15,13 +15,13 @@ jobs:
         run: |
           BRANCH="${GITHUB_HEAD_REF:-${GITHUB_REF_NAME}}"
           echo "Branche: $BRANCH"
-          if [[ "$BRANCH" =~ ^(main|develop|recette|feature/.*|bugfix/.*|hotfix/.*)$ ]]; then
+          if [[ "$BRANCH" =~ ^(main|develop|preview|feature/.*|bugfix/.*|hotfix/.*)$ ]]; then
             echo "✅ Convention respectée: $BRANCH"
           else
             echo "❌ Branche mal nommée: $BRANCH"
             echo ""
             echo "Conventions acceptées:"
-            echo "  - main, develop, recette"
+            echo "  - main, develop, preview"
             echo "  - feature/<nom>"
             echo "  - bugfix/<nom>"
             echo "  - hotfix/<nom>"
