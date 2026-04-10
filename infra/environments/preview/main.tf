@@ -26,9 +26,9 @@ provider "neon" {
 module "database" {
   source = "../../modules/neon"
 
-  project_name  = "yammaster-dev"
+  project_name  = "yammaster-preview"
   region        = "aws-eu-central-1"
-  branch_name   = "dev"
+  branch_name   = "preview"
   database_name = "yammaster"
   role_name     = "yammaster"
 }
@@ -37,13 +37,13 @@ module "database" {
 module "backend" {
   source = "../../modules/render"
 
-  service_name    = "yammaster-backend-dev"
+  service_name    = "yammaster-preview"
   plan            = "free"
   region          = "frankfurt"
   repo_url        = var.repo_url
-  branch          = "develop"
+  branch          = "preview"
   database_url    = module.database.connection_uri
   allowed_origins = var.allowed_origins
-  environment     = "development"
-  dev_mode        = "true"
+  environment     = "preview"
+  dev_mode        = "false"
 }

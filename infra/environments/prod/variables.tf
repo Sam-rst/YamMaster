@@ -4,6 +4,11 @@ variable "render_api_key" {
   sensitive   = true
 }
 
+variable "render_owner_id" {
+  description = "Owner ID Render (https://dashboard.render.com/u/settings → Owner ID)"
+  type        = string
+}
+
 variable "neon_api_key" {
   description = "Cle API Neon"
   type        = string

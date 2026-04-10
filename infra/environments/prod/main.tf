@@ -14,7 +14,8 @@ terraform {
 }
 
 provider "render" {
-  api_key = var.render_api_key
+  api_key  = var.render_api_key
+  owner_id = var.render_owner_id
 }
 
 provider "neon" {
@@ -36,8 +37,8 @@ module "database" {
 module "backend" {
   source = "../../modules/render"
 
-  service_name    = "yammaster-backend-prod"
-  plan            = "starter"
+  service_name    = "yammaster-prod"
+  plan            = "free"
   region          = "frankfurt"
   repo_url        = var.repo_url
   branch          = "main"

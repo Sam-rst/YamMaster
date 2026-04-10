@@ -47,11 +47,12 @@ CI/CD via GitHub Actions — workflows séparés par environnement dans `.github
 
 ## Gitflow
 
-- **`main`** : production — lint, tests, build, déploiement prod
-- **`recette`** : pré-production — lint, tests, build, déploiement recette
-- **`develop`** : développement — lint, tests, build, déploiement dev
+- **`main`** : production — lint, tests, build, déploiement prod (Render + Vercel + EAS)
+- **`preview`** : pré-production — lint, tests, build, déploiement preview (Render + EAS)
+- **`develop`** : développement — lint, tests, build (CI only, **pas de déploiement cloud**)
 - **`feature/*`**, **`bugfix/*`**, **`hotfix/*`** : lint, tests, build (pas de déploiement)
 - Branches mal nommées : **CI bloquée** (convention obligatoire)
+- Flow : `develop` (local) → `preview` (cloud test) → `main` (prod)
 - Détails : voir `docs/05-gitflow.md`
 
 ## Architecture
@@ -88,11 +89,13 @@ Backend listens on `localhost:3000`. Frontend connects via `EXPO_PUBLIC_SERVER_U
 
 ## Infrastructure
 
-- **Backend** : Render (free tier, auto-deploy depuis `develop`)
-- **Base de données** : Neon PostgreSQL (Francfort, free tier)
-- **Frontend web** : Vercel
-- **Mobile** : Expo EAS (builds + OTA updates)
-- **Infrastructure as Code** : Terraform dans `infra/`
+- **Backend preview** : Render `yammaster-preview` (free tier, auto-deploy depuis `preview`)
+- **Backend prod** : Render `yammaster-prod` (free tier, auto-deploy depuis `main`)
+- **Base de données preview** : Neon PostgreSQL branche `preview` (Francfort, free tier)
+- **Base de données prod** : Neon PostgreSQL branche `main` (Francfort, free tier)
+- **Frontend web** : Vercel (preview auto + prod)
+- **Mobile** : Expo EAS (builds preview + production, OTA updates)
+- **Infrastructure as Code** : Terraform dans `infra/environments/preview/` et `infra/environments/prod/`
 - **Qualité** : SonarCloud (0 issue), couverture 90%+
 
 ## Gestion de projet

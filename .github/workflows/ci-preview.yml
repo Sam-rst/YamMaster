@@ -1,0 +1,26 @@
+name: CI/CD Preview
+
+on:
+  push:
+    branches: [preview]
+
+jobs:
+  ci:
+    name: Lint → Tests → Build
+    uses: ./.github/workflows/_ci-shared.yml
+    secrets: inherit
+
+  deploy-preview:
+    name: Déploiement Preview
+    runs-on: ubuntu-latest
+    needs: ci
+    steps:
+      - name: Trigger Render Deploy
+        run: |
+          echo "🧪 Déploiement en environnement PREVIEW"
+          if [ -n "${{ secrets.RENDER_DEPLOY_HOOK_PREVIEW }}" ]; then
+            curl -s "${{ secrets.RENDER_DEPLOY_HOOK_PREVIEW }}"
+            echo "Deploy hook triggered"
+          else
+            echo "⚠️ RENDER_DEPLOY_HOOK_PREVIEW non configuré — Render auto-deploy actif"
+          fi
