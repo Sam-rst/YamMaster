@@ -13,24 +13,11 @@ resource "vercel_project" "frontend" {
   framework = null
   team_id   = var.team_id
 
-  git_repository = {
-    type              = "github"
-    repo              = var.github_repo
-    production_branch = var.production_branch
-  }
+  # Pas de git_repository — déploiement uniquement via CI (vercel deploy --prebuilt)
 
   build_command    = var.build_command
   output_directory = var.output_directory
   root_directory   = var.root_directory
-
-  # Desactive les commentaires Git automatiques de Vercel
-  git_comments = {
-    on_commit       = false
-    on_pull_request = false
-  }
-
-  # Ignore tous les builds Git automatiques — déploiement uniquement via CI
-  ignore_command = "exit 0"
 
   # Variables d'environnement
   environment = var.environment_variables
