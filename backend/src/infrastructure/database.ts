@@ -2,7 +2,7 @@
 // Client Prisma singleton — une seule connexion à la BDD
 
 import { PrismaClient } from '../generated/prisma/client';
-import { PrismaPg } from '@prisma/adapter-pg';
+import { PrismaNeon } from '@prisma/adapter-neon';
 import { logger } from '../shared/logger';
 
 let prismaInstance: PrismaClient | null = null;
@@ -14,7 +14,7 @@ export const getPrismaClient = (): PrismaClient => {
             throw new Error('DATABASE_URL non définie');
         }
 
-        const adapter = new PrismaPg({ connectionString: databaseUrl });
+        const adapter = new PrismaNeon({ connectionString: databaseUrl });
         prismaInstance = new PrismaClient({ adapter });
         logger.info('Connexion à la base de données établie');
     }
