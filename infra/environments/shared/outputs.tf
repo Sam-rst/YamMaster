@@ -20,7 +20,17 @@ output "database_host_preview" {
   value       = module.database.hosts["preview"]
 }
 
-output "project_id" {
+output "neon_project_id" {
   description = "ID du projet Neon"
   value       = module.database.project_id
+}
+
+output "vercel_project_id" {
+  description = "ID du projet Vercel"
+  value       = module.frontend.project_id
+}
+
+output "vercel_project_name" {
+  description = "Nom du projet Vercel"
+  value       = module.frontend.project_name
 }
