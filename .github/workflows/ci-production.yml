@@ -46,7 +46,7 @@ jobs:
 
       - name: Export Vercel env vars
         run: |
-          grep -v '^#' .vercel/.env.production.local | grep '=' >> $GITHUB_ENV
+          grep -v '^#' .vercel/.env.production.local | grep '=' | sed 's/"//g' >> $GITHUB_ENV
 
       - name: Build Frontend
         run: vercel build --prod --token=${{ secrets.VERCEL_TOKEN }}
