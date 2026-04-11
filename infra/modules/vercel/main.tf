@@ -19,6 +19,11 @@ resource "vercel_project" "frontend" {
   output_directory = var.output_directory
   root_directory   = var.root_directory
 
+  # Désactive la protection d'accès sur les preview deployments
+  vercel_authentication = {
+    deployment_type = "none"
+  }
+
   # Variables d'environnement
   environment = var.environment_variables
 }
