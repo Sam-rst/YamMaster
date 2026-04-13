@@ -52,7 +52,7 @@ variable "dev_mode" {
 variable "build_command" {
   description = "Commande de build"
   type        = string
-  default     = "cd backend && npm ci --legacy-peer-deps && npx prisma generate && npx prisma migrate deploy && npm run build"
+  default     = "cd backend && npm ci --include=dev --legacy-peer-deps && npx prisma generate && npx prisma migrate deploy && npm run build"
 }
 
 variable "start_command" {
