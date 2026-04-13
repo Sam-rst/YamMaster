@@ -1,3 +1,6 @@
+// Définit __DEV__ pour expo-modules-core (requis avant tout import Expo)
+globalThis.__DEV__ = true;
+
 // Silence les logs pendant les tests
 globalThis.console = {
     ...console,

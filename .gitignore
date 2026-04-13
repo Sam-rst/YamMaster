@@ -4,3 +4,16 @@ dist/
 .claude/settings.local.json
 .env
 .superpowers/
+
+# Terraform
+infra/**/.terraform/
+infra/**/.terraform.lock.hcl
+infra/**/terraform.tfstate
+infra/**/terraform.tfstate.backup
+infra/**/terraform.tfvars
+
+# Expo EAS
+frontend/.expo/
+frontend/android/
+frontend/ios/
+.vercel

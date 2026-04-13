@@ -47,11 +47,12 @@ CI/CD via GitHub Actions — workflows séparés par environnement dans `.github
 
 ## Gitflow
 
-- **`main`** : production — lint, tests, build, déploiement prod
-- **`recette`** : pré-production — lint, tests, build, déploiement recette
-- **`develop`** : développement — lint, tests, build, déploiement dev
+- **`main`** : production — lint, tests, build, déploiement prod (Render + Vercel + EAS)
+- **`preview`** : pré-production — lint, tests, build, déploiement preview (Render + EAS)
+- **`develop`** : développement — lint, tests, build (CI only, **pas de déploiement cloud**)
 - **`feature/*`**, **`bugfix/*`**, **`hotfix/*`** : lint, tests, build (pas de déploiement)
 - Branches mal nommées : **CI bloquée** (convention obligatoire)
+- Flow : `develop` (local) → `preview` (cloud test) → `main` (prod)
 - Détails : voir `docs/05-gitflow.md`
 
 ## Architecture
@@ -74,10 +75,43 @@ CI/CD via GitHub Actions — workflows séparés par environnement dans `.github
 
 ## Networking
 
-Backend listens on `localhost:3000`. Frontend connects via hardcoded IP for native platforms (requires ngrok for HTTPS tunneling on physical devices — see README). Web platform connects to `localhost:3000`.
+Backend listens on `localhost:3000`. Frontend connects via `EXPO_PUBLIC_SERVER_URL` (prod) ou `EXPO_PUBLIC_SERVER_HOST_MOBILE` (dev mobile). Web platform connects to `localhost:3000`. CORS piloté par `ALLOWED_ORIGINS` (env var).
+
+## Versioning (SemVer strict)
+
+- **0.x.y** = en développement (état actuel, pas encore lancé publiquement)
+- **1.0.0** = premier lancement public (réservé)
+- Pre-release : `1.0.0-alpha.x`, `1.0.0-beta.x`, `1.0.0-rc.x`
+- À chaque merge dans develop : **MINOR** (+feature) ou **PATCH** (+bugfix)
+- À chaque merge dans main : **tag Git** (`git tag -a v0.x.y -m "description"`)
+- Les versions sont synchronisées dans `backend/package.json` et `frontend/package.json`
+- Voir `CHANGELOG.md` pour l'historique complet
+
+## Infrastructure
+
+- **Backend preview** : Render `yammaster-preview` (free tier, deploy via CI uniquement)
+- **Backend prod** : Render `yammaster-prod` (free tier, deploy via CI uniquement)
+- **Base de données preview** : Neon PostgreSQL branche `preview` (Francfort, free tier)
+- **Base de données prod** : Neon PostgreSQL branche `main` (Francfort, free tier)
+- **Frontend web** : Vercel (deploy via CI — `vercel deploy` après tests verts)
+- **Mobile** : Expo EAS (builds preview + production, OTA updates)
+- **Infrastructure as Code** : Terraform dans `infra/` — modules `neon/`, `render/`, `vercel/` ; environnements `shared/`, `preview/`, `prod/`
+- **Déploiement** : aucun auto-deploy — tout passe par la CI/CD (tests verts → deploy hooks Render + Vercel CLI)
+- **Secrets CI** : `RENDER_DEPLOY_HOOK` et `VERCEL_TOKEN` par environnement GitHub (`preview`, `production`)
+- **Qualité** : SonarCloud (0 issue), couverture 90%+
+
+## Gestion de projet
+
+- **Jira** : source de vérité des tickets (https://samrst-studies.atlassian.net/jira/software/projects/YAM)
+- **Confluence** : documentation projet (https://samrst-studies.atlassian.net/wiki/spaces/YAM)
+- **Workflow** : Nouveau → Backlog → À spécifier → À estimer → Prêt → En développement → En revue → En QA → En recette → Terminé
+- **Branches** : `feature/YAM-XX-description`, `bugfix/YAM-XX-description`
+- **Commits** : en français, référencer le ticket Jira (`YAM-XX`)
+- **Version centralisée** : `version.json` → `node scripts/sync-version.js`
 
 ## Workflow Rules
 
+- **Versioning SemVer strict**: 0.x.y = dev, 1.0.0 = lancement public. MINOR pour les features, PATCH pour les bugfixes. Tag Git sur chaque merge dans main. Toujours mettre à jour `version` dans les deux package.json.
 - **Auto-commit**: When a bug is confirmed fixed or a feature works, commit immediately without asking.
 - **No Co-Authored-By**: Never add `Co-Authored-By` lines in commit messages.
 - **Commit language**: Write commit messages in **French**.

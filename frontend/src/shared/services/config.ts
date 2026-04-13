@@ -1,19 +1,23 @@
 // frontend/config.ts
-// Configuration centralisee — lit les variables depuis .env (EXPO_PUBLIC_*)
+// Configuration centralisee — lit les variables depuis env ou expo-constants
 
 import { Platform } from 'react-native';
+import Constants from 'expo-constants';
 
-// Si une URL complete est fournie (ex: https://yammaster-backend-dev.onrender.com), l'utiliser directement
-// Sinon construire l'URL a partir de host + port (mode dev local)
-const SERVER_URL_OVERRIDE: string = process.env.EXPO_PUBLIC_SERVER_URL || '';
+const getServerUrl = (): string => {
+    const fromEnv = process.env.EXPO_PUBLIC_SERVER_URL || '';
+    if (fromEnv) return fromEnv;
 
-const SERVER_HOST_WEB: string = process.env.EXPO_PUBLIC_SERVER_HOST_WEB || 'localhost';
-const SERVER_HOST_MOBILE: string = process.env.EXPO_PUBLIC_SERVER_HOST_MOBILE || 'localhost';
-const SERVER_PORT: string = process.env.EXPO_PUBLIC_SERVER_PORT || '3000';
+    const fromConstants = Constants.expoConfig?.extra?.serverUrl || '';
+    if (fromConstants) return fromConstants;
 
-export const SERVER_URL: string = SERVER_URL_OVERRIDE
-    || (Platform.OS === 'web'
-        ? `http://${SERVER_HOST_WEB}:${SERVER_PORT}`
-        : `http://${SERVER_HOST_MOBILE}:${SERVER_PORT}`);
+    const host = Platform.OS === 'web'
+        ? (process.env.EXPO_PUBLIC_SERVER_HOST_WEB || 'localhost')
+        : (process.env.EXPO_PUBLIC_SERVER_HOST_MOBILE || 'localhost');
+    const port = process.env.EXPO_PUBLIC_SERVER_PORT || '3000';
+    return `http://${host}:${port}`;
+};
+
+export const SERVER_URL: string = getServerUrl();
 
 export const DEV_MODE: boolean = process.env.EXPO_PUBLIC_DEV_MODE === 'true';
