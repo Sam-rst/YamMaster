@@ -13,7 +13,7 @@
     <img alt="Android" src="https://img.shields.io/badge/Android-4630EB.svg?style=flat-square&logo=ANDROID&labelColor=A4C639&logoColor=fff" />
   </a>
   <img alt="License" src="https://img.shields.io/badge/license-GPL%20v3-blue.svg?style=flat-square" />
-  <img alt="Version" src="https://img.shields.io/badge/version-1.3.0-green.svg?style=flat-square" />
+  <img alt="Version" src="https://img.shields.io/badge/version-0.15.0-green.svg?style=flat-square" />
 </p>
 
 ---
