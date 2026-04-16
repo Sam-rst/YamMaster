@@ -12,6 +12,9 @@
   <a href="https://play.google.com/store/apps/details?id=host.exp.exponent">
     <img alt="Android" src="https://img.shields.io/badge/Android-4630EB.svg?style=flat-square&logo=ANDROID&labelColor=A4C639&logoColor=fff" />
   </a>
+  <a href="https://github.com/Sam-rst/YamMaster/actions/workflows/ci-production.yml">
+    <img alt="CI/CD Production" src="https://github.com/Sam-rst/YamMaster/actions/workflows/ci-production.yml/badge.svg?branch=main" />
+  </a>
   <img alt="License" src="https://img.shields.io/badge/license-GPL%20v3-blue.svg?style=flat-square" />
   <img alt="Version" src="https://img.shields.io/badge/version-0.15.0-green.svg?style=flat-square" />
 </p>
