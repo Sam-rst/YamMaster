@@ -3,7 +3,7 @@
 > **Jeu de Yam (Yahtzee) multijoueur en temps reel** avec matchmaking, bot IA multi-niveaux, replay de parties et profil joueur.
 
 <p>
-  <a href="https://docs.expo.dev/workflow/web/">
+  <a href="https://yammaster.vercel.app/">
     <img alt="Web" src="https://img.shields.io/badge/web-4630EB.svg?style=flat-square&logo=GOOGLE-CHROME&labelColor=4285F4&logoColor=fff" />
   </a>
   <a href="https://itunes.apple.com/app/apple-store/id982107779">
